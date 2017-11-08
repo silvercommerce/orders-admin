@@ -1,5 +1,7 @@
 <?php
 
+use SilverStripe\ORM\ValidationResult;
+
 /**
  * Holder for items in the shopping cart and interacting with them, as
  * well as rendering these items into an interface that allows editing
@@ -471,15 +473,14 @@ class ShoppingCart extends Controller
             $this->save();
             
             if ($title) {
-                $this->setSessionMessage(
-                    "bad",
-                    _t(
+                $this
+                    ->CartForm()
+                    ->sessionMessage(_t(
                         "Checkout.RemovedItem",
                         "Removed '{title}' from your cart",
                         "Message to tell user they removed an item",
                         array("title" => $title)
-                    )
-                );
+                    ));
             }
         }
         
@@ -496,10 +497,12 @@ class ShoppingCart extends Controller
         $this->removeAll();
         $this->save();
         
-        $this->setSessionMessage(
-            "bad",
-            _t("Checkout.EmptiedCart", "Shopping cart emptied")
-        );
+        $this
+            ->CartForm()
+            ->sessionMessage(_t(
+                "Checkout.EmptiedCart",
+                "Shopping cart emptied"
+            ));
         
         return $this->redirectBack();
     }
@@ -1102,26 +1105,27 @@ class ShoppingCart extends Controller
                             if ($value > 0) {
                                 $this->update($cart_item->Key, $value);
                                 
-                                $this->setSessionMessage(
-                                    "success",
-                                    _t("Checkout.UpdatedShoppingCart", "Shopping cart updated")
+                                $form->sessionMessage(
+                                    _t(
+                                        "Checkout.UpdatedShoppingCart",
+                                        "Shopping cart updated"
+                                    ),
+                                    ValidationResult::TYPE_GOOD
                                 );
                             } else {
                                 $this->remove($cart_item->Key);
                                 
-                                $this->setSessionMessage(
-                                    "success",
-                                    _t("Checkout.EmptiedShoppingCart", "Shopping cart emptied")
-                                );
+                                $form->sessionMessage(_t(
+                                    "Checkout.EmptiedShoppingCart",
+                                    "Shopping cart emptied"
+                                ));
                             }
                         } catch (ValidationException $e) {
-                            $this->setSessionMessage(
-                                "bad",
+                            $form->sessionMessage(
                                 $e->getMessage()
                             );
                         } catch (Exception $e) {
-                            $this->setSessionMessage(
-                                "bad",
+                            $form->sessionMessage(
                                 $e->getMessage()
                             );
                         }
