@@ -1,7 +1,31 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use ilateral\SilverStripe\Orders\Forms\GridField\AddOrderItem;
+use ilateral\SilverStripe\Orders\Forms\GridField\OrderItemGridField;
+use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
+use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
+use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
+
 class Estimate extends Order
 {
+    private static $table_name = 'Estimate';
 
     /**
      * Standard DB columns
@@ -40,7 +64,7 @@ class Estimate extends Order
      */
     public function convertToOrder()
     {
-        $this->ClassName = "Order";
+        $this->ClassName = Order::class;
     }
     
     public function getCMSFields()
@@ -68,7 +92,7 @@ class Estimate extends Order
                                 new GridFieldEditButton(),
                                 new GridFieldDetailForm(),
                                 new GridFieldDeleteAction(),
-                                new GridFieldAddOrderItem()
+                                new AddOrderItem()
                             )
                     ),
                     
@@ -134,7 +158,7 @@ class Estimate extends Order
                         $existing_customer::get(),
                         $config = GridFieldConfig_Base::create()
                             ->addComponents(
-                                $map_extension = new GridFieldMapExistingAction()
+                                $map_extension = new MapExistingAction()
                             )
                     )
                 )->setTitle("Use Existing Customer"),
@@ -170,6 +194,6 @@ class Estimate extends Order
     {
         parent::onBeforeWrite();
         
-        $this->Status = $this->config()->default_status;
+        $this->Status = $this->config()->get("default_status");
     }
 }

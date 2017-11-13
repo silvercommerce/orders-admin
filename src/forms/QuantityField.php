@@ -1,4 +1,9 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Forms;
+
+use SilverStripe\Forms\NumericField;
+
 /**
  * Text input field with validation for numeric values.
  * 

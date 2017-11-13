@@ -1,5 +1,14 @@
 <?php
-class GridFieldMapExistingAction implements GridField_ColumnProvider, GridField_ActionProvider
+
+namespace ilateral\SilverStripe\Orders\Forms\GridField;
+
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridField_ColumnProvider;
+use SilverStripe\Forms\GridField\GridField_ActionProvider;
+use SilverStripe\Forms\GridField\GridField_FormAction;
+use SilverStripe\Control\Controller;
+
+class MapExistingAction implements GridField_ColumnProvider, GridField_ActionProvider
 {
     
     /**

@@ -1,7 +1,18 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Control\Controller;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Security\Group;
+use SilverStripe\Core\Convert;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+
 class Discount extends DataObject
 {
+    private static $table_name = 'Discount';
 
     private static $db = array(
         "Title"     => "Varchar",
@@ -13,11 +24,11 @@ class Discount extends DataObject
     );
 
     private static $has_one = array(
-        "Site"      => "SiteConfig"
+        "Site"      => SiteConfig::class
     );
 
     private static $many_many = array(
-        "Groups"    => "Group"
+        "Groups"    => Group::class
     );
 
     private static $summary_fields = array(
@@ -94,7 +105,7 @@ class Discount extends DataObject
         $this->Code = Convert::raw2url($this->Code);
     }
 
-    public function canView($member = null)
+    public function canView($member = null, $context = [])
     {
         $extended = $this->extendedCan('canView', $member);
         if ($extended !== null) {
@@ -104,7 +115,7 @@ class Discount extends DataObject
         return true;
     }
     
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         $extended = $this->extendedCan('canCreate', $member);
         if ($extended !== null) {
@@ -114,7 +125,7 @@ class Discount extends DataObject
         return true;
     }
 
-    public function canEdit($member = null)
+    public function canEdit($member = null, $context = [])
     {
         $extended = $this->extendedCan('canEdit', $member);
         if ($extended !== null) {
@@ -124,7 +135,7 @@ class Discount extends DataObject
         return true;
     }
 
-    public function canDelete($member = null)
+    public function canDelete($member = null, $context = [])
     {
         $extended = $this->extendedCan('canDelete', $member);
         if ($extended !== null) {

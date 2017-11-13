@@ -1,5 +1,13 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Extensions;
+
+use SilverStripe\Core\Extension;
+use SilverStripe\ORM\FieldType\DBCurrency as Currency;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use ilateral\SilverStripe\Orders\Checkout;
+
 /**
  * Extension for Content Controller that provide methods such as cart
  * link and category list to templates
@@ -7,7 +15,7 @@
  * @author i-lateral (http://www.i-lateral.com)
  * @package orders
  */
-class OrdersControllerExtension extends Extension
+class ControllerExtension extends Extension
 {
     
     /**

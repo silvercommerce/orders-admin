@@ -1,4 +1,23 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Forms\GridField;
+
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\View\Requirements;
+use SilverStripe\Versioned\Versioned;
+use SilverStripe\Versioned\DataDifferencer;
+use SilverStripe\Core\Convert;
+use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Control\PjaxResponseNegotiator;
+use SilverStripe\ORM\ValidationException;
+
 /**
  * Edit form specifically customised for the Orders module. This deals
  * with editing Order and Estimate objects specificaly and isn't really
@@ -7,19 +26,18 @@
  *
  * @author ilateral
  */
-
-class OrdersGridFieldDetailForm extends GridFieldDetailForm
+class DetailForm extends GridFieldDetailForm
 {
 }
 
-class OrdersGridFieldDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
+class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
 {
 
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'edit',
         'view',
         'ItemEditForm'
-    );
+    ];
     
     public function edit($request)
     {

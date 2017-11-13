@@ -1,5 +1,12 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\Estimate;
+use ilateral\SilverStripe\Orders\Checkout;
+
 /**
  * Add association to an order to payments and add
  * setting order status on capture.
@@ -8,10 +15,10 @@
  * @package checkout
  * @subpackage extensions
  */
-class OrdersPaymentExtension extends DataExtension
+class PaymentExtension extends DataExtension
 {
     private static $has_one = array(
-        'Order' => 'Order'
+        'Order' => Order::class
     );
 
     /**

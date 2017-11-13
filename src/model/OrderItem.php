@@ -1,5 +1,23 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use ilateral\SilverStripe\Orders\Tasks\OrderItemCustomisationMigrationTask;
+
 /**
  * OrderItem is a single line item on an order, extimate or even in
  * the shopping cart.
@@ -24,6 +42,8 @@
  */
 class OrderItem extends DataObject
 {
+    private static $table_name = 'OrderItem';
+
     /**
      * The name of the param used on a related product to
      * track Stock Levels.
@@ -41,7 +61,7 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $db = array(
+    private static $db = [
         "Key"           => "Varchar(255)",
         "Title"         => "Varchar",
         "Content"       => "HTMLText",
@@ -55,7 +75,7 @@ class OrderItem extends DataObject
         "Stocked"       => "Boolean",
         "Deliverable"   => "Boolean",
         "Customisation" => "Text",
-    );
+    ];
 
     /**
      * Foreign key associations in DB
@@ -63,9 +83,9 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $has_one = array(
-        "Parent"        => "Order"
-    );
+    private static $has_one = [
+        "Parent"        => Order::class
+    ];
     
     /**
      * One to many associations
@@ -73,9 +93,9 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $has_many = array(
-        "Customisations" => "OrderItemCustomisation"
-    );
+    private static $has_many = [
+        "Customisations" => OrderItemCustomisation::class
+    ];
 
     /**
      * Specify default values of a field
@@ -83,13 +103,13 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $defaults = array(
+    private static $defaults = [
         "Quantity"      => 1,
         "ProductClass"  => "Product",
         "Locked"        => false,
         "Stocked"       => false,
         "Deliverable"   => true
-    );
+    ];
 
     /**
      * Fields to display in list tables
@@ -97,14 +117,14 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "Quantity" => "Quantity",
         "Title" => "Title",
         "StockID" => "Stock ID",
         "Price" => "Item Price",
         "TaxRate" => "Tax Rate (percentage)",
         "CustomisationAndPriceList" => "Customisations"
-    );
+    ];
     
     /**
      * Function to DB Object conversions
@@ -112,13 +132,13 @@ class OrderItem extends DataObject
      * @var array
      * @config
      */
-    private static $casting = array(
+    private static $casting = [
         "Total" => "Currency",
         "UnitPrice" => "Currency",
         "UnitTax" => "Currency",
         "SubTotal" => "Currency",
         "Tax" => "Currency"
-    );
+    ];
 
     /**
      * Modify default field scaffolding in admin
@@ -134,7 +154,7 @@ class OrderItem extends DataObject
         $fields->addFieldsToTab(
             "Root.Main",
             array(
-                ReadOnlyField::create("Key")
+                ReadonlyField::create("Key")
             )
         );
 
@@ -386,7 +406,7 @@ class OrderItem extends DataObject
      */
     public function checkStockLevel($qty)
     {
-        $stock_param = $this->config()->stock_param;
+        $stock_param = $this->config()->get("stock_param");
         $item = $this->Match();
         $stock = ($item->$stock_param) ? $item->$stock_param : 0;
         $return = $stock - $qty;
@@ -405,7 +425,7 @@ class OrderItem extends DataObject
     {
         parent::requireDefaultRecords();
         
-        if(OrderItemCustomisationMigrationTask::config()->run_during_dev_build) {
+        if(OrderItemCustomisationMigrationTask::config()->get("run_during_dev_build")) {
             $task = new OrderItemCustomisationMigrationTask();
             $task->up();
         }
@@ -416,7 +436,7 @@ class OrderItem extends DataObject
      *
      * @return Boolean
      */
-    public function canView($member = null)
+    public function canView($member = null, $context = [])
     {
         $extended = $this->extend('canView', $member);
         if ($extended && $extended !== null) {
@@ -431,7 +451,7 @@ class OrderItem extends DataObject
      *
      * @return Boolean
      */
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         $extended = $this->extend('canCreate', $member);
         if ($extended && $extended !== null) {
@@ -446,7 +466,7 @@ class OrderItem extends DataObject
      *
      * @return Boolean
      */
-    public function canEdit($member = null)
+    public function canEdit($member = null, $context = [])
     {
         $extended = $this->extend('canEdit', $member);
         if ($extended && $extended !== null) {
@@ -461,7 +481,7 @@ class OrderItem extends DataObject
      *
      * @return Boolean
      */
-    public function canDelete($member = null)
+    public function canDelete($member = null, $context = [])
     {
         $extended = $this->extend('canDelete', $member);
         if ($extended && $extended !== null) {
@@ -477,7 +497,7 @@ class OrderItem extends DataObject
      * @param boolean $doWrite (write the cloned object to DB)
      * @return DataObject $clone The duplicated object
      */
-    public function duplicate($doWrite = true)
+    public function duplicate($doWrite = true, $manyMany = "many_many")
     {
         $clone = parent::duplicate($doWrite);
 

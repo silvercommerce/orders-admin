@@ -1,5 +1,23 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Forms\GridField;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\View\ArrayData;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataList;
+use SilverStripe\View\SSViewer;
+use SilverStripe\Core\Convert;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridField_ActionProvider;
+use SilverStripe\Forms\GridField\GridField_HTMLProvider;
+use SilverStripe\Forms\GridField\GridField_URLHandler;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\GridField\GridField_FormAction;
+use Doctrine\Instantiator\Exception\UnexpectedValueException;
+use LogicException;
+
+
 /**
  * A specific gridfield field designed to allow the creation of a new
  * order item and that auto completes all fields from a pre-defined
@@ -10,7 +28,7 @@
  * @author ilateral <info@ilateral.co.uk>
  * @author Michael Strong <github@michaelstrong.co.uk>
 **/
-class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, GridField_URLHandler
+class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, GridField_URLHandler
 {
 
     /**
@@ -19,7 +37,6 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      * @var string
      **/
     protected $targetFragment;
-
 
     /**
      * Default field to create the dataobject by should be Title.
@@ -40,19 +57,17 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      **/
     protected $source_class = "Product";
 
-
     public function getSourceClass()
     {
         return $this->source_class;
     }
-    
-    
+
     public function setSourceClass($class)
     {
         $this->source_class = $class;
         return $this;
     }
-    
+
     /**
      * When we check for existing items, should we check based on all
      * filters or any of the chosen (setting this to true uses 
@@ -71,7 +86,7 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
     {
         return $this->strict_filter;
     }
-    
+
     /**
      * Setter for strict_filter param
      *
@@ -89,47 +104,43 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      *
      * @var array
      **/
-    protected $filter_fields = array(
+    protected $filter_fields = [
         "Title",
         "StockID"
-    );
-
+    ];
 
     public function getFilterFields()
     {
         return $this->filter_fields;
     }
-    
-    
+
     public function setFilterFields($fields)
     {
         $this->filter_fields = $fields;
         return $this;
     }
-    
+
     /**
      * Fields that we use to filter items for our autocomplete
      *
      * @var array
      **/
-    protected $autocomplete_fields = array(
+    protected $autocomplete_fields = [
         "Title",
         "StockID"
-    );
-
+    ];
 
     public function getAutocompleteFields()
     {
         return $this->autocomplete_fields;
     }
-    
-    
+
     public function setAutocompleteFields($fields)
     {
         $this->autocomplete_fields = $fields;
         return $this;
     }
-    
+
     /**
      * If filter fails, set this field when creating
      *
@@ -137,44 +148,51 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      **/
     protected $create_field = "Title";
 
-
     public function getCreateField()
     {
         return $this->create_field;
     }
-    
-    
+
     public function setCreateField($field)
     {
         $this->create_field = $field;
         return $this;
     }
-    
+
     /**
      * Fields that we are mapping from the source object to our item
      *
      * @var array
      **/
-    protected $source_fields = array(
+    protected $source_fields = [
         "Title" => "Title",
         "StockID" => "StockID",
         "Price" => "Price",
         "TaxRate" => "TaxPercent"
-    );
+    ];
 
-
+    /**
+     * Get list of source fields
+     *
+     * @return array
+     */
     public function getSourceFields()
     {
         return $this->source_fields;
     }
-    
-    
+
+    /**
+     * Set the list of source fields
+     *
+     * @param  $fields
+     * @return AddOrderItem
+     */
     public function setSourceFields($fields)
     {
         $this->source_fields = $fields;
         return $this;
     }
-    
+
     /**
      * Number of results to appear in autocomplete
      * 
@@ -186,8 +204,7 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
     {
         return $this->results_limit;
     }
-    
-    
+
     public function setResultsLimit($fields)
     {
         $this->results_limit = $fields;
@@ -207,11 +224,10 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      */
     public function getURLHandlers($gridField)
     {
-        return array(
+        return [
             'search' => 'doSearch',
-        );
+        ];
     }
-
 
     /**
      * Provide actions to this component.
@@ -222,7 +238,7 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
      **/
     public function getActions($gridField)
     {
-        return array("add");
+        return ["add"];
     }
 
 
@@ -459,14 +475,14 @@ class GridFieldAddOrderItem implements GridField_ActionProvider, GridField_HTMLP
 
         $json = array();
         
-        $originalSourceFileComments = Config::inst()->get('SSViewer', 'source_file_comments');
-        Config::inst()->update('SSViewer', 'source_file_comments', false);
+        $originalSourceFileComments = SSViewer::config()->get('source_file_comments');
+        SSViewer::config()->update('source_file_comments', false);
         
         foreach ($results as $result) {
             $json[$result->ID] = html_entity_decode(SSViewer::fromString($this->results_format)->process($result));
         }
         
-        Config::inst()->update('SSViewer', 'source_file_comments', $originalSourceFileComments);
+        SSViewer::config()->update('source_file_comments', $originalSourceFileComments);
         
         return Convert::array2json($json);
     }

@@ -1,5 +1,12 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Control;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Model\Order;
+
 /**
  * Controller responsible for displaying either an rendered order or a
  * rendered quote that can be emailed or printed.
@@ -17,10 +24,10 @@ class OrdersFront_Controller extends Controller
     private static $url_segment = "orders/front";
     
     
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         "invoice",
         "quote"
-    );
+    ];
 
     /**
      * ClassName of Order object 
@@ -28,7 +35,7 @@ class OrdersFront_Controller extends Controller
      * @var string
      * @config
      */
-    private static $order_class = "Order";
+    private static $order_class = "ilateral\\SilverStripe\\Orders\\Model\\Order";
     
     /**
      * ClassName of Order object 
@@ -36,7 +43,7 @@ class OrdersFront_Controller extends Controller
      * @var string
      * @config
      */
-    private static $estimate_class = "Estimate";
+    private static $estimate_class = "ilateral\\SilverStripe\\Orders\\Model\\Estimate";
     
     /**
      * Get a relative link to anorder or invoice
@@ -49,7 +56,8 @@ class OrdersFront_Controller extends Controller
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function Link($action = "invoice") {
+    public function Link($action = "invoice")
+    {
         return Controller::join_links(
             $this->config()->url_segment,
             $action
@@ -67,7 +75,8 @@ class OrdersFront_Controller extends Controller
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function AbsoluteLink($action = "invoice") {
+    public function AbsoluteLink($action = "invoice")
+    {
         return Controller::join_links(
             Director::absoluteBaseURL(),
             $this->Link($action)
@@ -76,11 +85,11 @@ class OrdersFront_Controller extends Controller
 
     public function invoice()
     {
-        $object = Order::get()
-            ->filter(array(
+        $object = DataList::create($this->config()->order_class)
+            ->filter([
                 "ClassName" => $this->config()->order_class,
                 "ID" => $this->request->param("ID")
-            ))->first();
+            ])->first();
 
         if ($object && $object->AccessKey && $object->AccessKey == $this->request->param("OtherID")) {
             return $this
@@ -100,11 +109,11 @@ class OrdersFront_Controller extends Controller
     
     public function quote()
     {
-        $object = Order::get()
-            ->filter(array(
+        $object = DataList::create($this->config()->order_class)
+            ->filter([
                 "ClassName" => $this->config()->estimate_class,
                 "ID" => $this->request->param("ID")
-            ))->first();
+            ])->first();
 
         if ($object && $object->AccessKey && $object->AccessKey == $this->request->param("OtherID")) {
             return $this

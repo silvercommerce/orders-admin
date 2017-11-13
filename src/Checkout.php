@@ -1,5 +1,10 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders;
+
+use SilverStripe\View\ViewableData;
+use ilateral\SilverStripe\Orders\Model\PostageArea;
+
 /**
  * Helper class for the checkout, contains tools used by all
  * subcomponents of the checkout module.
@@ -82,7 +87,7 @@ class Checkout extends ViewableData
      * @var array
      * @config
      */
-    private static $checkout_data = array(
+    private static $checkout_data = [
         "OrderNumber",
         "PaymentNo",
         "PaymentID",
@@ -115,7 +120,7 @@ class Checkout extends ViewableData
         "PostageType",
         "PostageCost",
         "PostageTax"
-    );
+    ];
 
     /**
      * A list of fields in the checkout module that are mapped to
@@ -129,7 +134,7 @@ class Checkout extends ViewableData
      * @var array
      * @config
      */
-    private static $omnipay_map = array(
+    private static $omnipay_map = [
         "OrderNumber" => "transactionId",
         "FirstName" => "firstName",
         "Surname" => "lastName",
@@ -149,7 +154,7 @@ class Checkout extends ViewableData
         "DeliveryPostCode" => "shippingPostcode",
         "DeliveryCountry" => "shippingCountry",
         "PhoneNumber" => "shippingPhone"
-    );
+    ];
     
     /**
      * Generate a free postage object we can use in our code.
@@ -162,35 +167,13 @@ class Checkout extends ViewableData
      */
     public static function CreateFreePostageObject()
     {
-        $postage = new PostageArea();
+        $postage = PostageArea::create();
         $postage->ID = -1;
         $postage->Title = _t("Checkout.FreeShipping", "Free Shipping");
         $postage->Country = "*";
         $postage->ZipCode = "*";
         
         return $postage;
-    }
-
-    /**
-     * Get the full translated country name from a 2 digit country code
-     * EG: GB
-     * 
-     * @param $country_code 2 character code
-     * @return string
-     */
-    public static function country_name_from_code($country_code)
-    {
-        try {
-            $source = Zend_Locale::getTranslationList(
-                'territory',
-                $country_code,
-                2
-            );
-
-            return (array_key_exists($country_code, $source)) ? $source[$country_code] : $country_code;
-        } catch (Exception $e) {
-            return "";
-        }
     }
 
     /**

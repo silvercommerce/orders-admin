@@ -1,5 +1,13 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Tools;
+
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use ilateral\SilverStripe\Orders\Checkout;
+
 /**
  * Shipping calculator is a basic helper class that can be used to query
  * the shipping table.
@@ -11,7 +19,7 @@
  * @author ilateral (info@ilateral.co.uk)
  * @package checkout
  */
-class ShippingCalculator extends Object
+class ShippingCalculator
 {
     
     /**
@@ -136,9 +144,7 @@ class ShippingCalculator extends Object
         if ($country_code) {
             $this->country_code = $country_code;
         } else {
-            $locale = new Zend_Locale();
-            $locale->setLocale($this->locale());
-            $this->country_code = $locale->getRegion();
+            $this->country_code = $this->locale();
         }
         
         if ($zipcode) {

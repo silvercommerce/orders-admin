@@ -1,6 +1,16 @@
 <?php
 
-class OrdersMemberExtension extends DataExtension
+namespace ilateral\SilverStripe\Orders\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\ArrayList;
+use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\Estimate;
+use ilateral\SilverStripe\Orders\Model\MemberAddress;
+
+class MemberExtension extends DataExtension
 {
     /**
      * Cache an address object for if we need to us it again.
@@ -15,9 +25,9 @@ class OrdersMemberExtension extends DataExtension
     );
 
     private static $has_many = array(
-        "Orders"        => "Order",
-        "Estimates"     => "Estimate",
-        "Addresses"     => "MemberAddress"
+        "Orders"        => Order::class,
+        "Estimates"     => Estimate::class,
+        "Addresses"     => MemberAddress::class
     );
     
     private static $casting = array(
@@ -74,7 +84,7 @@ class OrdersMemberExtension extends DataExtension
             ->owner
             ->Orders()
             ->filter(array(
-                "Status" => Order::config()->outstanding_statuses
+                "Status" => Order::config()->get("outstanding_statuses")
             ));
     }
 

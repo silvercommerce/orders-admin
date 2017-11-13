@@ -1,6 +1,22 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Forms;
+
+use SilverStripe\Control\Session;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\CompositeField;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Omnipay\GatewayInfo;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use ilateral\SilverStripe\Orders\Tools\ShippingCalculator;
+use ilateral\SilverStripe\Orders\Checkout;
+use ilateral\SilverStripe\Orders\Control\Payment_Controller;
 
 /**
  * Description of CheckoutForm
@@ -31,8 +47,7 @@ class PostagePaymentForm extends Form
             // Loop through all postage areas and generate a new list
             $postage_array = array();
             foreach ($postage_areas as $area) {
-                $area_currency = new Currency("Cost");
-                $area_currency->setValue($area->Cost);
+                $area_currency = $area->dbObject("Cost");
                 $postage_array[$area->ID] = $area->Title . " (" . $area_currency->Nice() . ")";
             }
 
@@ -159,10 +174,9 @@ class PostagePaymentForm extends Form
             Session::set("Checkout.PostageID", $data["PostageID"]);
         }
 
-        $url = Controller::join_links(
-            Director::absoluteBaseUrl(),
-            Payment_Controller::config()->url_segment
-        );
+        $url = Injector::inst()
+            ->create(Payment_Controller::class)
+            ->AbsoluteLink();
 
         return $this
             ->controller

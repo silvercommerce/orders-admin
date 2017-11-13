@@ -1,5 +1,11 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+
 /**
  * An address that belongs to a member object. This allows us to define
  * more than one address that a user can have or send orders to.
@@ -10,7 +16,9 @@
 class MemberAddress extends DataObject
 {
 
-    public static $db = array(
+    private static $table_name = 'MemberAddress';
+
+    private static $db = array(
         'Company'            => 'Varchar',
         'FirstName'         => 'Varchar',
         'Surname'           => 'Varchar',
@@ -23,11 +31,11 @@ class MemberAddress extends DataObject
         'Default'           => 'Boolean'
     );
 
-    public static $has_one = array(
-        "Owner" => "Member"
+    private static $has_one = array(
+        "Owner" => Member::class
     );
     
-    public static $summary_fields = array(
+    private static $summary_fields = array(
         "FirstName",
         "Surname",
         "Address1",
@@ -42,7 +50,7 @@ class MemberAddress extends DataObject
      *
      * @return Boolean
      */
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         if (!$member) {
             $member = Member::currentUser();
@@ -65,7 +73,7 @@ class MemberAddress extends DataObject
      *
      * @return Boolean
      */
-    public function canView($member = null)
+    public function canView($member = null, $context = [])
     {
         if (!$member) {
             $member = Member::currentUser();
@@ -90,7 +98,7 @@ class MemberAddress extends DataObject
      *
      * @return Boolean
      */
-    public function canEdit($member = null)
+    public function canEdit($member = null, $context = [])
     {
         if (!$member) {
             $member = Member::currentUser();
@@ -115,7 +123,7 @@ class MemberAddress extends DataObject
      *
      * @return Boolean
      */
-    public function canDelete($member = null)
+    public function canDelete($member = null, $context = [])
     {
         if (!$member) {
             $member = Member::currentUser();

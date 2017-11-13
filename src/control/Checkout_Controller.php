@@ -1,5 +1,21 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Control;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\Security\Member;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\HiddenField;
+use ilateral\SilverStripe\Orders\Checkout;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use ilateral\SilverStripe\Orders\Model\MemberAddress;
+use ilateral\SilverStripe\Orders\Forms\CheckoutLoginForm;
+use ilateral\SilverStripe\Orders\Forms\BillingDetailsForm;
+use ilateral\SilverStripe\Orders\Forms\DeliveryDetailsForm;
+use ilateral\SilverStripe\Orders\Forms\PostagePaymentForm;
+
 /**
  * Controller used to render the checkout process
  *
@@ -29,7 +45,7 @@ class Checkout_Controller extends Controller
     private static $class_name = "Checkout";
     
 
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         "billing",
         "delivery",
         "usememberaddress",
@@ -38,7 +54,7 @@ class Checkout_Controller extends Controller
         'BillingForm',
         'DeliveryForm',
         "PostagePaymentForm"
-    );
+    ];
 
     public function getClassName()
     {
@@ -79,13 +95,16 @@ class Checkout_Controller extends Controller
      */
     public function index()
     {
+        $simple_checkout = Checkout::config()->get("simple_checkout");
+        $show_login_form = Checkout::config()->get("login_form");
+
         // If we are using simple checkout, skip
-        if (Checkout::config()->simple_checkout) {
+        if ($simple_checkout) {
             return $this->redirect($this->Link('finish'));
         }
         
         // If we have turned off login, or member logged in
-        if (!(Checkout::config()->login_form) || Member::currentUserID()) {
+        if (!$show_login_form || Member::currentUserID()) {
             return $this->redirect($this->Link('billing'));
         }
 
@@ -111,15 +130,17 @@ class Checkout_Controller extends Controller
      */
     public function billing()
     {
+        $simple_checkout = Checkout::config()->get("simple_checkout");
+        $guest_checkout = Checkout::config()->get("guest_checkout");
         $form = $this->BillingForm();
 
         // If we are using simple checkout, skip
-        if (Checkout::config()->simple_checkout) {
+        if ($simple_checkout) {
             return $this->redirect($this->Link('finish'));
         }
             
         // Check permissions for guest checkout
-        if (!Member::currentUserID() && !Checkout::config()->guest_checkout) {
+        if (!Member::currentUserID() && !$guest_checkout) {
             return $this->redirect($this->Link('index'));
         }
 
@@ -151,10 +172,12 @@ class Checkout_Controller extends Controller
      */
     public function delivery()
     {
+        $simple_checkout = Checkout::config()->get("simple_checkout");
+        $guest_checkout = Checkout::config()->get("guest_checkout");
         $cart = ShoppingCart::get();
         
         // If we are using simple checkout, skip
-        if (Checkout::config()->simple_checkout) {
+        if ($simple_checkout) {
             return $this->redirect($this->Link('finish'));
         }
             
@@ -169,7 +192,7 @@ class Checkout_Controller extends Controller
         }
         
         // Check permissions for guest checkout
-        if (!Member::currentUserID() && !Checkout::config()->guest_checkout) {
+        if (!Member::currentUserID() && !$guest_checkout) {
             return $this->redirect($this->Link('index'));
         }
         
@@ -267,20 +290,23 @@ class Checkout_Controller extends Controller
      */
     public function finish()
     {
+        $simple_checkout = Checkout::config()->get("simple_checkout");
+        $guest_checkout = Checkout::config()->get("guest_checkout");
+
         // Check the users details are set, if not, send them to the cart
         $billing_data = Session::get("Checkout.BillingDetailsForm.data");
         $delivery_data = Session::get("Checkout.DeliveryDetailsForm.data");
 
-        if (!Checkout::config()->simple_checkout && !is_array($billing_data) && !is_array($delivery_data)) {
+        if (!$simple_checkout && !is_array($billing_data) && !is_array($delivery_data)) {
             return $this->redirect($this->Link('index'));
         }
-        
+
         // Check permissions for guest checkout
-        if (!Member::currentUserID() && !Checkout::config()->guest_checkout) {
+        if (!Member::currentUserID() && !$guest_checkout) {
             return $this->redirect($this->Link('index'));
         }
-            
-        if (Checkout::config()->simple_checkout) {
+
+        if ($simple_checkout) {
             $title = _t('Checkout.SelectPaymentMethod', "Select Payment Method");
         } else {
             $title = _t('Checkout.SeelctPostagePayment', "Select Postage and Payment Method");
@@ -331,9 +357,12 @@ class Checkout_Controller extends Controller
      */
     public function BillingForm()
     {
-        $form = BillingDetailsForm::create($this, 'BillingForm');
-
+        $form = BillingDetailsForm::create(
+            $this,
+            'BillingForm'
+        );
         $data = Session::get("Checkout.BillingDetailsForm.data");
+        
         if (is_array($data)) {
             $form->loadDataFrom($data);
         } elseif($member = Member::currentUser()) {
@@ -358,9 +387,12 @@ class Checkout_Controller extends Controller
      */
     public function DeliveryForm()
     {
-        $form = DeliveryDetailsForm::create($this, 'DeliveryForm');
-
+        $form = DeliveryDetailsForm::create(
+            $this,
+            'DeliveryForm'
+        );
         $data = Session::get("Checkout.DeliveryDetailsForm.data");
+        
         if (is_array($data)) {
             $form->loadDataFrom($data);
         }
@@ -377,7 +409,10 @@ class Checkout_Controller extends Controller
      */
     public function PostagePaymentForm()
     {
-        $form = PostagePaymentForm::create($this, "PostagePaymentForm");
+        $form = PostagePaymentForm::create(
+            $this,
+            "PostagePaymentForm"
+        );
 
         $this->extend("updatePostagePaymentForm", $form);
 

@@ -1,4 +1,13 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Tasks;
+
+use SilverStripe\Dev\MigrationTask;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\Control\Director;
+use ilateral\SilverStripe\Orders\Model\OrderItem;
+use ilateral\SilverStripe\Orders\Model\OrderItemCustomisation;
+
 /**
  * Find all OrderItems with customisations and convert them to using
  * OrderItemCustomisation associations instead
@@ -38,11 +47,11 @@ class OrderItemCustomisationMigrationTask extends MigrationTask {
                     }
 
                     foreach($curr_items as $curr_item) {
-                        $new_item = OrderItemCustomisation::create(array(
+                        $new_item = OrderItemCustomisation::create([
                             "Title" => $curr_item->Title,
                             "Value" => $curr_item->Value,
                             "Price" => $curr_item->Price
-                        ));
+                        ]);
                         $new_item->OrderItemID = $item->ID;
                         $new_item->write();
                         $clean = true;
@@ -54,11 +63,11 @@ class OrderItemCustomisationMigrationTask extends MigrationTask {
                     }
 
                     foreach($curr_items as $curr_item) {
-                        $new_item = OrderItemCustomisation::create(array(
+                        $new_item = OrderItemCustomisation::create([
                             "Title" => $curr_item["Title"],
                             "Value" => $curr_item["Value"],
                             "Price" => $curr_item["Price"]
-                        ));
+                        ]);
                         $new_item->OrderItemID = $item->ID;
                         $new_item->write();
                         $clean = true;

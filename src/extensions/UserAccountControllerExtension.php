@@ -1,6 +1,26 @@
 <?php
 
-class OrdersUserAccountControllerExtension extends Extension
+namespace ilateral\SilverStripe\Orders\Extensions;
+
+use SilverStripe\Core\Extension;
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\PaginatedList;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\CompositeField;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\i18n\i18n;
+use SilverStripe\View\ArrayData;
+use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\MemberAddress;
+
+class UserAccountControllerExtension extends Extension
 {
     private static $allowed_actions = array(
         "history",
@@ -20,7 +40,6 @@ class OrdersUserAccountControllerExtension extends Extension
     public function history()
     {
         $member = Member::currentUser();
-        
         $orders = new PaginatedList(
             $member->getHistoricOrders(),
             $this->owner->request
@@ -205,9 +224,10 @@ class OrdersUserAccountControllerExtension extends Extension
             TextField::create('City', _t('Checkout.City', 'City')),
             TextField::create('State', _t('Checkout.StateCounty', 'State/County')),
             TextField::create('PostCode', _t('Checkout.PostCode', 'Post Code')),
-            CountryDropdownField::create(
+            DropdownField::create(
                 'Country',
-                _t('Checkout.Country','Country')
+                _t('Checkout.Country','Country'),
+                i18n::getData()->getCountries()
             )->setAttribute("class",'countrydropdown dropdown')
         )->setName("AddressFields")
         ->addExtraClass('unit')
@@ -246,7 +266,13 @@ class OrdersUserAccountControllerExtension extends Extension
             'Country',
         ));
 
-        $form = Form::create($this->owner, "AddressForm", $fields, $actions, $validator);
+        $form = Form::create(
+            $this->owner,
+            "AddressForm",
+            $fields,
+            $actions,
+            $validator
+        );
 
         return $form;
     }

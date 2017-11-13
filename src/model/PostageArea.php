@@ -1,4 +1,11 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Checkout;
+
 /**
  * Postage objects list available postage costs and destination locations
  *
@@ -6,25 +13,26 @@
  */
 class PostageArea extends DataObject
 {
+    private static $table_name = 'PostageArea';
 
-    private static $db = array(
+    private static $db = [
         "Title"         => "Varchar",
         "Country"       => "Varchar(255)",
         "ZipCode"       => "Text",
         "Calculation"   => "Enum('Price,Weight,Items','Weight')",
         "Unit"          => "Decimal",
-        "Cost"          => "Decimal",
+        "Cost"          => "Currency",
         "Tax"           => "Decimal"
-    );
+    ];
 
-    private static $has_one = array(
-        "Site"          => "SiteConfig"
-    );
+    private static $has_one = [
+        "Site"          => SiteConfig::class
+    ];
     
-    private static $casting = array(
+    private static $casting = [
         "TaxAmount"     => "Currency",
         "Total"         => "Currency"
-    );
+    ];
 
     /**
      * Get the amount of tax for this postage object.
@@ -62,7 +70,7 @@ class PostageArea extends DataObject
         return $cost;
     }
 
-    public function canView($member = null)
+    public function canView($member = null, $context = [])
     {
         $extended = $this->extendedCan('canView', $member);
         if ($extended !== null) {
@@ -72,7 +80,7 @@ class PostageArea extends DataObject
         return true;
     }
     
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         $extended = $this->extendedCan('canCreate', $member);
         if ($extended !== null) {
@@ -82,7 +90,7 @@ class PostageArea extends DataObject
         return true;
     }
 
-    public function canEdit($member = null)
+    public function canEdit($member = null, $context = [])
     {
         $extended = $this->extendedCan('canEdit', $member);
         if ($extended !== null) {
@@ -92,7 +100,7 @@ class PostageArea extends DataObject
         return true;
     }
 
-    public function canDelete($member = null)
+    public function canDelete($member = null, $context = [])
     {
         $extended = $this->extendedCan('canDelete', $member);
         if ($extended !== null) {

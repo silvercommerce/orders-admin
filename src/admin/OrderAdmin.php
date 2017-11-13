@@ -1,4 +1,15 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Admin;
+
+use SilverStripe\Admin\ModelAdmin;
+use Colymba\BulkManager\BulkManager;
+use SilverStripe\Omnipay\Model\Payment;
+use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\Estimate;
+use ilateral\SilverStripe\Orders\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
+use ilateral\SilverStripe\Orders\Forms\GridField\BulkActions as OrdersBulkActions;
+
  /**
   * Add interface to manage orders through the CMS
   *
@@ -13,13 +24,13 @@ class OrderAdmin extends ModelAdmin
 
     private static $menu_priority = 4;
 
-    private static $managed_models = array(
-        'Order' => array("title" => "Orders"),
-        'Estimate' => array("title" => "Estimates"),
-        'Payment' => array("title" => "Payments")
-    );
+    private static $managed_models = [
+        Order::class,
+        Estimate::class,
+        Payment::class
+    ];
 
-    private static $model_importers = array();
+    private static $model_importers = [];
     
     /**
      * For an order, export all fields by default
@@ -27,7 +38,7 @@ class OrderAdmin extends ModelAdmin
      */
     public function getExportFields()
     {
-        if ($this->modelClass == 'Order') {
+        if ($this->modelClass == Order::class) {
             $return = array(
                 "OrderNumber"       => "#",
                 "Status"            => "Status",
@@ -79,68 +90,64 @@ class OrderAdmin extends ModelAdmin
         $config = null;
         
         // Bulk manager
-        $manager = new GridFieldBulkManager();
+        $manager = new BulkManager();
         $manager->removeBulkAction("bulkEdit");
         $manager->removeBulkAction("unLink");
 
+        \Debug::show(Order::class);
 
         // Manage orders
-        if ($this->modelClass == 'Order') {
+        if ($this->modelClass == Order::class) {
             $gridField = $fields->fieldByName('Order');
             $config = $gridField->getConfig();
 
             $manager->addBulkAction(
                 'cancelled',
                 'Mark Cancelled',
-                'OrdersFieldBulkActions'
+                OrdersBulkActions::class
+            );
+            
+            $manager->addBulkAction(
+                'refunded',
+                'Mark Refunded',
+                OrdersBulkActions::class
+            );
+
+            $manager->addBulkAction(
+                'pending',
+                'Mark Pending',
+                OrdersBulkActions::class
+            );
+
+            $manager->addBulkAction(
+                'partpaid',
+                'Mark Part Paid',
+                OrdersBulkActions::class
             );
             
             $manager->addBulkAction(
                 'paid',
                 'Mark Paid',
-                'OrdersFieldBulkActions'
+                OrdersBulkActions::class
             );
 
             $manager->addBulkAction(
                 'processing',
                 'Mark Processing',
-                'OrdersFieldBulkActions'
+                OrdersBulkActions::class
             );
 
             $manager->addBulkAction(
                 'dispatched',
                 'Mark Dispatched',
-                'OrdersFieldBulkActions'
+                OrdersBulkActions::class
             );
-
-            // Update list of items for subsite (if used)
-            if (class_exists('Subsite')) {
-                $list = $gridField
-                    ->getList()
-                    ->filter(array(
-                        'SubsiteID' => Subsite::currentSubsiteID()
-                    ));
-
-                $gridField->setList($list);
-            }
         }
         
-        
         // Manage Estimates
-        if ($this->modelClass == 'Estimate') {
+        if ($this->modelClass == Estimate::class) {
             $gridField = $fields->fieldByName('Estimate');
             $config = $gridField->getConfig();
-
-            // Update list of items for subsite (if used)
-            if (class_exists('Subsite')) {
-                $list = $gridField
-                    ->getList()
-                    ->filter(array(
-                        'SubsiteID' => Subsite::currentSubsiteID()
-                    ));
-
-                $gridField->setList($list);
-            }
         }
         
         // Set our default detailform and bulk manager
@@ -161,9 +168,9 @@ class OrderAdmin extends ModelAdmin
         $list = parent::getList();
         
         // Ensure that we only show Order objects in the order tab
-        if ($this->modelClass == "Order") {
+        if ($this->modelClass == "ilateral-SilverStripe-Orders-Model-Order") {
             $list = $list
-                ->addFilter(array("ClassName" => "Order"));
+                ->addFilter(array("ClassName" => Order::class));
         }
                 
         $this->extend("updateList", $list);

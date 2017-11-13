@@ -1,8 +1,15 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Reports;
+
+use SilverStripe\Reports\Report;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
+use ilateral\SilverStripe\Orders\Model\Order;
+
 // Only load this if reports are active
-if (class_exists("SS_Report")) {
-    class OrdersReport extends SS_Report
+if (class_exists(Report::class)) {
+    class OrdersReport extends Report
     {
 
         public function title()
@@ -17,7 +24,7 @@ if (class_exists("SS_Report")) {
 
         public function columns()
         {
-            return array(
+            return [
                 'OrderNumber' => '#',
                 'Created' => 'Date',
                 'SubTotal' => 'Sub Total',
@@ -32,13 +39,13 @@ if (class_exists("SS_Report")) {
                 'DeliveryCity' => 'Delivery:<br/>City',
                 'DeliveryPostCode' => 'Delivery:<br/>Post Code',
                 'DeliveryCountry' => 'Delivery:<br/>Country'
-            );
+            ];
         }
 
         public function exportColumns()
         {
             // Loop through all colls and replace BR's with spaces
-            $cols = array();
+            $cols = [];
 
             foreach ($this->columns() as $key => $value) {
                 $cols[$key] = str_replace('<br/>', ' ', $value);
@@ -49,7 +56,7 @@ if (class_exists("SS_Report")) {
 
         public function sortColumns()
         {
-            return array();
+            return [];
         }
 
         public function getReportField()
@@ -66,7 +73,7 @@ if (class_exists("SS_Report")) {
         public function sourceRecords($params, $sort, $limit)
         {
             // Check filters
-            $where_filter = array();
+            $where_filter = [];
 
             $where_filter[] = (isset($params['Filter_Year'])) ? "YEAR(\"Created\") = '{$params['Filter_Year']}'" : "YEAR(\"Created\") = '".date('Y')."'";
             if (!empty($params['Filter_Month'])) {
@@ -106,7 +113,7 @@ if (class_exists("SS_Report")) {
                 }
 
                 // Get the first order, then count down from current year to that
-                $firstyear = new SS_Datetime('FirstDate');
+                $firstyear = new SSDatetime('FirstDate');
                 $firstyear->setValue($first_order->Created);
                 
                 $years = array();

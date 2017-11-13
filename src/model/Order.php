@@ -1,5 +1,41 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
+use SilverStripe\Security\PermissionProvider;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
+use SilverStripe\i18n\i18n;
+use SilverStripe\Control\Controller;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Versioned\Versioned;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TabSet;
+use SilverStripe\Forms\Tab;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\Forms\GridField\GridFieldConfig_Base;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use ilateral\SilverStripe\Orders\Forms\GridField\AddOrderItem;
+use ilateral\SilverStripe\Orders\Forms\GridField\OrderItemGridField;
+use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
+use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
+use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
+use ilateral\SilverStripe\Orders\Control\OrdersFront_Controller;
+use ilateral\SilverStripe\Orders\Checkout;
+
 /**
  * Order objects track all the details of an order and if they were completed or
  * not.
@@ -20,6 +56,8 @@
 class Order extends DataObject implements PermissionProvider
 {
 
+    private static $table_name = 'Order';
+
     /**
      * Add a string to the start of an order number (can be useful for
      * exporting orders).
@@ -37,7 +75,7 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $statuses = array(
+    private static $statuses = [
         "incomplete" => "Incomplete",
         "failed" => "Failed",
         "cancelled" => "Cancelled",
@@ -49,7 +87,7 @@ class Order extends DataObject implements PermissionProvider
         "dispatched" => "Dispatched",
         "collected" => "Collected",
         "refunded" => "Refunded"
-    );
+    ];
 
     /**
      * What statuses does an order need to be marked as "outstanding".
@@ -58,11 +96,11 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $outstanding_statuses = array(
+    private static $outstanding_statuses = [
         "part-paid",
         "paid",
         "processing"
-    );
+    ];
 
     /**
      * What statuses does an order need to be marked as "historic".
@@ -71,11 +109,11 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $historic_statuses = array(
+    private static $historic_statuses = [
         "dispatched",
         "collected",
         "canceled"
-    );
+    ];
 
     /**
      * What statuses are considered "paid for". Meaning
@@ -84,13 +122,13 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $paid_statuses = array(
+    private static $paid_statuses = [
         "paid",
         "processing",
         "ready",
         "dispatched",
         "collected"
-    );
+    ];
 
     /**
      * List of statuses that allow editing of an order. We can use this
@@ -99,7 +137,7 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $editable_statuses = array(
+    private static $editable_statuses = [
         "",
         "incomplete",
         "pending",
@@ -107,7 +145,7 @@ class Order extends DataObject implements PermissionProvider
         "paid",
         "failed",
         "cancelled"
-    );
+    ];
 
     /**
      * Set the default status for a new order, if this is set to null or
@@ -203,10 +241,10 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $actions = array(
+    private static $actions = [
         "post" => "Post",
         "collect" => "Collect"
-    );
+    ];
 
     /**
      * Set the default action on our order. If we were using this module
@@ -226,7 +264,7 @@ class Order extends DataObject implements PermissionProvider
      * @var string
      * @config
      */
-    private static $existing_customer_class = "Member";
+    private static $existing_customer_class = Member::class;
 
     /**
      * The list of fields that will show in the existing customer
@@ -237,7 +275,7 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $existing_customer_fields = array();
+    private static $existing_customer_fields = [];
 
     /**
      * Select the fields that will be copied from the source object to
@@ -247,7 +285,7 @@ class Order extends DataObject implements PermissionProvider
      * @var array
      * @config
      */
-    private static $existing_customer_map = array(
+    private static $existing_customer_map = [
         "FirstName" => "FirstName",
         "Surname" => "Surname",
         "Email" => "Email",
@@ -256,9 +294,9 @@ class Order extends DataObject implements PermissionProvider
         "Address2" => "Address2",
         "City" => "City",
         "PostCode" => "PostCode"
-    );
+    ];
 
-    private static $db = array(
+    private static $db = [
         'Status'            => "Varchar",
         'OrderNumber'       => 'Varchar',
         
@@ -302,18 +340,18 @@ class Order extends DataObject implements PermissionProvider
         
         // Misc Data
         "AccessKey"         => "Varchar(20)",
-    );
+    ];
 
-    private static $has_one = array(
-        "Customer"          => "Member"
-    );
+    private static $has_one = [
+        "Customer"          => Member::class
+    ];
 
-    private static $has_many = array(
-        'Items'             => 'OrderItem'
-    );
+    private static $has_many = [
+        'Items'             => OrderItem::class
+    ];
 
     // Cast method calls nicely
-    private static $casting = array(
+    private static $casting = [
         'CountryFull'       => 'Varchar',
         'BillingAddress'    => 'Text',
         'DeliveryCountryFull'=> 'Varchar',
@@ -330,14 +368,14 @@ class Order extends DataObject implements PermissionProvider
         'TranslatedStatus'  => 'Varchar',
         "QuoteLink"         => 'Varchar',
         "InvoiceLink"       => 'Varchar'
-    );
+    ];
 
-    private static $defaults = array(
+    private static $defaults = [
         'EmailDispatchSent' => 0,
         'DiscountAmount'    => 0
-    );
+    ];
 
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "OrderNumber"   => "#",
         "Status"        => "Status",
         "Action"        => "Action",
@@ -347,13 +385,20 @@ class Order extends DataObject implements PermissionProvider
         "Total"         => "Total",
         "Created"       => "Created",
         "LastEdited"    => "Last Edited"
-    );
+    ];
 
-    private static $extensions = array(
-        "Versioned('History')"
-    );
+    private static $extensions = [
+        Versioned::class
+    ];
 
-    private static $default_sort = "Created DESC";
+    private static $versioning = [
+        "History"
+    ];
+
+    private static $default_sort = [
+        "LastEdited" => "DESC",
+        "Created" => "DESC"
+    ];
 
     /**
      * Generate a link to view the associated front end quote
@@ -364,7 +409,7 @@ class Order extends DataObject implements PermissionProvider
     public function QuoteLink()
     {
         return Controller::join_links(
-            OrdersFront_Controller::create()->AbsoluteLink("quote"),
+            Injector::inst()->create(OrdersFront_Controller::class)->AbsoluteLink("quote"),
             $this->ID,
             $this->AccessKey
         );
@@ -379,7 +424,7 @@ class Order extends DataObject implements PermissionProvider
     public function InvoiceLink()
     {
         return Controller::join_links(
-            OrdersFront_Controller::create()->AbsoluteLink(),
+            Injector::inst()->create(OrdersFront_Controller::class)->AbsoluteLink(),
             $this->ID,
             $this->AccessKey
         );
@@ -388,26 +433,26 @@ class Order extends DataObject implements PermissionProvider
     public function populateDefaults()
     {
         parent::populateDefaults();
-        $this->Status = $this->config()->default_status;
-        $this->Action = $this->config()->default_action;
+        $this->Status = $this->config()->get("default_status");
+        $this->Action = $this->config()->get("default_action");
     }
 
     public function getCMSFields()
     {
         $member = Member::currentUser();
-        $existing_customer = $this->config()->existing_customer_class;
+        $existing_customer = $this->config()->get("existing_customer_class");
         $payment = $this->getPayment();
 
-        $fields = new FieldList(
-            $tab_root = new TabSet(
+        $fields = FieldList::create(
+            $tab_root = TabSet::create(
                 "Root",
                 
                 // Main Tab Fields
-                $tab_main = new Tab(
+                $tab_main = Tab::create(
                     'Main',
                     
                     // Items field
-                    new OrderItemGridField(
+                    OrderItemGridField::create(
                         "Items",
                         "",
                         $this->Items(),
@@ -419,12 +464,12 @@ class Order extends DataObject implements PermissionProvider
                                 new GridFieldEditButton(),
                                 new GridFieldDetailForm(),
                                 new GridFieldDeleteAction(),
-                                new GridFieldAddOrderItem()
+                                new AddOrderItem()
                             )
                     ),
                     
                     // Postage
-                    new HeaderField(
+                    HeaderField::create(
                         "PostageDetailsHeader",
                         _t("Orders.PostageDetails", "Postage Details")
                     ),
@@ -433,7 +478,7 @@ class Order extends DataObject implements PermissionProvider
                     TextField::create("PostageTax"),
                     
                     // Discount
-                    new HeaderField(
+                    HeaderField::create(
                         "DiscountDetailsHeader",
                         _t("Orders.DiscountDetails", "Discount")
                     ),
@@ -467,7 +512,7 @@ class Order extends DataObject implements PermissionProvider
                 ),
                 
                 // Main Tab Fields
-                $tab_customer = new Tab(
+                $tab_customer = Tab::create(
                     'Customer',
                     HeaderField::create(
                         "BillingDetailsHeader",
@@ -480,13 +525,17 @@ class Order extends DataObject implements PermissionProvider
                     TextField::create("Address2"),
                     TextField::create("City"),
                     TextField::create("PostCode"),
-                    CountryDropdownField::create("Country"),
+                    DropdownField::create(
+                        'Country',
+                        _t('Checkout.Country', 'Country'),
+                        i18n::getData()->getCountries()
+                    ),
                     TextField::create("Email"),
                     TextField::create("PhoneNumber")
                 ),
                 
                 // Delivery Tab
-                $tab_delivery = new Tab(
+                $tab_delivery = Tab::create(
                     'Delivery',
                     HeaderField::create(
                         "DeliveryDetailsHeader",
@@ -499,11 +548,15 @@ class Order extends DataObject implements PermissionProvider
                     TextField::create("DeliveryAddress2"),
                     TextField::create("DeliveryCity"),
                     TextField::create("DeliveryPostCode"),
-                    CountryDropdownField::create("DeliveryCountry")
+                    DropdownField::create(
+                        'Country',
+                        _t('Checkout.Country', 'Country'),
+                        i18n::getData()->getCountries()
+                    )
                 ),
 
                 // List payments
-                $tab_payments = new Tab(
+                $tab_payments = Tab::create(
                     "Payments",
                     GridField::create(
                         "Payments",
@@ -543,34 +596,34 @@ class Order extends DataObject implements PermissionProvider
             $tab_customer->insertBefore(
                 CustomerSidebar::create(
                     // Items field
-                    new GridField(
+                    GridField::create(
                         "ExistingCustomers",
                         "",
                         $existing_customer::get(),
                         $config = GridFieldConfig_Base::create()
                             ->addComponents(
-                                $map_extension = new GridFieldMapExistingAction()
+                                $map_extension = new MapExistingAction()
                             )
                     )
                 )->setTitle("Use Existing Customer"),
                 "BillingDetailsHeader"
             );
             
-            if (is_array($this->config()->existing_customer_fields) && count($this->config()->existing_customer_fields)) {
+            if (is_array($this->config()->get("existing_customer_fields")) && count($this->config()->existing_customer_fields)) {
                 $columns = $config->getComponentByType("GridFieldDataColumns");
                 
                 if ($columns) {
                     $columns
                         ->setDisplayFields($this
                             ->config()
-                            ->existing_customer_fields
+                            ->get("existing_customer_fields")
                         );
                 }
             }
             
             // Set the record ID
             $map_extension
-                ->setMapFields($this->config()->existing_customer_map);
+                ->setMapFields($this->config()->get("existing_customer_map"));
         }
 
 		$tab_root->addextraClass('orders-root');
@@ -605,17 +658,8 @@ class Order extends DataObject implements PermissionProvider
      */
     public function getCountryFull()
     {
-        try {
-            $source = Zend_Locale::getTranslationList(
-                'territory',
-                $this->Country,
-                2
-            );
-
-            return (array_key_exists($this->Country, $source)) ? $source[$this->Country] : $this->Country;
-        } catch (Exception $e) {
-            return "";
-        }
+        $list = i18n::getData()->getCountries();
+        return (array_key_exists($this->Country, $list)) ? $list[$this->Country] : $this->Country;
     }
 
     /**
@@ -641,17 +685,8 @@ class Order extends DataObject implements PermissionProvider
      */
     public function getDeliveryCountryFull()
     {
-        try {
-            $source = Zend_Locale::getTranslationList(
-                'territory',
-                $this->DeliveryCountry,
-                2
-            );
-
-            return (array_key_exists($this->DeliveryCountry, $source)) ? $source[$this->DeliveryCountry] : $this->DeliveryCountry;
-        } catch (Exception $e) {
-            return "";
-        }
+        $list = i18n::getData()->getCountries();
+        return (array_key_exists($this->DeliveryCountry, $list)) ? $list[$this->DeliveryCountry] : $this->DeliveryCountry;
     }
 
     /**
@@ -665,7 +700,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function isPaid()
     {
-        $statuses = $this->Config()->paid_statuses;
+        $statuses = $this->config()->get("paid_statuses");
 
         if (!is_array($statuses)) {
             return $this->Status == $statuses;
@@ -701,7 +736,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markComplete()
     {
-        $this->Status = $this->config()->completion_status;
+        $this->Status = $this->config()->get("completion_status");
         return $this;
     }
 
@@ -713,7 +748,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markPaid()
     {
-        $this->Status = $this->config()->paid_status;
+        $this->Status = $this->config()->get("paid_status");
         return $this;
     }
 
@@ -724,7 +759,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markPartPaid()
     {
-        $this->Status = $this->config()->part_paid_status;
+        $this->Status = $this->config()->get("part_paid_status");
         return $this;
     }
 
@@ -735,7 +770,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markPending()
     {
-        $this->Status = $this->config()->pending_status;
+        $this->Status = $this->config()->get("pending_status");
         return $this;
     }
 
@@ -746,7 +781,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markCanceled()
     {
-        $this->Status = $this->config()->canceled_status;
+        $this->Status = $this->config()->get("canceled_status");
         return $this;
     }
 
@@ -757,7 +792,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markRefunded()
     {
-        $this->Status = $this->config()->refunded_status;
+        $this->Status = $this->config()->get("refunded_status");
         return $this;
     }
 
@@ -768,7 +803,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markDispatched()
     {
-        $this->Status = $this->config()->dispatched_status;
+        $this->Status = $this->config()->get("dispatched_status");
         return $this;
     }
 
@@ -779,7 +814,7 @@ class Order extends DataObject implements PermissionProvider
      */
     public function markCollected()
     {
-        $this->Status = $this->config()->collected_status;
+        $this->Status = $this->config()->get("collected_status");
         return $this;
     }
 
@@ -809,7 +844,6 @@ class Order extends DataObject implements PermissionProvider
     public function getItemSummaryHTML()
     {
         $html = new HTMLText("ItemSummary");
-        
         $html->setValue(nl2br($this->ItemSummary));
         
         $this->extend("updateItemSummaryHTML", $html);
@@ -1054,9 +1088,9 @@ class Order extends DataObject implements PermissionProvider
      *                 duplicate in the database.
      * @return DataObject A duplicate of this node. The exact type will be the type of this node.
      */
-    public function duplicate($doWrite = true)
+    public function duplicate($doWrite = true, $manyMany = 'many_many')
     {
-        $clone = parent::duplicate($doWrite);
+        $clone = parent::duplicate($doWrite, $manyMany);
         
         // Set up items
         if ($doWrite) {
@@ -1118,8 +1152,8 @@ class Order extends DataObject implements PermissionProvider
         }
         
         
-        $this->Status = (!$this->Status) ? $this->config()->default_status : $this->Status;
-        $this->Action = (!$this->Action) ? $this->config()->default_action :  $this->Action;
+        $this->Status = (!$this->Status) ? $this->config()->get("default_status") : $this->Status;
+        $this->Action = (!$this->Action) ? $this->config()->get("default_action") :  $this->Action;
     }
 
     /**
@@ -1155,38 +1189,38 @@ class Order extends DataObject implements PermissionProvider
 
     public function providePermissions()
     {
-        return array(
-            "COMMERCE_VIEW_ORDERS" => array(
+        return [
+            "COMMERCE_VIEW_ORDERS" => [
                 'name' => 'View any order',
                 'help' => 'Allow user to view any commerce order',
                 'category' => 'Orders',
                 'sort' => 99
-            ),
-            "COMMERCE_STATUS_ORDERS" => array(
+            ],
+            "COMMERCE_STATUS_ORDERS" => [
                 'name' => 'Change status of any order',
                 'help' => 'Allow user to change the status of any order',
                 'category' => 'Orders',
                 'sort' => 98
-            ),
-            "COMMERCE_EDIT_ORDERS" => array(
+            ],
+            "COMMERCE_EDIT_ORDERS" => [
                 'name' => 'Edit any order',
                 'help' => 'Allow user to edit any order',
                 'category' => 'Orders',
                 'sort' => 98
-            ),
-            "COMMERCE_DELETE_ORDERS" => array(
+            ],
+            "COMMERCE_DELETE_ORDERS" => [
                 'name' => 'Delete any order',
                 'help' => 'Allow user to delete any order',
                 'category' => 'Orders',
                 'sort' => 97
-            ),
-            "COMMERCE_ORDER_HISTORY" => array(
+            ],
+            "COMMERCE_ORDER_HISTORY" => [
                 'name' => 'View order history',
                 'help' => 'Allow user to see the history of an order',
                 'category' => 'Orders',
                 'sort' => 96
-            )
-        );
+            ]
+        ];
     }
 
     /**
@@ -1194,7 +1228,7 @@ class Order extends DataObject implements PermissionProvider
      *
      * @return Boolean
      */
-    public function canView($member = null)
+    public function canView($member = null, $context = [])
     {
         $extended = $this->extend('canView', $member);
         if ($extended && $extended !== null) {
@@ -1209,7 +1243,7 @@ class Order extends DataObject implements PermissionProvider
             $memberID = Member::currentUserID();
         }
 
-        if ($memberID && Permission::checkMember($memberID, array("ADMIN", "COMMERCE_VIEW_ORDERS"))) {
+        if ($memberID && Permission::checkMember($memberID, ["ADMIN", "COMMERCE_VIEW_ORDERS"])) {
             return true;
         } elseif ($memberID && $memberID == $this->CustomerID) {
             return true;
@@ -1223,7 +1257,7 @@ class Order extends DataObject implements PermissionProvider
      *
      * @return Boolean
      */
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         $extended = $this->extend('canCreate', $member);
         if ($extended && $extended !== null) {
@@ -1238,7 +1272,7 @@ class Order extends DataObject implements PermissionProvider
      *
      * @return Boolean
      */
-    public function canEdit($member = null)
+    public function canEdit($member = null, $context = [])
     {
         $extended = $this->extend('canEdit', $member);
         if ($extended && $extended !== null) {
@@ -1255,7 +1289,7 @@ class Order extends DataObject implements PermissionProvider
 
         if (
             $memberID &&
-            Permission::checkMember($memberID, array("ADMIN", "COMMERCE_EDIT_ORDERS")) &&
+            Permission::checkMember($memberID, ["ADMIN", "COMMERCE_EDIT_ORDERS"]) &&
             in_array($this->Status, $this->config()->editable_statuses)
         ) {
             return true;
@@ -1269,7 +1303,7 @@ class Order extends DataObject implements PermissionProvider
      *
      * @return Boolean
      */
-    public function canChangeStatus($member = null)
+    public function canChangeStatus($member = null, $context = [])
     {
         $extended = $this->extend('canEdit', $member);
         if ($extended && $extended !== null) {
@@ -1284,7 +1318,7 @@ class Order extends DataObject implements PermissionProvider
             $memberID = Member::currentUserID();
         }
 
-        if ($memberID && Permission::checkMember($memberID, array("ADMIN", "COMMERCE_STATUS_ORDERS"))) {
+        if ($memberID && Permission::checkMember($memberID, ["ADMIN", "COMMERCE_STATUS_ORDERS"])) {
             return true;
         }
 
@@ -1296,7 +1330,7 @@ class Order extends DataObject implements PermissionProvider
      *
      * @return Boolean
      */
-    public function canDelete($member = null)
+    public function canDelete($member = null, $context = [])
     {
         $extended = $this->extend('canEdit', $member);
         if ($extended && $extended !== null) {
@@ -1311,7 +1345,7 @@ class Order extends DataObject implements PermissionProvider
             $memberID = Member::currentUserID();
         }
 
-        if ($memberID && Permission::checkMember($memberID, array("ADMIN", "COMMERCE_DELETE_ORDERS"))) {
+        if ($memberID && Permission::checkMember($memberID, ["ADMIN", "COMMERCE_DELETE_ORDERS"])) {
             return true;
         }
 

@@ -1,4 +1,21 @@
 <?php
+
+namespace ilateral\SilverStripe\Orders\Forms;
+
+use SilverStripe\Control\Session;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\CompositeField;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\i18n\i18n;
+use SilverStripe\Security\Member;
+use ilateral\SilverStripe\Orders\Model\MemberAddress;
+
 /**
  * Description of CheckoutForm
  *
@@ -33,9 +50,10 @@ class DeliveryDetailsForm extends Form
             TextField::create('DeliveryCity', _t('Checkout.City', 'City')),
             TextField::create('DeliveryState', _t('Checkout.StateCounty', 'State/County')),
             TextField::create('DeliveryPostCode', _t('Checkout.PostCode', 'Post Code')),
-            CountryDropdownField::create(
-                'DeliveryCountry',
-                _t('Checkout.Country', 'Country')
+            DropdownField::create(
+                'Country',
+                _t('Checkout.Country', 'Country'),
+                i18n::getData()->getCountries()
             )
         )->setName("AddressFields");
 

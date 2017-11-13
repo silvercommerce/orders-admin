@@ -1,26 +1,28 @@
 ---
 Name: orderconfig
 ---
-LeftAndMain:
-  extra_requirements_css:
-    - orders/css/admin.css
-
 ## Extensions
-Controller:
+SilverStripe\Admin\LeftAndMain:
   extensions:
-    - OrdersControllerExtension
-SiteConfig:
+    - ilateral\SilverStripe\Orders\Extensions\AdminExtension
+SilverStripe\Control\Controller:
   extensions:
-    - OrdersSiteConfigExtension
-Member:
+    - ilateral\SilverStripe\Orders\Extensions\ControllerExtension
+SilverStripe\SiteConfig\SiteConifg:
   extensions:
-    - OrdersMemberExtension
-Group:
+    - ilateral\SilverStripe\Orders\Extensions\SiteConfigExtension
+SilverStripe\Security\Member:
   extensions:
-    - OrdersGroupExtension
-Order:
+    - ilateral\SilverStripe\Orders\Extensions\MemberExtension
+SilverStripe\Security\Group:
   extensions:
-    - Payable
-Payment:
+    - ilateral\SilverStripe\Orders\Extensions\GroupExtension
+ilateral\SilverStripe\Orders\Model\Order:
   extensions:
-    - OrdersPaymentExtension
+    - SilverStripe\Omnipay\Extensions\Payable
+SilverStripe\Omnipay\Model\Payment:
+  extensions:
+    - ilateral\SilverStripe\Orders\Extensions\PaymentExtension
+Users_Account_Controller:
+  extensions:
+    - ilateral\SilverStripe\Orders\Extensions\UserAccountControllerExtension

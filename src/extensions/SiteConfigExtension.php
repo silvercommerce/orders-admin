@@ -1,22 +1,42 @@
 <?php
 
-class OrdersSiteConfigExtension extends DataExtension
+namespace ilateral\SilverStripe\Orders\Extensions;
+
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
+use SilverStripe\Forms\ToggleCompositeField;
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
+use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
+use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+
+class SiteConfigExtension extends DataExtension
 {
     
-    private static $db = array(
+    private static $db = [
         "OrdersHeader" => "HTMLText",
         "QuoteFooter" => "HTMLText",
         "InvoiceFooter" => "HTMLText",
         "PaymentNumberPrefix" => "Varchar(6)",
         'PaymentSuccessContent' => 'Text',
         'PaymentFailerContent'  => 'Text'
-    );
+    ];
     
-    private static $has_many = array(
-        "OrderNotifications" => "OrderNotification",
-        'PostageAreas'      => 'PostageArea',
-        'Discounts'         => 'Discount'
-    );
+    private static $has_many = [
+        "OrderNotifications"=> OrderNotification::class,
+        'PostageAreas'      => PostageArea::class,
+        'Discounts'         => Discount::class
+    ];
     
     public function updateCMSFields(FieldList $fields)
     {
@@ -49,7 +69,7 @@ class OrdersSiteConfigExtension extends DataExtension
         $payment_fields = ToggleCompositeField::create(
             'PaymentSettings',
             _t("CheckoutAdmin.Payments", "Payment Settings"),
-            array(
+            [
                 TextField::create(
                     'PaymentNumberPrefix',
                     _t("CheckoutAdmin.OrderPrefix", "Add prefix to order numbers"),
@@ -60,20 +80,20 @@ class OrdersSiteConfigExtension extends DataExtension
                     _t("CheckoutAdmin.OrderPrefixPlaceholder", "EG 'abc'")
                 ),
                 
-                TextAreaField::create(
+                TextareaField::create(
                     'PaymentSuccessContent',
                     _t("CheckoutAdmin.PaymentSuccessContent", "Payment successfull content")
                 )->setRows(4)
                 ->setColumns(30)
                 ->addExtraClass('stacked'),
                 
-                TextAreaField::create(
+                TextareaField::create(
                     'PaymentFailerContent',
                     _t("CheckoutAdmin.PaymentFailerContent", "Payment failer content")
                 )->setRows(4)
                 ->setColumns(30)
                 ->addExtraClass('stacked')
-            )
+            ]
         );
 
         // Add html description of how to edit contries
@@ -87,7 +107,7 @@ class OrdersSiteConfigExtension extends DataExtension
         $country_html_field = LiteralField::create("CountryDescription", $country_html);
 
         // Deal with product features
-        $postage_field = new GridField(
+        $postage_field = GridField::config(
             'PostageAreas',
             '',
             $this->owner->PostageAreas(),

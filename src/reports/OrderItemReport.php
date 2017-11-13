@@ -1,8 +1,18 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Reports;
+
+use SilverStripe\Reports\Report;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\FieldType\DBDatetime as SSDateTime;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
+use SilverStripe\View\ViewableData;
+use ilateral\SilverStripe\Orders\Model\Order;
+
 // Only load this if reports are active
-if (class_exists("SS_Report")) {
-    class OrderItemReport extends SS_Report
+if (class_exists(Report::class)) {
+    class OrderItemReport extends Report
     {
         
         public function title()
@@ -17,18 +27,18 @@ if (class_exists("SS_Report")) {
 
         public function columns()
         {
-            return array(
+            return [
                 "StockID" => "StockID",
                 "Details" => "Details",
                 "Price" => "Price",
                 "Quantity" => "Quantity"
-            );
+            ];
         }
 
         public function exportColumns()
         {
             // Loop through all colls and replace BR's with spaces
-            $cols = array();
+            $cols = [];
 
             foreach ($this->columns() as $key => $value) {
                 $cols[$key] = $value;
@@ -39,7 +49,7 @@ if (class_exists("SS_Report")) {
 
         public function sortColumns()
         {
-            return array();
+            return [];
         }
 
         public function getReportField()
@@ -58,7 +68,7 @@ if (class_exists("SS_Report")) {
             $return = ArrayList::create();
 
             // Check filters
-            $where_filter = array();
+            $where_filter = [];
 
             $where_filter[] = (isset($params['Filter_Year'])) ? "YEAR(\"Created\") = '{$params['Filter_Year']}'" : "YEAR(\"Created\") = '".date('Y')."'";
             if (!empty($params['Filter_Month'])) {
@@ -116,15 +126,9 @@ if (class_exists("SS_Report")) {
         {
             $fields = new FieldList();
 
-            if (class_exists("Subsite")) {
-                $first_order = Subsite::get_from_all_subsites("Order")
-                    ->sort('Created', 'ASC')
-                    ->first();
-            } else {
-                $first_order = Order::get()
-                    ->sort('Created', 'ASC')
-                    ->first();
-            }
+            $first_order = Order::get()
+                ->sort('Created', 'ASC')
+                ->first();
 
             // Check if any order exist
             if ($first_order) {
@@ -135,7 +139,7 @@ if (class_exists("SS_Report")) {
                 }
 
                 // Get the first order, then count down from current year to that
-                $firstyear = new SS_Datetime('FirstDate');
+                $firstyear = new SSDatetime('FirstDate');
                 $firstyear->setValue($first_order->Created);
                 $years = array();
                 for ($i = date('Y'); $i >= $firstyear->Year(); $i--) {
@@ -194,9 +198,8 @@ if (class_exists("SS_Report")) {
  * Item that can be loaded into an OrderItem report
  *
  */
-class OrderItemReportItem extends Object
+class OrderItemReportItem extends ViewableData
 {
-
     public $ClassName = "OrderItemReportItem";
 
     public $StockID;

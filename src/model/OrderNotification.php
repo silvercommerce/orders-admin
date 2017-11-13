@@ -1,36 +1,44 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\SiteConfig\SiteConfig;
+
 class OrderNotification extends DataObject
 {
-    
+    private static $table_name = 'OrderNotification';
+
     /**
      * @config
      */
-    private static $db = array(
+    private static $db = [
         "Status" => "Varchar",
         "SendNotificationTo" => "Enum('Customer,Vendor,Both','Customer')",
         "CustomSubject" => "Varchar(255)",
         "FromEmail" => "Varchar",
         "VendorEmail" => "Varchar"
-    );
+    ];
     
     /**
      * @config
      */
-    private static $has_one = array(
-        "Parent" => "SiteConfig"
-    );
+    private static $has_one = [
+        "Parent" => SiteConfig::class
+    ];
     
     /**
      * @config
      */
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "Status",
         "SendNotificationTo",
         "FromEmail",
         "VendorEmail",
         "CustomSubject"
-    );
+    ];
     
     public function getCMSFields()
     {
@@ -39,7 +47,7 @@ class OrderNotification extends DataObject
         $status_field = DropdownField::create(
             "Status",
             $this->fieldLabel("Status"),
-            Order::config()->statuses
+            Order::config()->get("statuses")
         );
         
         $fields->replaceField("Status", $status_field);

@@ -1,5 +1,7 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Tools;
+
 /**
  * Class designed to deal with encrypting strings sent to it, either using XOR
  * or AES encryption.

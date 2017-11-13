@@ -1,8 +1,27 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Control;
+
+use SilverStripe\Core\Convert;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Security\Member;
+use SilverStripe\i18n\i18n;
 use SilverStripe\Omnipay\GatewayInfo;
 use SilverStripe\Omnipay\GatewayFieldsFactory;
 use SilverStripe\Omnipay\Service\ServiceFactory;
+use SilverStripe\Omnipay\Model\Payment;
+use SilverStripe\SiteConfig\SiteConfig;
+use ilateral\SilverStripe\Orders\Checkout;
+use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use ilateral\SilverStripe\Orders\Control\Checkout_Controller;
+use ilateral\SilverStripe\Orders\Model\Estimate;
+use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\PostageArea;
 
 /**
  * Summary Controller is responsible for displaying all order data before posting
@@ -138,6 +157,8 @@ class Payment_Controller extends Controller
         $payment_data = array();
         $member = Member::currentUser();
         $order = null;
+        $simple_checkout = Checkout::config()->get("simple_checkout");
+        $show_login_form = Checkout::config()->get("login_form");
 
         // If shopping cart doesn't exist, redirect to base
         if (!$cart->getItems()->exists()) {
@@ -156,12 +177,16 @@ class Payment_Controller extends Controller
         }
         
         // If we are using a complex checkout and do not have correct details redirect 
-        if (!Checkout::config()->simple_checkout && !$cart->isCollection() && $cart->isDeliverable() && (!$postage || !$billing_data || !$delivery_data)) {
-            return $this->redirect(Checkout_Controller::create()->Link());
+        if (!$simple_checkout && !$cart->isCollection() && $cart->isDeliverable() && (!$postage || !$billing_data || !$delivery_data)) {
+            return $this->redirect(Injector::inst()
+                ->create("ilateral\\SilverStripe\\Orders\\Control\\Checkout_Controller")
+                ->Link());
         }
             
         if ($cart->isCollection() && (!$billing_data)) {
-            return $this->redirect(Checkout_Controller::create()->Link());
+            return $this->redirect(Injector::inst()
+                ->create("ilateral\\SilverStripe\\Orders\\Control\\Checkout_Controller")
+                ->Link());
         }
          
         // Setup holder for Payment ID
@@ -171,10 +196,10 @@ class Payment_Controller extends Controller
         $data['Status'] = 'incomplete';
 
         // Assign billing, delivery and postage data
-        if (!Checkout::config()->simple_checkout) {
+        if (!$simple_checkout) {
             $data = array_merge($data, $billing_data);
             $data = (is_array($delivery_data)) ? array_merge($data, $delivery_data) : $data;
-            $checkout_data = Checkout::config()->checkout_data;
+            $checkout_data = Checkout::config()->get("checkout_data");
             
             if (!$cart->isCollection()) {
                 $data['PostageType'] = $postage->Title;
@@ -189,11 +214,11 @@ class Payment_Controller extends Controller
             
             // Add full country names if needed
             if (in_array("CountryFull", $checkout_data)) {
-                $data['CountryFull'] = Checkout::country_name_from_code($data["Country"]);
+                $data['CountryFull'] = i18n::getData()->countryName($data["Country"]);
             }
             
             if (in_array("DeliveryCountryFull", $checkout_data) && array_key_exists("DeliveryCountry", $data)) {
-                $data['DeliveryCountryFull'] = Checkout::country_name_from_code($data["DeliveryCountry"]);
+                $data['DeliveryCountryFull'] = i18n::getData()->countryName($data["DeliveryCountry"]);
             }
             
             foreach ($checkout_data as $key) {
@@ -255,7 +280,7 @@ class Payment_Controller extends Controller
         // Generate a map of payment data and load into form.
         // This way we can add users to a form
         $omnipay_data = [];
-        $omnipay_map = Checkout::config()->omnipay_map;
+        $omnipay_map = Checkout::config()->get("omnipay_map");
 
         foreach ($payment_data as $key => $value) {
             if (array_key_exists($key, $omnipay_map)) {
@@ -395,7 +420,7 @@ class Payment_Controller extends Controller
 
         // Map our order data to an array to omnipay
         $omnipay_data = [];
-        $omnipay_map = Checkout::config()->omnipay_map;
+        $omnipay_map = Checkout::config()->get("omnipay_map");
 
         foreach ($order->toMap() as $key => $value) {
             if (array_key_exists($key, $omnipay_map)) {
@@ -410,7 +435,7 @@ class Payment_Controller extends Controller
             ->init(
                 $this->getPaymentMethod(),
                 Checkout::round_up($order->Total, 2),
-                Checkout::config()->currency_code
+                Checkout::config()->get("currency_code")
             )->setSuccessUrl($this->Link('complete'))
             ->setFailureUrl(Controller::join_links(
                 $this->Link('complete'),

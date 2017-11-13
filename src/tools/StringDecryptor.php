@@ -1,5 +1,7 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Tools;
+
 /**
  * Class designed to deal with decrypting strings sent to it, either using XOR
  * or AES encryption.
@@ -35,7 +37,6 @@
  *              ->decrypt()
  *              ->get();
  */
-
 class StringDecryptor
 {
 

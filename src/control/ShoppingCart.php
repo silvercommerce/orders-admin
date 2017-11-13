@@ -1,6 +1,26 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Control;
+
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\ValidationResult;
+use SilverStripe\ORM\ValidationException;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\OptionsetField;
+use SilverStripe\i18n\i18n;
+use ilateral\SilverStripe\Orders\Checkout;
+use ilateral\SilverStripe\Orders\Tools\ShippingCalculator;
+use ilateral\SilverStripe\Orders\Model\OrderItemCustomisation;
+use ilateral\SilverStripe\Orders\Model\Discount;
 
 /**
  * Holder for items in the shopping cart and interacting with them, as
@@ -73,7 +93,7 @@ class ShoppingCart extends Controller
      *
      * @var array
      */
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         "remove",
         "emptycart",
         "clear",
@@ -83,7 +103,7 @@ class ShoppingCart extends Controller
         "CartForm",
         "PostageForm",
         "DiscountForm"
-    );
+    ];
     
     /**
      * Track all items stored in the current shopping cart
@@ -125,7 +145,7 @@ class ShoppingCart extends Controller
      */
     private static $show_discount_form = false;
     
-    private static $casting = array(
+    private static $casting = [
         "TotalWeight" => "Decimal",
         "TotalItems" => "Int",
         "SubTotalCost" => "Currency",
@@ -133,7 +153,7 @@ class ShoppingCart extends Controller
         "TaxCost" => "Currency",
         "PostageCost" => "Currency",
         "TotalCost" => "Currency"
-    );
+    ];
     
     /**
      * Getters and setters
@@ -141,7 +161,7 @@ class ShoppingCart extends Controller
      */
     public function getClassName()
     {
-        return self::config()->class_name;
+        return $this->config()->class_name;
     }
     
     public function getTitle()
@@ -310,7 +330,7 @@ class ShoppingCart extends Controller
      */
     public static function get()
     {
-        return ShoppingCart::create();
+        return self::create();
     }
     
     /**
@@ -955,18 +975,17 @@ class ShoppingCart extends Controller
      * @return Form
      */
     public function CartForm()
-    {
-        $fields = new FieldList();
-        
-        $actions = new FieldList(
-            FormAction::create('doUpdate', _t('Checkout.UpdateCart', 'Update Cart'))
-                ->addExtraClass('btn')
-                ->addExtraClass('btn-blue btn-info')
-        );
-        
-        $form = Form::create($this, "CartForm", $fields, $actions)
-            ->addExtraClass("forms")
-            ->setTemplate("ShoppingCartForm");
+    {   
+        $form = Form::create(
+            $this,
+            "CartForm",
+            FieldList::create(),
+            FieldList::create(
+                FormAction::create('doUpdate', _t('Checkout.UpdateCart', 'Update Cart'))
+                    ->addExtraClass('btn')
+                    ->addExtraClass('btn-blue btn-info')
+            )
+        )->setTemplate("ShoppingCartForm");
         
         $this->extend("updateCartForm", $form);
         
@@ -980,25 +999,27 @@ class ShoppingCart extends Controller
      * @return Form
      */
     public function DiscountForm()
-    {
-        $fields = new FieldList(
-            TextField::create(
-                "DiscountCode",
-                _t("Checkout.DiscountCode", "Discount Code")
-            )->setAttribute(
-                "placeholder",
-                _t("Checkout.EnterDiscountCode", "Enter a discount code")
+    {   
+        $form = Form::create(
+            $this,
+            "DiscountForm",
+            FieldList::create(
+                TextField::create(
+                    "DiscountCode",
+                    _t("Checkout.DiscountCode", "Discount Code")
+                )->setAttribute(
+                    "placeholder",
+                    _t("Checkout.EnterDiscountCode", "Enter a discount code")
+                )
+            ),
+            FieldList::create(
+                FormAction::create(
+                    'doAddDiscount',
+                    _t('Checkout.Add', 'Add')
+                )->addExtraClass('btn')
+                ->addExtraClass('btn-blue btn-info')
             )
         );
-        
-        $actions = new FieldList(
-            FormAction::create('doAddDiscount', _t('Checkout.Add', 'Add'))
-                ->addExtraClass('btn')
-                ->addExtraClass('btn-blue btn-info')
-        );
-        
-        $form = Form::create($this, "DiscountForm", $fields, $actions)
-            ->addExtraClass("forms");
         
         $this->extend("updateDiscountForm", $form);
         
@@ -1020,17 +1041,18 @@ class ShoppingCart extends Controller
             $form = Form::create(
                 $this,
                 'PostageForm',
-                $fields = new FieldList(
-                    CountryDropdownField::create(
+                $fields = FieldList::create(
+                    DropdownField::create(
                         'Country',
-                        _t('Checkout.Country', 'Country')
+                        _t('Checkout.Country', 'Country'),
+                        i18n::getData()->getCountries()
                     ),
                     TextField::create(
                         "ZipCode",
                         _t('Checkout.ZipCode', "Zip/Postal Code")
                     )
                 ),
-                $actions = new FieldList(
+                $actions = FieldList::create(
                     FormAction::create(
                         "doSetPostage",
                         _t('Checkout.Search', "Search")
@@ -1052,8 +1074,7 @@ class ShoppingCart extends Controller
                 $postage_array = array();
                 
                 foreach ($available_postage as $area) {
-                    $area_currency = new Currency("Cost");
-                    $area_currency->setValue($area->Cost);
+                    $area_currency = $area->dbObject("Cost");
                     $postage_array[$area->ID] = $area->Title . " (" . $area_currency->Nice() . ")";
                 }
                 

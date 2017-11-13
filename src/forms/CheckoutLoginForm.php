@@ -1,9 +1,18 @@
 <?php
+
+
+namespace ilateral\SilverStripe\Orders\Forms;
+
+use SilverStripe\Control\Session;
+use SilverStripe\Control\Director;
+use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
+
 /**
  * Log-in form for the "member" authentication method that extends the
  * default login method
  *
- * @package checkout
+ * @package orders
+ * @subpackage forms
  * @author i-lateral (http://www.i-lateral.com)
  */
 class CheckoutLoginForm extends MemberLoginForm

@@ -1,5 +1,9 @@
 <?php
 
+namespace ilateral\SilverStripe\Orders\Model;
+
+use SilverStripe\ORM\DataObject;
+
 /**
  * A single customisation that can be applied to an OrderItem.
  * 
@@ -10,17 +14,19 @@
  */
 class OrderItemCustomisation extends DataObject
 {
+    private static $table_name = 'OrderItemCustomisation';
+
     /**
      * Standard database columns
      *
      * @var array
      * @config
      */
-    private static $db = array(
+    private static $db = [
         "Title" => "Varchar",
         "Value" => "Text",
         "Price" => "Currency"
-    );
+    ];
 
     /**
      * DB foreign key associations
@@ -28,9 +34,9 @@ class OrderItemCustomisation extends DataObject
      * @var array
      * @config
      */
-    private static $has_one = array(
-        "OrderItem" => "OrderItem"
-    );
+    private static $has_one = [
+        "OrderItem" => OrderItem::class
+    ];
 
     /**
      * Fields to display in gridfields
@@ -38,9 +44,9 @@ class OrderItemCustomisation extends DataObject
      * @var array
      * @config
      */
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "Title",
         "Value",
         "Price"
-    );
+    ];
 }
