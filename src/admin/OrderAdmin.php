@@ -10,6 +10,7 @@ use ilateral\SilverStripe\Orders\Model\Estimate;
 use ilateral\SilverStripe\Orders\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
 use ilateral\SilverStripe\Orders\Forms\GridField\BulkActions as OrdersBulkActions;
 
+use SilverStripe\Dev\Debug;
  /**
   * Add interface to manage orders through the CMS
   *
@@ -87,6 +88,8 @@ class OrderAdmin extends ModelAdmin
     {
         $form = parent::getEditForm($id, $fields);
         $fields = $form->Fields();
+        $gridfield = $fields
+            ->fieldByName($this->sanitiseClassName($this->modelClass));
         $config = null;
         
         // Bulk manager
@@ -94,12 +97,9 @@ class OrderAdmin extends ModelAdmin
         $manager->removeBulkAction("bulkEdit");
         $manager->removeBulkAction("unLink");
 
-        \Debug::show(Order::class);
-
         // Manage orders
-        if ($this->modelClass == Order::class) {
-            $gridField = $fields->fieldByName('Order');
-            $config = $gridField->getConfig();
+        if ($this->modelClass == Order::class && $gridfield) {
+            $config = $gridfield->getConfig();
 
             $manager->addBulkAction(
                 'cancelled',
@@ -146,8 +146,7 @@ class OrderAdmin extends ModelAdmin
         
         // Manage Estimates
         if ($this->modelClass == Estimate::class) {
-            $gridField = $fields->fieldByName('Estimate');
-            $config = $gridField->getConfig();
+            $config = $gridfield->getConfig();
         }
         
         // Set our default detailform and bulk manager
