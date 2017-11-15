@@ -8,6 +8,7 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_Base;
@@ -114,7 +115,7 @@ class Estimate extends Order
                     TextField::create("DiscountAmount"),
                     
                     // Sidebar
-                    OrderSidebar::create(
+                    FieldGroup::create(
                         ReadonlyField::create("QuoteNumber", "#")
                             ->setValue($this->ID),
                         ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
@@ -127,7 +128,8 @@ class Estimate extends Order
                             ->setValue($this->obj("TaxTotal")->Nice()),
                         ReadonlyField::create("TotalValue",_t("Orders.Total", "Total"))
                             ->setValue($this->obj("Total")->Nice())
-                    )->setTitle("Details")
+                    )->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
+                    ->addExtraClass("order-admin-sidebar")
                 ),
                 
                 // Main Tab Fields

@@ -18,6 +18,7 @@ use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_Base;
@@ -486,7 +487,7 @@ class Order extends DataObject implements PermissionProvider
                     TextField::create("DiscountAmount"),
                     
                     // Sidebar
-                    $order_sidebar = OrderSidebar::create(
+                    $order_sidebar = FieldGroup::create(
                         TextField::create('Status'),
                         DropdownField::create(
                             'Action',
@@ -508,7 +509,8 @@ class Order extends DataObject implements PermissionProvider
                             ->setValue($this->obj("Total")->Nice()),
                         ReadonlyField::create("AmountPaidValue",_t("Orders.AmountPaid", "Amount Paid"))
                             ->setValue($this->obj("AmountPaid")->Nice())
-                    )->setTitle("Details")
+                    )->setTitle(_t("Orders.OrderDetails", "Order Details"))
+                    ->addExtraClass("order-admin-sidebar")
                 ),
                 
                 // Main Tab Fields
@@ -549,7 +551,7 @@ class Order extends DataObject implements PermissionProvider
                     TextField::create("DeliveryCity"),
                     TextField::create("DeliveryPostCode"),
                     DropdownField::create(
-                        'Country',
+                        'DeliveryCountry',
                         _t('Checkout.Country', 'Country'),
                         i18n::getData()->getCountries()
                     )
