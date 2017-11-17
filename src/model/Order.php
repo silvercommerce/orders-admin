@@ -37,6 +37,7 @@ use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
 use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
 use ilateral\SilverStripe\Orders\Control\OrdersFront_Controller;
 use ilateral\SilverStripe\Orders\Checkout;
+use DateTime;
 
 /**
  * Order objects track all the details of an order and if they were completed or
@@ -1051,7 +1052,8 @@ class Order extends DataObject implements PermissionProvider
      * ID and is padded to a multiple of 4 and we add "-" every
      * 4 characters.
      * 
-     * We then add an order prefix (if one is set).
+     * We then add an order prefix (if one is set) or the current
+     * year.
      * 
      * This keeps a consistent order number structure that allows
      * for a large number of orders before changing.
@@ -1063,7 +1065,7 @@ class Order extends DataObject implements PermissionProvider
         $length = strlen($this->ID);
         $i = $length;
         $config = SiteConfig::current_site_config();
-        $prefix = $config->PaymentNumberPrefix;
+        $prefix = $config->OrderNumberPrefix;
 
         // Determine what the next multiple of 4 is
         while ($i % 4 != 0) {
@@ -1074,8 +1076,14 @@ class Order extends DataObject implements PermissionProvider
         $id_base = str_pad($this->ID, $pad_amount, "0", STR_PAD_LEFT);
         $id_base = wordwrap($id_base, 4, "-", true);
 
+        $current_date = new DateTime();
+
         // Work out if an order prefix string has been set
-        $order_num = ($prefix) ? $prefix . '-' . $id_base : $id_base;
+        if ($prefix) {
+            $order_num = $prefix . '-' . $id_base;
+        } else {
+            $order_num = $current_date->format("Y") . "-" . $id_base;
+        }
 
         return $order_num;
     }

@@ -19,17 +19,23 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use ilateral\SilverStripe\Orders\Model\OrderNotification;
+use ilateral\SilverStripe\Orders\Model\PostageArea;
+use ilateral\SilverStripe\Orders\Model\Discount;
 
+/**
+ * Add additional settings to the default siteconfig 
+ */
 class SiteConfigExtension extends DataExtension
 {
     
     private static $db = [
+        "OrderNumberPrefix" => "Varchar(6)",
         "OrdersHeader" => "HTMLText",
         "QuoteFooter" => "HTMLText",
         "InvoiceFooter" => "HTMLText",
-        "PaymentNumberPrefix" => "Varchar(6)",
-        'PaymentSuccessContent' => 'Text',
-        'PaymentFailerContent'  => 'Text'
+        'PaymentSuccessContent' => 'HTMLText',
+        'PaymentFailerContent'  => 'HTMLText'
     ];
     
     private static $has_many = [
@@ -40,159 +46,107 @@ class SiteConfigExtension extends DataExtension
     
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->addFieldToTab(
-            "Root.Orders",
-            GridField::create(
-                "OrderNotifications",
-                "Order status notifications",
-                $this->owner->OrderNotifications(),
-                GridFieldConfig_RecordEditor::create()
-            )
-        );
-        
-        $fields->addFieldToTab(
-            "Root.Orders",
-            HTMLEditorField::create("OrdersHeader", _t("Orders.QuoteInvoiceHeader", "Quote and Invoice Header"))
-        );
-        
-        $fields->addFieldToTab(
-            "Root.Orders",
-            HTMLEditorField::create("QuoteFooter")
-        );
-        
-        $fields->addFieldToTab(
-            "Root.Orders",
-            HTMLEditorField::create("InvoiceFooter")
-        );
-
-        // setup compressed payment options
+        // Payment options
         $payment_fields = ToggleCompositeField::create(
             'PaymentSettings',
-            _t("CheckoutAdmin.Payments", "Payment Settings"),
-            [
-                TextField::create(
-                    'PaymentNumberPrefix',
-                    _t("CheckoutAdmin.OrderPrefix", "Add prefix to order numbers"),
-                    null,
-                    9
-                )->setAttribute(
-                    "placeholder",
-                    _t("CheckoutAdmin.OrderPrefixPlaceholder", "EG 'abc'")
-                ),
-                
-                TextareaField::create(
+            _t("Orders.PaymentSettings", "Payment Settings"),
+            [   
+                HTMLEditorField::create(
                     'PaymentSuccessContent',
-                    _t("CheckoutAdmin.PaymentSuccessContent", "Payment successfull content")
-                )->setRows(4)
-                ->setColumns(30)
-                ->addExtraClass('stacked'),
+                    _t("Orders.PaymentSuccessContent", "Payment success content")
+                )->addExtraClass('stacked'),
                 
-                TextareaField::create(
+                HTMLEditorField::create(
                     'PaymentFailerContent',
-                    _t("CheckoutAdmin.PaymentFailerContent", "Payment failer content")
-                )->setRows(4)
-                ->setColumns(30)
-                ->addExtraClass('stacked')
+                    _t("Orders.PaymentFailerContent", "Payment failer content")
+                )->addExtraClass('stacked')
             ]
         );
 
-        // Add html description of how to edit contries
+        // Postage Options
         $country_html = "<div class=\"field\">";
         $country_html .= "<p>First select valid countries using the 2 character ";
         $country_html .= "shortcode (see http://fasteri.com/list/2/short-names-of-countries-and-iso-3166-codes).</p>";
         $country_html .= "<p>You can add multiple countries seperating them with";
         $country_html .= "a comma or use a '*' for all countries.</p>";
-        $country_html .= "</div>";
+        $country_html .= "</div><br/>";
 
         $country_html_field = LiteralField::create("CountryDescription", $country_html);
-
-        // Deal with product features
-        $postage_field = GridField::config(
-            'PostageAreas',
-            '',
-            $this->owner->PostageAreas(),
-            GridFieldConfig::create()
-                ->addComponents(
-                    new GridFieldButtonRow('before'),
-                    new GridFieldToolbarHeader(),
-                    new GridFieldTitleHeader(),
-                    new GridFieldEditableColumns(),
-                    new GridFieldDeleteAction(),
-                    new GridFieldAddNewInlineButton('toolbar-header-left')
-                )
-        );
-
-        // Add country dropdown to inline editing
-        $postage_field
-            ->getConfig()
-            ->getComponentByType('GridFieldEditableColumns')
-            ->setDisplayFields(array(
-                'Title' => array(
-                    'title' => 'Title',
-                    'field' => 'TextField'
-                ),
-                'Country' => array(
-                    'title' => 'ISO 3166 codes',
-                    'field' => 'TextField'
-                ),
-                'ZipCode' => array(
-                    'title' => 'Zip/Post Codes',
-                    'field' => 'TextField'
-                ),
-                'Calculation'  => array(
-                    'title' => 'Base unit',
-                    'callback' => function ($record, $column, $grid) {
-                        return DropdownField::create(
-                            $column,
-                            "Based on",
-                            singleton('PostageArea')
-                                ->dbObject('Calculation')
-                                ->enumValues()
-                        )->setValue("Weight");
-                    }
-                ),
-                'Unit' => array(
-                    'title' => 'Unit (equals or above)',
-                    'field' => 'NumericField'
-                ),
-                'Cost' => array(
-                    'title' => 'Cost',
-                    'field' => 'NumericField'
-                ),
-                'Tax' => array(
-                    'title' => 'Tax (percentage)',
-                    'field' => 'NumericField'
-                )
-            ));
-
-        // Setup compressed postage options
+        
         $postage_fields = ToggleCompositeField::create(
-            'PostageFields',
-            'Postage Options',
-            array(
+            'PostageSettings',
+            _t("Orders.PostageSettings", "Postage Settings"),
+            [
                 $country_html_field,
-                $postage_field
-            )
+                GridField::create(
+                    'PostageAreas',
+                    '',
+                    $this->owner->PostageAreas()
+                )->setConfig(GridFieldConfig_RecordEditor::create())
+            ]
         );
 
-
-        // Setup compressed postage options
+        // Discount options
         $discount_fields = ToggleCompositeField::create(
-            'DiscountFields',
-            'Discounts',
-            array(
+            'DiscountSettings',
+            _t("Orders.DiscountSettings", "Discount Settings"),
+            [
+                LiteralField::create("DiscountPadding", "<br/>"),
                 GridField::create(
                     'Discounts',
                     '',
-                    $this->owner->Discounts(),
-                    GridFieldConfig_RecordEditor::create()
-                )
-            )
+                    $this->owner->Discounts()
+                )->setConfig(GridFieldConfig_RecordEditor::create())
+            ]
+        );
+
+        // Order Notifications
+        $notification_fields = ToggleCompositeField::create(
+            'OrderNotificationSettings',
+            _t("Orders.OrderNotificationSettings", "Order Notification Settings"),
+            [
+                LiteralField::create("NotificationPadding", "<br/>"),
+                GridField::create(
+                    "OrderNotifications",
+                    "Order status notifications",
+                    $this->owner->OrderNotifications()
+                )->setConfig(GridFieldConfig_RecordEditor::create())
+            ]
+        );
+
+        // Invoice Customisation
+        $invoice_customisation_fields = ToggleCompositeField::create(
+            'InvoiceQuoteCustomSettings',
+            _t("Orders.InvoiceQuoteSettings", "Invoice and Quote Settings"),
+            [
+                TextField::create(
+                    'OrderNumberPrefix',
+                    _t("Orders.OrderPrefix", "Add prefix to order numbers"),
+                    null,
+                    9
+                )->setAttribute(
+                    "placeholder",
+                    _t("Orders.OrderPrefixPlaceholder", "EG 'uk-123'")
+                ),
+                HTMLEditorField::create("OrdersHeader")
+                    ->addExtraClass("stacked"),
+                HTMLEditorField::create("QuoteFooter")
+                    ->addExtraClass("stacked"),
+                HTMLEditorField::create("InvoiceFooter")
+                    ->addExtraClass("stacked")
+            ]
         );
 
         // Add config sets
-        $fields->addFieldToTab('Root.Checkout', $payment_fields);
-        $fields->addFieldToTab('Root.Checkout', $postage_fields);
-        $fields->addFieldToTab('Root.Checkout', $discount_fields);
+        $fields->addFieldsToTab(
+            'Root.Orders',
+            [
+                $payment_fields,
+                $postage_fields,
+                $discount_fields,
+                $notification_fields,
+                $invoice_customisation_fields
+            ]
+        );
     }
 }
