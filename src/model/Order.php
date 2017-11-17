@@ -23,6 +23,7 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_Base;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
+use SilverStripe\SiteConfig\SiteConfig;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
@@ -438,6 +439,11 @@ class Order extends DataObject implements PermissionProvider
         $this->Action = $this->config()->get("default_action");
     }
 
+    /**
+     * Scaffold admin form feilds
+     *
+     * @return \SilverStripe\Forms\FieldList
+     */
     public function getCMSFields()
     {
         $member = Member::currentUser();
@@ -494,8 +500,8 @@ class Order extends DataObject implements PermissionProvider
                             null,
                             $this->config()->actions
                         ),
-                        ReadonlyField::create("QuoteNumber", "#")
-                            ->setValue($this->ID),
+                        ReadonlyField::create("OrderNumber", "#")
+                            ->setValue($this->OrderNumber),
                         ReadonlyField::create("Created"),
                         ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
                             ->setValue($this->obj("SubTotal")->Nice()),
@@ -1038,20 +1044,40 @@ class Order extends DataObject implements PermissionProvider
         return $total;
     }
 
+    /**
+     * Generate a randomised order number for this order.
+     * 
+     * The order number is generated based on the current order
+     * ID and is padded to a multiple of 4 and we add "-" every
+     * 4 characters.
+     * 
+     * We then add an order prefix (if one is set).
+     * 
+     * This keeps a consistent order number structure that allows
+     * for a large number of orders before changing.
+     *
+     * @return string
+     */
     protected function generate_order_number()
     {
-        $id = str_pad($this->ID, 8,  "0");
+        $length = strlen($this->ID);
+        $i = $length;
+        $config = SiteConfig::current_site_config();
+        $prefix = $config->PaymentNumberPrefix;
 
-        $guidText =
-            substr($id, 0, 4) . '-' .
-            substr($id, 4, 4) . '-' .
-            rand(1000, 9999);
+        // Determine what the next multiple of 4 is
+        while ($i % 4 != 0) {
+            $i++;
+        }
+
+        $pad_amount = ($i >= 8) ? $i : 8;
+        $id_base = str_pad($this->ID, $pad_amount, "0", STR_PAD_LEFT);
+        $id_base = wordwrap($id_base, 4, "-", true);
 
         // Work out if an order prefix string has been set
-        $prefix = $this->config()->order_prefix;
-        $guidText = ($prefix) ? $prefix . '-' . $guidText : $guidText;
+        $order_num = ($prefix) ? $prefix . '-' . $id_base : $id_base;
 
-        return $guidText;
+        return $order_num;
     }
 
     protected function generate_random_string($length = 20)
