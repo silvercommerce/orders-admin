@@ -245,18 +245,17 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
     /**
      * Handles the add action for the given DataObject
      *
-     * @param $gridFIeld GridFIeld
+     * @param $grid GridFIeld
      * @param $actionName string
      * @param $arguments mixed
      * @param $data array
      **/
-    public function handleAction(GridField $gridField, $actionName, $arguments, $data)
+    public function handleAction(GridField $grid, $actionName, $arguments, $data)
     {
         if ($actionName == "add") {
-            
             // Get our submitted fields and object class
             $dbField = $this->getDataObjectField();
-            $objClass = $gridField->getModelClass();
+            $objClass = $grid->getModelClass();
             $source_class = $this->getSourceClass();
             $source_item = null;
             $filter = array();
@@ -266,13 +265,6 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
                 $id = $data['relationID'];
             } else {
                 $id = null;
-            }
-            
-            $obj = new $objClass();
-            
-            // Is this a valid field
-            if (!$obj->hasField($dbField)) {
-                throw new UnexpectedValueException("Invalid field (" . $dbField . ") on  " . $obj->ClassName . ".");
             }
             
             // If we have an ID try and get an existing object then
@@ -295,12 +287,12 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
             // First check if we already have an object or if we need to
             // create one
             if ($this->getStrictFilter()) {
-                $existing_obj = $gridField
+                $existing_obj = $grid
                     ->getList()
                     ->filter($filter)
                     ->first();
             } else {
-                $existing_obj = $gridField
+                $existing_obj = $grid
                     ->getList()
                     ->filterAny($filter)
                     ->first();
@@ -308,6 +300,13 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
             
             if ($existing_obj) {
                 $obj = $existing_obj;
+            } else {
+                $obj = $objClass::create();
+            }
+
+            // Is this a valid field
+            if (!$obj->hasField($dbField)) {
+                throw new UnexpectedValueException("Invalid field (" . $dbField . ") on  " . $obj->ClassName . ".");
             }
         
             if ($obj->ID && $obj->canEdit()) {
@@ -319,13 +318,13 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
                      $curr_qty + 1
                 );
                 
-                $id = $gridField->getList()->add($obj);
+                $id = $grid->getList()->add($obj);
             }
             
             if (!$obj->ID && $obj->canCreate()) {
                 // If source item not set, try and get one or get a 
                 // an existing record
-                if (!$source_item) {
+                if (!$source_item && class_exists($source_class)) {
                     $source_item = $source_class::get()
                         ->filterAny($filter)
                         ->first();
@@ -341,32 +340,19 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
                 } else {
                     $obj->setCastedField($this->getCreateField(), $string);
                 }
-                
+
                 $obj->setCastedField("Quantity", 1);
-                
-                $id = $gridField->getList()->add($obj);
+                $grid->getList()->add($obj, []);
             }
-            
-            if (!$id) {
-                $gridField->setError(_t(
-                    "GridFieldAddOrderItem.AddFail",
-                    "Unable to save {class} to the database.",
-                    "Unable to add the DataObject.",
-                    array(
-                        "class" => get_class($obj)
-                    )),
-                    "error"
-                );
-            }
-            
+
             // Finally, issue a redirect to update totals
             $controller = Controller::curr();
-    
+
             $response = $controller->response;
             $response->addHeader('X-Pjax', 'Content');
             $response->addHeader('X-Reload', true);
-            
-            return $controller->redirect($gridField->getForm()->controller->Link(), 302);
+
+            return $controller->redirect($grid->getForm()->controller->Link(), 302);
         }
     }
 
@@ -379,9 +365,9 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
      *
      * @return string HTML
      **/
-    public function getHTMLFragments($gridField)
-    {        
-        $dataClass = $gridField->getList()->dataClass();
+    public function getHTMLFragments($grid)
+    {
+        $dataClass = $grid->getList()->dataClass();
         $obj = singleton($dataClass);
 
         if (!$obj->canCreate()) {
@@ -403,18 +389,18 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
             )->addExtraClass("relation-search no-change-track")
             ->setAttribute(
                 'data-search-url',
-                Controller::join_links($gridField->Link('search'))
+                Controller::join_links($grid->Link('search'))
             );
 
-        $find_action = new GridField_FormAction(
-            $gridField,
+        $find_action = GridField_FormAction::create(
+            $grid,
             'gridfield_relationfind',
 			_t('GridField.Find', "Find"), 'find', 'find'
         );
 		$find_action->setAttribute('data-icon', 'relationfind');
 
-        $add_action = new GridField_FormAction(
-            $gridField,
+        $add_action = GridField_FormAction::create(
+            $grid,
             'gridfield_orderitemadd',
             _t("GridFieldAddOrderItem.Add", "Add"),
             'add',
@@ -423,18 +409,18 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
         $add_action->setAttribute('data-icon', 'add');
 
         // Start thinking about rending this back to the GF
-        $fields = new ArrayList();
+        $fields = ArrayList::create();
 
         $fields->push($text_field);
         $fields->push($find_action);
         $fields->push($add_action);
         
-        $forTemplate = new ArrayData(array());
+        $forTemplate = ArrayData::create([]);
         $forTemplate->Fields = $fields;
 
-        return array(
+        return [
             $this->targetFragment => $forTemplate->renderWith("\\Orders\\Forms\\GridField\\AddOrderItem")
-        );
+        ];
     }
     
     /**
@@ -467,22 +453,25 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
             $name = (strpos($search_field, ':') !== false) ? $search_field : "$search_field:StartsWith";
             $params[$name] = $request->getVar('gridfieldaddbydbfield');
         }
-        
-        $results = DataList::create($product_class)
-            ->filterAny($params)
-            ->sort(strtok($search_fields[0], ':'), 'ASC')
-            ->limit($this->getResultsLimit());
 
         $json = array();
-        
-        $originalSourceFileComments = SSViewer::config()->get('source_file_comments');
-        SSViewer::config()->update('source_file_comments', false);
-        
-        foreach ($results as $result) {
-            $json[$result->ID] = html_entity_decode(SSViewer::fromString($this->results_format)->process($result));
+
+        if (class_exists($product_class)) {
+            $results = DataList::create($product_class)
+                ->filterAny($params)
+                ->sort(strtok($search_fields[0], ':'), 'ASC')
+                ->limit($this->getResultsLimit());
+            
+            $originalSourceFileComments = SSViewer::config()->get('source_file_comments');
+            
+            SSViewer::config()->update('source_file_comments', false);
+            
+            foreach ($results as $result) {
+                $json[$result->ID] = html_entity_decode(SSViewer::fromString($this->results_format)->process($result));
+            }
+
+            SSViewer::config()->update('source_file_comments', $originalSourceFileComments);
         }
-        
-        SSViewer::config()->update('source_file_comments', $originalSourceFileComments);
         
         return Convert::array2json($json);
     }
