@@ -31,9 +31,9 @@ class SiteConfigExtension extends DataExtension
     
     private static $db = [
         "OrderNumberPrefix" => "Varchar(6)",
-        "OrdersHeader" => "HTMLText",
-        "QuoteFooter" => "HTMLText",
-        "InvoiceFooter" => "HTMLText",
+        "OrdersHeaderContent" => "HTMLText",
+        "QuoteFooterContent" => "HTMLText",
+        "InvoiceFooterContent" => "HTMLText",
         'PaymentSuccessContent' => 'HTMLText',
         'PaymentFailerContent'  => 'HTMLText'
     ];
@@ -128,11 +128,11 @@ class SiteConfigExtension extends DataExtension
                     "placeholder",
                     _t("Orders.OrderPrefixPlaceholder", "EG 'uk-123'")
                 ),
-                HTMLEditorField::create("OrdersHeader")
+                HTMLEditorField::create("OrdersHeaderContent")
                     ->addExtraClass("stacked"),
-                HTMLEditorField::create("QuoteFooter")
+                HTMLEditorField::create("QuoteFooterContent")
                     ->addExtraClass("stacked"),
-                HTMLEditorField::create("InvoiceFooter")
+                HTMLEditorField::create("InvoiceFooterContent")
                     ->addExtraClass("stacked")
             ]
         );
