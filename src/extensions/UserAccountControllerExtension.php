@@ -22,7 +22,7 @@ use ilateral\SilverStripe\Orders\Model\MemberAddress;
 
 class UserAccountControllerExtension extends Extension
 {
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         "history",
         "outstanding",
         "order",
@@ -31,7 +31,7 @@ class UserAccountControllerExtension extends Extension
         "editaddress",
         "removeaddress",
         "AddressForm"
-    );
+    ];
     
     /**
      * Display all historic orders for the current user

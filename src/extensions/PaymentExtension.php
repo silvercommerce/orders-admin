@@ -17,9 +17,9 @@ use ilateral\SilverStripe\Orders\Checkout;
  */
 class PaymentExtension extends DataExtension
 {
-    private static $has_one = array(
+    private static $has_one = [
         'Order' => Order::class
-    );
+    ];
 
     /**
      * Process attached order when payment is taken

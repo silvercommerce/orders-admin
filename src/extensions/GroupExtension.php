@@ -15,9 +15,9 @@ use ilateral\SilverStripe\Orders\Model\Discount;
  */
 class GroupExtension extends DataExtension
 {
-    private static $belongs_many_many = array(
+    private static $belongs_many_many = [
         "Discounts" => Discount::class
-    );
+    ];
 
     public function requireDefaultRecords()
     {

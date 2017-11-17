@@ -19,24 +19,24 @@ class MemberExtension extends DataExtension
      */
     private $cached_address;
     
-    private static $db = array(
+    private static $db = [
         "PhoneNumber"   => "Varchar",
         "Company"       => "Varchar(99)"
-    );
+    ];
 
-    private static $has_many = array(
+    private static $has_many = [
         "Orders"        => Order::class,
         "Estimates"     => Estimate::class,
         "Addresses"     => MemberAddress::class
-    );
+    ];
     
-    private static $casting = array(
+    private static $casting = [
         'Address1'          => 'Varchar',
         'Address2'          => 'Varchar',
         'City'              => 'Varchar',
         'PostCode'          => 'Varchar',
         'Country'           => 'Varchar'
-    );
+    ];
 
     public function updateCMSFields(FieldList $fields)
     {
