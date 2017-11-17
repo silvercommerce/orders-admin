@@ -28,6 +28,16 @@ class PostageArea extends DataObject
     private static $has_one = [
         "Site"          => SiteConfig::class
     ];
+
+    private static $summary_fields = [
+        "Title",
+        "Country",
+        "ZipCode",
+        "Calculation",
+        "Unit",
+        "Cost",
+        "Tax"
+    ];
     
     private static $casting = [
         "TaxAmount"     => "Currency",
