@@ -8,7 +8,7 @@ SilverStripe\Admin\LeftAndMain:
 SilverStripe\Control\Controller:
   extensions:
     - ilateral\SilverStripe\Orders\Extensions\ControllerExtension
-SilverStripe\SiteConfig\SiteConifg:
+SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - ilateral\SilverStripe\Orders\Extensions\SiteConfigExtension
 SilverStripe\Security\Member:
