@@ -89,21 +89,19 @@ class OrderNotification extends DataObject
                 $subject = _t('Orders.Order', 'Order') . " {$order->OrderNumber} {$order->Status}";
             }
 
-            $email = new Email();
-            $email->setSubject($subject);
-            $email->setTo($order->Email);
+            $email = Email::create()
+                ->setSubject($subject)
+                ->setTo($order->Email)
+                ->setHTMLTemplate("\\Orders\\Email\\OrderNotificationEmail_Customer")
+                ->setData([
+                    "Order" => $order,
+                    "SiteConfig" => $this->Parent(),
+                    "Notification" => $this
+                ]);
 
             if ($this->FromEmail) {
                 $email->setFrom($this->FromEmail);
             }
-
-            $email->setTemplate("OrderNotificationEmail_Customer");
-            
-            $email->populateTemplate(array(
-                "Order" => $order,
-                "SiteConfig" => $this->Parent(),
-                "Notification" => $this
-            ));
             
             $this->extend("augmentEmailCustomer", $email, $order);
             
@@ -118,20 +116,18 @@ class OrderNotification extends DataObject
                 $subject = _t('Orders.Order', 'Order') . " {$order->OrderNumber} {$order->Status}";
             }
             
-            $email = new Email();
-            $email->setSubject($subject);
-            $email->setTo($this->VendorEmail);
+            $email = Email::create()
+                ->setSubject($subject)
+                ->setTo($this->VendorEmail)
+                ->setHTMLTemplate("\\Orders\\Email\\OrderNotificationEmail_Vendor")
+                ->setData([
+                    "Order" => $order,
+                    "Notification" => $this
+                ]);
 
             if ($this->FromEmail) {
                 $email->setFrom($this->FromEmail);
             }
-
-            $email->setTemplate("OrderNotificationEmail_Vendor");
-            
-            $email->populateTemplate(array(
-                "Order" => $order,
-                "Notification" => $this
-            ));
             
             $this->extend("augmentEmailVendor", $email, $order);
             

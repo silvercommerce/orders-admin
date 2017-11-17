@@ -1,4 +1,4 @@
-<% include OrderEmailHead %>
+<% include \\Orders\\Email\\Includes\\EmailHead %>
 
 <% with $Order %>
     <h1><%t Orders.OrderStatusUpdate "Order Status Update" %></h1>
@@ -105,4 +105,4 @@
     <% end_if %>
 <% end_with %>
 
-<% include OrderEmailFooter %>
+<% include \\Orders\\Email\\Includes\\EmailFooter %>
