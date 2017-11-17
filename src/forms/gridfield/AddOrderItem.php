@@ -433,7 +433,7 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
         $forTemplate->Fields = $fields;
 
         return array(
-            $this->targetFragment => $forTemplate->renderWith("GridFieldAddOrderItem")
+            $this->targetFragment => $forTemplate->renderWith("\\Orders\\Forms\\GridField\\AddOrderItem")
         );
     }
     
