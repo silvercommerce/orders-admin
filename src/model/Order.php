@@ -495,11 +495,15 @@ class Order extends DataObject implements PermissionProvider
                     
                     // Sidebar
                     $order_sidebar = FieldGroup::create(
-                        TextField::create('Status'),
+                        DropdownField::create(
+                            'Status',
+                            null,
+                            $this->config()->get("statuses")
+                        ),
                         DropdownField::create(
                             'Action',
                             null,
-                            $this->config()->actions
+                            $this->config()->get("actions")
                         ),
                         ReadonlyField::create("OrderNumber", "#")
                             ->setValue($this->OrderNumber),
@@ -601,7 +605,7 @@ class Order extends DataObject implements PermissionProvider
         
         
         // Add Sidebar is editable
-        if ($this->canEdit()) {
+        /*if ($this->canEdit()) {
             $tab_customer->insertBefore(
                 CustomerSidebar::create(
                     // Items field
@@ -633,7 +637,7 @@ class Order extends DataObject implements PermissionProvider
             // Set the record ID
             $map_extension
                 ->setMapFields($this->config()->get("existing_customer_map"));
-        }
+        }*/
 
 		$tab_root->addextraClass('orders-root');
         $tab_main->addExtraClass("order-admin-items");
