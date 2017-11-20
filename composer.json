@@ -32,6 +32,16 @@
         "symbiote/silverstripe-gridfieldextensions": "~3.0",
         "silverstripe/silverstripe-omnipay": "dev-master"
     },
+    "extra": {
+        "expose": [
+            "client/dist"
+        ]
+    },
+    "autoload": {
+        "psr-4": {
+            "ilateral\\SilverStripe\\Orders\\": "src/"
+        }
+    },
     "suggest": {
         "silverstripe/cms": "Add full content management support to your site",
         "i-lateral/silverstripe-middleman": "Add CMS vars, such as menu, searchform, etc to your site",
