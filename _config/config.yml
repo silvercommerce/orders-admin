@@ -1,13 +1,10 @@
 ---
-Name: orderconfig
+Name: orderadminconfig
 ---
 ## Extensions
 SilverStripe\Admin\LeftAndMain:
   extensions:
     - ilateral\SilverStripe\Orders\Extensions\AdminExtension
-SilverStripe\Control\Controller:
-  extensions:
-    - ilateral\SilverStripe\Orders\Extensions\ControllerExtension
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - ilateral\SilverStripe\Orders\Extensions\SiteConfigExtension
@@ -20,9 +17,3 @@ SilverStripe\Security\Group:
 ilateral\SilverStripe\Orders\Model\Order:
   extensions:
     - SilverStripe\Omnipay\Extensions\Payable
-SilverStripe\Omnipay\Model\Payment:
-  extensions:
-    - ilateral\SilverStripe\Orders\Extensions\PaymentExtension
-Users_Account_Controller:
-  extensions:
-    - ilateral\SilverStripe\Orders\Extensions\UserAccountControllerExtension
