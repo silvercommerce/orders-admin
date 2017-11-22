@@ -7,7 +7,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\SiteConfig\SiteConfig;
 
-class OrderNotification extends DataObject
+class Notification extends DataObject
 {
     private static $table_name = 'OrderNotification';
 

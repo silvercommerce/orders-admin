@@ -6,26 +6,27 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
-use ilateral\SilverStripe\Orders\Model\Order;
+use SilverStripe\Core\Config\Config;
+use ilateral\SilverStripe\Orders\Model\Invoice;
 use ilateral\SilverStripe\Orders\Model\Estimate;
 use ilateral\SilverStripe\Orders\Model\MemberAddress;
 
+/**
+ * Add additional settings to a memeber object
+ * 
+ * @package orders-admin
+ * @subpackage extensions
+ */
 class MemberExtension extends DataExtension
 {
-    /**
-     * Cache an address object for if we need to us it again.
-     * 
-     * @var MemberAddress
-     */
-    private $cached_address;
-    
+
     private static $db = [
         "PhoneNumber"   => "Varchar",
         "Company"       => "Varchar(99)"
     ];
 
     private static $has_many = [
-        "Orders"        => Order::class,
+        "Orders"        => Invoice::class,
         "Estimates"     => Estimate::class,
         "Addresses"     => MemberAddress::class
     ];
@@ -58,33 +59,18 @@ class MemberExtension extends DataExtension
     }
 
     /**
-     * Get the estimate from this user that is designated as a
-     * "Cart" estimate (a shopping cart that has not been
-     *  converted to an order).
-     * 
-     * @return Estimate
-     */
-    public function getCart()
-    {
-        return $this
-            ->owner
-            ->Estimates()
-            ->find("Cart", "1");
-    }
-
-    /**
      * Get all orders that have been generated and are marked as paid or
      * processing
      *
      * @return DataList
      */
-    public function getOutstandingOrders()
+    public function OutstandingOrders()
     {
         return $this
             ->owner
             ->Orders()
             ->filter(array(
-                "Status" => Order::config()->get("outstanding_statuses")
+                "Status" => Config::inst()->get(Invoice::class, "outstanding_statuses")
             ));
     }
 
@@ -94,43 +80,24 @@ class MemberExtension extends DataExtension
      *
      * @return DataList
      */
-    public function getHistoricOrders()
+    public function HistoricOrders()
     {
         return $this
             ->owner
             ->Orders()
             ->filter(array(
-                "Status" => Order::config()->historic_statuses
+                "Status" => Config::inst()->get(Invoice::class, "historic_statuses")
             ));
     }
 
+
     public function DefaultAddress()
     {
-        return $this->owner->getDefaultAddress();
-    }
-    
-    
-    /**
-     * Get the default address from our list of addreses. If no default
-     * is set, we should return the first in the list.
-     * 
-     * @return MemberAddress
-     */
-    public function getDefaultAddress()
-    {
-        if ($this->cached_address) {
-            return $this->cached_address;
-        } else {
-            $address = $this
-                ->owner
-                ->Addresses()
-                ->sort("Default", "DESC")
-                ->first();
-                
-            $this->cached_address = $address;
-            
-            return $address;
-        }
+        return $this
+            ->owner
+            ->Addresses()
+            ->sort("Default", "DESC")
+            ->first();
     }
     
     /**

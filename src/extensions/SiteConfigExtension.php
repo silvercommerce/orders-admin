@@ -19,7 +19,7 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use ilateral\SilverStripe\Orders\Model\OrderNotification;
+use ilateral\SilverStripe\Orders\Model\Notification as OrderNotification;
 use ilateral\SilverStripe\Orders\Model\PostageArea;
 use ilateral\SilverStripe\Orders\Model\Discount;
 
@@ -31,9 +31,10 @@ class SiteConfigExtension extends DataExtension
     
     private static $db = [
         "OrderNumberPrefix" => "Varchar(6)",
-        "OrdersHeaderContent" => "HTMLText",
-        "QuoteFooterContent" => "HTMLText",
+        "InvoiceHeaderContent" => "HTMLText",
         "InvoiceFooterContent" => "HTMLText",
+        "EstimateHeaderContent" => "HTMLText",
+        "EstimateFooterContent" => "HTMLText",
         'PaymentSuccessContent' => 'HTMLText',
         'PaymentFailerContent'  => 'HTMLText'
     ];
@@ -50,7 +51,7 @@ class SiteConfigExtension extends DataExtension
         $payment_fields = ToggleCompositeField::create(
             'PaymentSettings',
             _t("Orders.PaymentSettings", "Payment Settings"),
-            [   
+            [
                 HTMLEditorField::create(
                     'PaymentSuccessContent',
                     _t("Orders.PaymentSuccessContent", "Payment success content")
@@ -117,7 +118,7 @@ class SiteConfigExtension extends DataExtension
         // Invoice Customisation
         $invoice_customisation_fields = ToggleCompositeField::create(
             'InvoiceQuoteCustomSettings',
-            _t("Orders.InvoiceQuoteSettings", "Invoice and Quote Settings"),
+            _t("Orders.InvoiceQuoteCustomisation", "Invoice and Quote Customisation"),
             [
                 TextField::create(
                     'OrderNumberPrefix',
@@ -128,11 +129,13 @@ class SiteConfigExtension extends DataExtension
                     "placeholder",
                     _t("Orders.OrderPrefixPlaceholder", "EG 'uk-123'")
                 ),
-                HTMLEditorField::create("OrdersHeaderContent")
+                HTMLEditorField::create("InvoiceHeaderContent")
                     ->addExtraClass("stacked"),
-                HTMLEditorField::create("QuoteFooterContent")
+                    HTMLEditorField::create("InvoiceFooterContent")
                     ->addExtraClass("stacked"),
-                HTMLEditorField::create("InvoiceFooterContent")
+                HTMLEditorField::create("EstimateHeaderContent")
+                    ->addExtraClass("stacked"),
+                HTMLEditorField::create("EstimateFooterContent")
                     ->addExtraClass("stacked")
             ]
         );
