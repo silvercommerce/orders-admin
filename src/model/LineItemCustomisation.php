@@ -5,16 +5,16 @@ namespace ilateral\SilverStripe\Orders\Model;
 use SilverStripe\ORM\DataObject;
 
 /**
- * A single customisation that can be applied to an OrderItem.
+ * A single customisation that can be applied to a LineItem.
  * 
  * A customisation by default allows the following details:
  *  - Title: The name of the customisation (eg. "Colour")
  *  - Value: The data associated with thie customisation (eg. "Red")
- *  - Price: Does this customisation change the OrderItem's price?
+ *  - Price: Does this customisation change the LineItem's price?
  */
-class OrderItemCustomisation extends DataObject
+class LineItemCustomisation extends DataObject
 {
-    private static $table_name = 'OrderItemCustomisation';
+    private static $table_name = 'LineItemCustomisation';
 
     /**
      * Standard database columns
@@ -35,7 +35,7 @@ class OrderItemCustomisation extends DataObject
      * @config
      */
     private static $has_one = [
-        "OrderItem" => OrderItem::class
+        "Parent" => LineItem::class
     ];
 
     /**

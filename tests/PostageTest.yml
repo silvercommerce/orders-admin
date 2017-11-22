@@ -53,7 +53,7 @@ PostageArea:
     Cost: 25.00
     Tax: 0
     SiteID: 1
-OrderItem:
+LineItem:
   noweightitem:
     Title: "No weight item"
     Quantity: 1
@@ -108,7 +108,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "SO98 9XZ"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.noweightitem
+    Items: =>LineItem.noweightitem
   lightorderone:
     Status: incomplete
     Address1: "123 Street Name"
@@ -120,7 +120,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "SO98 9XZ"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.weightitemone
+    Items: =>LineItem.weightitemone
   lightordertwo:
     Status: incomplete
     Address1: "123 Street Name"
@@ -132,7 +132,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "IG12 3AB"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.weightitemtwo
+    Items: =>LineItem.weightitemtwo
   heavyorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -144,7 +144,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "BA12 3AB"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.weightitemthree
+    Items: =>LineItem.weightitemthree
   offshoreorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -156,7 +156,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "IV55 3AB"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.offshoreitem
+    Items: =>LineItem.offshoreitem
   wildcardorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -168,7 +168,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "PO30 1BA"
     DeliveryCountry: "GB"
-    Items: =>OrderItem.wildcarditem
+    Items: =>LineItem.wildcarditem
   globalorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -180,4 +180,4 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "12345 12345"
     DeliveryCountry: "US"
-    Items: =>OrderItem.globalitem
+    Items: =>LineItem.globalitem

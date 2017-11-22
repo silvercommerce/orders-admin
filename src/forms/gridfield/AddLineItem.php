@@ -28,7 +28,7 @@ use LogicException;
  * @author ilateral <info@ilateral.co.uk>
  * @author Michael Strong <github@michaelstrong.co.uk>
 **/
-class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, GridField_URLHandler
+class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, GridField_URLHandler
 {
 
     /**
@@ -185,7 +185,7 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
      * Set the list of source fields
      *
      * @param  $fields
-     * @return AddOrderItem
+     * @return AddLineItem
      */
     public function setSourceFields($fields)
     {
@@ -378,7 +378,7 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
             ->setAttribute(
                 "placeholder",
                 _t(
-                    "GridFieldAddOrderItem.TypeToAdd",
+                    "GridFieldAddLineItem.TypeToAdd",
                     "Type to add by {Filters} or {Title}",
                     "Inform the user what to add based on",
                     array(
@@ -401,8 +401,8 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
 
         $add_action = GridField_FormAction::create(
             $grid,
-            'gridfield_orderitemadd',
-            _t("GridFieldAddOrderItem.Add", "Add"),
+            'gridfield_lineitemadd',
+            _t("GridFieldAddLineItem.Add", "Add"),
             'add',
             'add'
         );
@@ -419,7 +419,7 @@ class AddOrderItem implements GridField_ActionProvider, GridField_HTMLProvider, 
         $forTemplate->Fields = $fields;
 
         return [
-            $this->targetFragment => $forTemplate->renderWith("\\Orders\\Forms\\GridField\\AddOrderItem")
+            $this->targetFragment => $forTemplate->renderWith("\\Orders\\Forms\\GridField\\AddLineItem")
         ];
     }
     

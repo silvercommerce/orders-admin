@@ -18,13 +18,13 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use ilateral\SilverStripe\Orders\Forms\GridField\AddOrderItem;
-use ilateral\SilverStripe\Orders\Forms\GridField\OrderItemGridField;
+use ilateral\SilverStripe\Orders\Forms\GridField\AddLineItem;
+use ilateral\SilverStripe\Orders\Forms\GridField\LineItemGridField;
 use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
 use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
 use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
 
-class Estimate extends Order
+class Estimate extends Invoice
 {
     private static $table_name = 'Estimate';
 
@@ -65,7 +65,7 @@ class Estimate extends Order
      */
     public function convertToOrder()
     {
-        $this->ClassName = Order::class;
+        $this->ClassName = Invoice::class;
     }
     
     public function getCMSFields()
@@ -81,7 +81,7 @@ class Estimate extends Order
                     'Main',
                     
                     // Items field
-                    new OrderItemGridField(
+                    new LineItemGridField(
                         "Items",
                         "",
                         $this->Items(),
@@ -93,7 +93,7 @@ class Estimate extends Order
                                 new GridFieldEditButton(),
                                 new GridFieldDetailForm(),
                                 new GridFieldDeleteAction(),
-                                new AddOrderItem()
+                                new AddLineItem()
                             )
                     ),
                     
@@ -148,40 +148,6 @@ class Estimate extends Order
                 )
             )
         );
-        
-        if ($this->canEdit()) {
-            // Sidebar
-            $tab_customer->insertBefore(
-                CustomerSidebar::create(
-                    // Items field
-                    new GridField(
-                        "ExistingCustomers",
-                        "",
-                        $existing_customer::get(),
-                        $config = GridFieldConfig_Base::create()
-                            ->addComponents(
-                                $map_extension = new MapExistingAction()
-                            )
-                    )
-                )->setTitle("Use Existing Customer"),
-                "Company"
-            );
-            
-            if (is_array($this->config()->existing_customer_fields)) {
-                $columns = $config->getComponentByType("GridFieldDataColumns");
-                
-                if ($columns) {
-                    $columns
-                        ->setDisplayFields($this
-                            ->config()
-                            ->existing_customer_fields
-                        );
-                }
-            }
-        
-            // Set the record ID
-            $map_extension->setMapFields($this->config()->existing_customer_map);
-        }
         
 		$tab_root->addextraClass('orders-root');
         $tab_main->addExtraClass("order-admin-items");

@@ -12,17 +12,17 @@ use ilateral\SilverStripe\Orders\Model\Order;
 
 // Only load this if reports are active
 if (class_exists(Report::class)) {
-    class OrderItemReport extends Report
+    class LineItemReport extends Report
     {
         
         public function title()
         {
-            return _t("Orders.OrderItems", "Items ordered");
+            return _t("Orders.LineItems", "Items ordered");
         }
 
         public function description()
         {
-            return _t("Orders.OrderItemReportDescription", "View all individual products ordered through this site");
+            return _t("Orders.LineItemReportDescription", "View all individual products ordered through this site");
         }
 
         public function columns()
@@ -106,7 +106,7 @@ if (class_exists(Report::class)) {
                         if ($list_item = $return->find("StockID", $order_item->StockID)) {
                             $list_item->Quantity = $list_item->Quantity + $order_item->Quantity;
                         } else {
-                            $report_item = OrderItemReportItem::create();
+                            $report_item = LineItemReportItem::create();
                             $report_item->ID = $order_item->StockID;
                             $report_item->StockID = $order_item->StockID;
                             $report_item->Details = $order_item->Title;
@@ -195,12 +195,12 @@ if (class_exists(Report::class)) {
 }
 
 /**
- * Item that can be loaded into an OrderItem report
+ * Item that can be loaded into an LineItem report
  *
  */
-class OrderItemReportItem extends ViewableData
+class LineItemReportItem extends ViewableData
 {
-    public $ClassName = "OrderItemReportItem";
+    public $ClassName = "LineItemReportItem";
 
     public $StockID;
     public $Details;

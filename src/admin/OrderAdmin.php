@@ -4,8 +4,7 @@ namespace ilateral\SilverStripe\Orders\Admin;
 
 use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
-use SilverStripe\Omnipay\Model\Payment;
-use ilateral\SilverStripe\Orders\Model\Order;
+use ilateral\SilverStripe\Orders\Model\Invoice;
 use ilateral\SilverStripe\Orders\Model\Estimate;
 use ilateral\SilverStripe\Orders\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
 use ilateral\SilverStripe\Orders\Forms\GridField\BulkActions as OrdersBulkActions;
@@ -26,9 +25,8 @@ class OrderAdmin extends ModelAdmin
     private static $menu_priority = 4;
 
     private static $managed_models = [
-        Order::class,
-        Estimate::class,
-        Payment::class
+        Invoice::class,
+        Estimate::class
     ];
 
     private static $model_importers = [];
@@ -39,7 +37,7 @@ class OrderAdmin extends ModelAdmin
      */
     public function getExportFields()
     {
-        if ($this->modelClass == Order::class) {
+        if ($this->modelClass == Invoice::class) {
             $return = array(
                 "OrderNumber"       => "#",
                 "Status"            => "Status",
@@ -98,7 +96,7 @@ class OrderAdmin extends ModelAdmin
         $manager->removeBulkAction("unLink");
 
         // Manage orders
-        if ($this->modelClass == Order::class && $gridfield) {
+        if ($this->modelClass == Invoice::class && $gridfield) {
             $config = $gridfield->getConfig();
 
             $manager->addBulkAction(
@@ -169,7 +167,7 @@ class OrderAdmin extends ModelAdmin
         // Ensure that we only show Order objects in the order tab
         if ($this->modelClass == "ilateral-SilverStripe-Orders-Model-Order") {
             $list = $list
-                ->addFilter(array("ClassName" => Order::class));
+                ->addFilter(array("ClassName" => Invoice::class));
         }
                 
         $this->extend("updateList", $list);

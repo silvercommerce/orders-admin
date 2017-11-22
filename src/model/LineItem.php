@@ -16,10 +16,9 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use ilateral\SilverStripe\Orders\Tasks\OrderItemCustomisationMigrationTask;
 
 /**
- * OrderItem is a single line item on an order, extimate or even in
+ * LineItem is a single line item on an order, extimate or even in
  * the shopping cart.
  * 
  * An item has a number of fields that describes a product:
@@ -40,9 +39,9 @@ use ilateral\SilverStripe\Orders\Tasks\OrderItemCustomisationMigrationTask;
  *
  * @author Mo <morven@ilateral.co.uk>
  */
-class OrderItem extends DataObject
+class LineItem extends DataObject
 {
-    private static $table_name = 'OrderItem';
+    private static $table_name = 'LineItem';
 
     /**
      * The name of the param used on a related product to
@@ -84,7 +83,7 @@ class OrderItem extends DataObject
      * @config
      */
     private static $has_one = [
-        "Parent"        => Order::class
+        "Parent"        => Invoice::class
     ];
     
     /**
@@ -94,7 +93,7 @@ class OrderItem extends DataObject
      * @config
      */
     private static $has_many = [
-        "Customisations" => OrderItemCustomisation::class
+        "Customisations" => LineItemCustomisation::class
     ];
 
     /**
@@ -388,7 +387,7 @@ class OrderItem extends DataObject
      * original product).
      * 
      * This function is a synonym for @Link Match (as a result of) merging
-     * OrderItem and ShoppingCartItem
+     * LineItem
      * 
      * @return DataObject
      */
@@ -414,21 +413,6 @@ class OrderItem extends DataObject
         $this->extend("updateCheckStockLevel", $return);
         
         return $return;
-    }
-
-    /**
-     * Add default recoprds when the database is built
-     * 
-     * @return void
-     */
-    public function requireDefaultRecords()
-    {
-        parent::requireDefaultRecords();
-        
-        if(OrderItemCustomisationMigrationTask::config()->get("run_during_dev_build")) {
-            $task = new OrderItemCustomisationMigrationTask();
-            $task->up();
-        }
     }
 
     /**
@@ -505,7 +489,7 @@ class OrderItem extends DataObject
         if ($doWrite) {
             foreach ($this->Customisations() as $customisation) {
                 $new_item = $customisation->duplicate(false);
-                $new_item->OrderItemID = $clone->ID;
+                $new_item->ParentID = $clone->ID;
                 $new_item->write();
             }
         }
@@ -527,7 +511,7 @@ class OrderItem extends DataObject
 
             if ($data instanceof ArrayList) {
                 foreach ($data as $data_item) {
-                    $data_item->OrderItemID = $this->ID;
+                    $data_item->ParentID = $this->ID;
                     $data_item->write();
                 }
 

@@ -8,7 +8,7 @@ use SilverStripe\Forms\GridField\GridFieldDataColumns;
 /**
  * GridField used for order items that allows a proper ReadOnly version
  */
-class OrderItemGridField extends GridField
+class LineItemGridField extends GridField
 {
     /**
      * Returns a readonly version of this field

@@ -30,8 +30,8 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use ilateral\SilverStripe\Orders\Forms\GridField\AddOrderItem;
-use ilateral\SilverStripe\Orders\Forms\GridField\OrderItemGridField;
+use ilateral\SilverStripe\Orders\Forms\GridField\AddLineItem;
+use ilateral\SilverStripe\Orders\Forms\GridField\LineItemGridField;
 use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
 use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
 use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
@@ -56,10 +56,10 @@ use DateTime;
  *
  * @author ilateral (http://www.ilateral.co.uk)
  */
-class Order extends DataObject implements PermissionProvider
+class Invoice extends DataObject implements PermissionProvider
 {
 
-    private static $table_name = 'Order';
+    private static $table_name = 'Invoice';
 
     /**
      * Add a string to the start of an order number (can be useful for
@@ -337,10 +337,6 @@ class Order extends DataObject implements PermissionProvider
         "PostageCost"       => "Currency",
         "PostageTax"        => "Currency",
         
-        // Payment Gateway Info
-        "PaymentProvider"   => "Varchar",
-        "PaymentNo"         => "Varchar(255)",
-        
         // Misc Data
         "AccessKey"         => "Varchar(20)",
     ];
@@ -350,7 +346,7 @@ class Order extends DataObject implements PermissionProvider
     ];
 
     private static $has_many = [
-        'Items'             => OrderItem::class
+        'Items'             => LineItem::class
     ];
 
     // Cast method calls nicely
@@ -449,7 +445,6 @@ class Order extends DataObject implements PermissionProvider
     {
         $member = Member::currentUser();
         $existing_customer = $this->config()->get("existing_customer_class");
-        $payment = $this->getPayment();
 
         $fields = FieldList::create(
             $tab_root = TabSet::create(
@@ -460,7 +455,7 @@ class Order extends DataObject implements PermissionProvider
                     'Main',
                     
                     // Items field
-                    OrderItemGridField::create(
+                    LineItemGridField::create(
                         "Items",
                         "",
                         $this->Items(),
@@ -472,7 +467,7 @@ class Order extends DataObject implements PermissionProvider
                                 new GridFieldEditButton(),
                                 new GridFieldDetailForm(),
                                 new GridFieldDeleteAction(),
-                                new AddOrderItem()
+                                new AddLineItem()
                             )
                     ),
                     
@@ -566,78 +561,9 @@ class Order extends DataObject implements PermissionProvider
                         _t('Checkout.Country', 'Country'),
                         i18n::getData()->getCountries()
                     )
-                ),
-
-                // List payments
-                $tab_payments = Tab::create(
-                    "Payments",
-                    GridField::create(
-                        "Payments",
-                        "",
-                        $this->Payments(),
-                        $config = GridFieldConfig::create()
-                            ->addComponents(
-                                new GridFieldButtonRow('before'),
-                                new GridFieldTitleHeader(),
-                                new GridFieldDataColumns(),
-                                new GridFieldEditButton(),
-                                new GridFieldDetailForm()
-                            )
-                    )
                 )
             )
         );
-
-        if ($payment) {
-            $payment_ref = $payment->TransactionReference;
-        } elseif ($this->PaymentNo) {
-            $payment_ref = $this->PaymentNo;
-        } else {
-            $payment_ref = null;
-        }
-
-        if ($payment_ref) {
-            $order_sidebar->push(
-                ReadonlyField::create("PaymentNoValue",_t("Orders.PaymentNo", "Payment No"))
-                    ->setValue($payment_ref)
-            );
-        }
-        
-        
-        // Add Sidebar is editable
-        /*if ($this->canEdit()) {
-            $tab_customer->insertBefore(
-                CustomerSidebar::create(
-                    // Items field
-                    GridField::create(
-                        "ExistingCustomers",
-                        "",
-                        $existing_customer::get(),
-                        $config = GridFieldConfig_Base::create()
-                            ->addComponents(
-                                $map_extension = new MapExistingAction()
-                            )
-                    )
-                )->setTitle("Use Existing Customer"),
-                "BillingDetailsHeader"
-            );
-            
-            if (is_array($this->config()->get("existing_customer_fields")) && count($this->config()->existing_customer_fields)) {
-                $columns = $config->getComponentByType("GridFieldDataColumns");
-                
-                if ($columns) {
-                    $columns
-                        ->setDisplayFields($this
-                            ->config()
-                            ->get("existing_customer_fields")
-                        );
-                }
-            }
-            
-            // Set the record ID
-            $map_extension
-                ->setMapFields($this->config()->get("existing_customer_map"));
-        }*/
 
 		$tab_root->addextraClass('orders-root');
         $tab_main->addExtraClass("order-admin-items");
@@ -720,25 +646,6 @@ class Order extends DataObject implements PermissionProvider
         } else {
             return in_array($this->Status, $statuses);
         }
-    }
-
-    /**
-     * Get the captured payment object associated with this order
-     *
-     * @return Payment || null
-     */
-    public function getPayment()
-    {
-        foreach ($this->Payments() as $payment) {
-            $a = Checkout::round_up($payment->getAmount(), 2);
-            $b = Checkout::round_up($this->Total, 2);
-
-            if ($payment->isCaptured() && (abs(($a-$b)/$b) < 0.00001)) {
-                return $payment;
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -1029,27 +936,6 @@ class Order extends DataObject implements PermissionProvider
     }
 
     /**
-     * Find the total amount paid for this order
-     * (based on the sum of its payments)
-     * 
-     * @return float
-     */
-    public function getAmountPaid()
-    {
-        $total = 0;
-
-        foreach ($this->Payments() as $payment) {
-            if ($payment->isCaptured()) {
-                $total += $payment->getAmount();
-            }
-        }
-
-        $this->extend("updateAmountPaid", $total);
-
-        return $total;
-    }
-
-    /**
      * Generate a randomised order number for this order.
      * 
      * The order number is generated based on the current order
@@ -1217,7 +1103,7 @@ class Order extends DataObject implements PermissionProvider
 
         // Deal with sending the status emails
         if ($this->isChanged('Status')) {
-            $notifications = OrderNotification::get()
+            $notifications = Notification::get()
                 ->filter("Status", $this->Status);
                 
             // Loop through available notifications and send
