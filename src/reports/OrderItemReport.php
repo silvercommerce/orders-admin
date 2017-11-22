@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Reports;
+namespace SilverCommerce\OrdersAdmin\Reports;
 
 use SilverStripe\Reports\Report;
 use SilverStripe\ORM\ArrayList;
@@ -8,7 +8,7 @@ use SilverStripe\ORM\FieldType\DBDatetime as SSDateTime;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\View\ViewableData;
-use ilateral\SilverStripe\Orders\Model\Order;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
 
 // Only load this if reports are active
 if (class_exists(Report::class)) {
@@ -84,7 +84,7 @@ if (class_exists(Report::class)) {
                 $where_filter[] = "Surname = '{$params['Filter_Surname']}'";
             }
 
-            $orders = Order::get()
+            $orders = Invoice::get()
                 ->where(implode(' AND ', $where_filter));
 
             foreach ($orders as $order) {
@@ -126,7 +126,7 @@ if (class_exists(Report::class)) {
         {
             $fields = new FieldList();
 
-            $first_order = Order::get()
+            $first_order = Invoice::get()
                 ->sort('Created', 'ASC')
                 ->first();
 
@@ -147,7 +147,7 @@ if (class_exists(Report::class)) {
                 }
 
                 // Order Status
-                $statuses = Order::config()->statuses;
+                $statuses = Invoice::config()->statuses;
                 array_unshift($statuses, 'All');
 
                 $fields->push(TextField::create(

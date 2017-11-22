@@ -1,13 +1,13 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Admin;
+namespace SilverCommerce\OrdersAdmin\Admin;
 
 use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
-use ilateral\SilverStripe\Orders\Model\Invoice;
-use ilateral\SilverStripe\Orders\Model\Estimate;
-use ilateral\SilverStripe\Orders\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
-use ilateral\SilverStripe\Orders\Forms\GridField\BulkActions as OrdersBulkActions;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverCommerce\OrdersAdmin\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
+use SilverCommerce\OrdersAdmin\Forms\GridField\BulkActions as OrdersBulkActions;
 
 use SilverStripe\Dev\Debug;
  /**

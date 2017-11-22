@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Controller;
@@ -8,7 +8,7 @@ use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Security\Group;
 use SilverStripe\Core\Convert;
 use SilverStripe\SiteConfig\SiteConfig;
-use ilateral\SilverStripe\Orders\Control\ShoppingCart;
+use SilverCommerce\OrdersAdmin\Control\ShoppingCart;
 
 class Discount extends DataObject
 {
@@ -87,7 +87,7 @@ class Discount extends DataObject
                 "Root.Main",
                 ReadonlyField::create(
                     "DiscountURL",
-                    _t("CheckoutAdmin.AddDiscountURL", "Add discount URL"),
+                    _t("OrdersAdmin.AddDiscountURL", "Add discount URL"),
                     $this->AddLink()
                 ),
                 "Code"

@@ -1,12 +1,12 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Tools;
+namespace SilverCommerce\OrdersAdmin\Tools;
 
 use SilverStripe\Security\Member;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\SiteConfig\SiteConfig;
-use ilateral\SilverStripe\Orders\Control\ShoppingCart;
-use ilateral\SilverStripe\Orders\Checkout;
+use SilverCommerce\OrdersAdmin\Control\ShoppingCart;
+use SilverCommerce\OrdersAdmin\Model\PostageArea;
 
 /**
  * Shipping calculator is a basic helper class that can be used to query
@@ -17,7 +17,7 @@ use ilateral\SilverStripe\Orders\Checkout;
  * needed.
  * 
  * @author ilateral (info@ilateral.co.uk)
- * @package checkout
+ * @package orders-admin
  */
 class ShippingCalculator
 {
@@ -164,6 +164,26 @@ class ShippingCalculator
             
         return i18n::get_locale();
     }
+
+    /**
+     * Generate a free postage object we can use in our code.
+     * 
+     * @todo This is a little hacky, ideally we need to find a cleaner
+     * way of dealing with postage options that doesn't involve unsaved
+     * database objects.
+     * 
+     * @return PostageArea
+     */
+    public static function CreateFreePostageObject()
+    {
+        $postage = PostageArea::create();
+        $postage->ID = -1;
+        $postage->Title = _t("OrdersAdmin.FreeShipping", "Free Shipping");
+        $postage->Country = "*";
+        $postage->ZipCode = "*";
+        
+        return $postage;
+    }
     
     
     /**
@@ -236,7 +256,7 @@ class ShippingCalculator
         // This is a little hacky at the moment, need to find a nicer
         // way to add free shipping.
         if ($discount && $discount->Type == "Free Shipping" && ((strpos($discount->Country, $this->country_code) !== false) || $discount->Country == "*")) {
-            $postage = Checkout::CreateFreePostageObject();
+            $postage = $this->CreateFreePostageObject();
             $return->add($postage);
         }
         

@@ -4,16 +4,16 @@ Name: orderadminconfig
 ## Extensions
 SilverStripe\Admin\LeftAndMain:
   extensions:
-    - ilateral\SilverStripe\Orders\Extensions\AdminExtension
+    - SilverCommerce\OrdersAdmin\Extensions\AdminExtension
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
-    - ilateral\SilverStripe\Orders\Extensions\SiteConfigExtension
+    - SilverCommerce\OrdersAdmin\Extensions\SiteConfigExtension
 SilverStripe\Security\Member:
   extensions:
-    - ilateral\SilverStripe\Orders\Extensions\MemberExtension
+    - SilverCommerce\OrdersAdmin\Extensions\MemberExtension
 SilverStripe\Security\Group:
   extensions:
-    - ilateral\SilverStripe\Orders\Extensions\GroupExtension
-ilateral\SilverStripe\Orders\Model\Order:
+    - SilverCommerce\OrdersAdmin\Extensions\GroupExtension
+SilverCommerce\OrdersAdmin\Model\Order:
   extensions:
     - SilverStripe\Omnipay\Extensions\Payable

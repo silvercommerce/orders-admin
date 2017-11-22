@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
@@ -35,7 +35,7 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
  * - Locked: Is this a locked item? Locked items cannot be changed in the
  *           shopping cart
  * - Deliverable: Is this a product that can be delivered? This can effect
- *                delivery options in the checkout
+ *                delivery options
  *
  * @author Mo <morven@ilateral.co.uk>
  */

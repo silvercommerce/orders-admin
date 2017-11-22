@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 

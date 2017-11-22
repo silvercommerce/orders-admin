@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Forms\GridField;
+namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;

@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Extensions;
+namespace SilverCommerce\OrdersAdmin\Extensions;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\View\Requirements;
@@ -8,13 +8,12 @@ use SilverStripe\View\Requirements;
 /**
  * Inject extra requirements into the CMS
  * 
- * @author i-lateral (http://www.i-lateral.com)
- * @package orders
+ * @package orders-admin
  */
 class AdminExtension extends Extension
 {
     public function init()
     {
-        Requirements::css('i-lateral/silverstripe-orders: client/dist/css/admin.css');
+        Requirements::css('silvercommerce/orders-admin: client/dist/css/admin.css');
     }
 }

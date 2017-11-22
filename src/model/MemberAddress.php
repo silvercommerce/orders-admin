@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -10,8 +10,7 @@ use SilverStripe\Security\Permission;
  * An address that belongs to a member object. This allows us to define
  * more than one address that a user can have or send orders to.
  *
- * @package checkout
- * @author i-lateral (http://www.i-lateral.com)
+ * @package orders-admin
  */
 class MemberAddress extends DataObject
 {

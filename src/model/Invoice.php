@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
@@ -30,13 +30,13 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use ilateral\SilverStripe\Orders\Forms\GridField\AddLineItem;
-use ilateral\SilverStripe\Orders\Forms\GridField\LineItemGridField;
-use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
-use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
-use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
-use ilateral\SilverStripe\Orders\Control\OrdersFront_Controller;
-use ilateral\SilverStripe\Orders\Checkout;
+use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
+use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
+use SilverCommerce\OrdersAdmin\Forms\GridField\MapExistingAction;
+use SilverCommerce\OrdersAdmin\Forms\OrderSidebar;
+use SilverCommerce\OrdersAdmin\Forms\CustomerSidebar;
+use SilverCommerce\OrdersAdmin\Control\OrdersFront_Controller;
+use SilverCommerce\OrdersAdmin\Tools\Helpers;
 use DateTime;
 
 /**
@@ -399,36 +399,6 @@ class Invoice extends DataObject implements PermissionProvider
         "Created" => "DESC"
     ];
 
-    /**
-     * Generate a link to view the associated front end quote
-     * for this order
-     *
-     * @return string
-     */
-    public function QuoteLink()
-    {
-        return Controller::join_links(
-            Injector::inst()->create(OrdersFront_Controller::class)->AbsoluteLink("quote"),
-            $this->ID,
-            $this->AccessKey
-        );
-    }
-
-    /**
-     * Generate a link to view an assocaited front end invoice for
-     * this order
-     *
-     * @return string
-     */
-    public function InvoiceLink()
-    {
-        return Controller::join_links(
-            Injector::inst()->create(OrdersFront_Controller::class)->AbsoluteLink(),
-            $this->ID,
-            $this->AccessKey
-        );
-    }
-
     public function populateDefaults()
     {
         parent::populateDefaults();
@@ -535,7 +505,7 @@ class Invoice extends DataObject implements PermissionProvider
                     TextField::create("PostCode"),
                     DropdownField::create(
                         'Country',
-                        _t('Checkout.Country', 'Country'),
+                        _t('OrdersAdmin.Country', 'Country'),
                         i18n::getData()->getCountries()
                     ),
                     TextField::create("Email"),
@@ -558,7 +528,7 @@ class Invoice extends DataObject implements PermissionProvider
                     TextField::create("DeliveryPostCode"),
                     DropdownField::create(
                         'DeliveryCountry',
-                        _t('Checkout.Country', 'Country'),
+                        _t('OrdersAdmin.Country', 'Country'),
                         i18n::getData()->getCountries()
                     )
                 )
@@ -916,7 +886,7 @@ class Invoice extends DataObject implements PermissionProvider
         
         $this->extend("updateTaxTotal", $total);
 
-        $total = Checkout::round_up($total, 2);
+        $total = Helpers::round_up($total, 2);
 
         return $total;
     }
@@ -990,7 +960,7 @@ class Invoice extends DataObject implements PermissionProvider
 
     protected function validAccessKey()
     {
-        $existing = Order::get()
+        $existing = Invoice::get()
             ->filter("AccessKey", $this->AccessKey)
             ->first();
         
@@ -999,7 +969,7 @@ class Invoice extends DataObject implements PermissionProvider
 
     protected function validOrderNumber()
     {
-        $existing = Order::get()
+        $existing = Invoice::get()
             ->filterAny("OrderNumber", $this->OrderNumber)
             ->first();
         

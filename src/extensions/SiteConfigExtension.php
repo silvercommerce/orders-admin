@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Extensions;
+namespace SilverCommerce\OrdersAdmin\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
@@ -19,9 +19,9 @@ use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use ilateral\SilverStripe\Orders\Model\Notification as OrderNotification;
-use ilateral\SilverStripe\Orders\Model\PostageArea;
-use ilateral\SilverStripe\Orders\Model\Discount;
+use SilverCommerce\OrdersAdmin\Model\Notification as OrderNotification;
+use SilverCommerce\OrdersAdmin\Model\PostageArea;
+use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
  * Add additional settings to the default siteconfig 

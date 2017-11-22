@@ -1,17 +1,16 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Extensions;
+namespace SilverCommerce\OrdersAdmin\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\Group;
 use SilverStripe\ORM\DB;
-use ilateral\SilverStripe\Orders\Model\Discount;
+use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
  * Overwrite group object so we can setup default groups
  * 
- * @author i-lateral (http://www.i-lateral.com)
- * @package orders
+ * @package orders-admin
  */
 class GroupExtension extends DataExtension
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\SiteConfig\SiteConfig;
-use ilateral\SilverStripe\Orders\Checkout;
+use SilverCommerce\OrdersAdmin\Tools\Helpers;
 
 /**
  * Postage objects list available postage costs and destination locations
@@ -52,11 +52,12 @@ class PostageArea extends DataObject
     public function getTaxAmount()
     {   
         if ($this->Cost && $this->Tax) {
-            return Checkout::round_up((($this->Cost / 100) * $this->Tax), 2);
+            return Helpers::round_up((($this->Cost / 100) * $this->Tax), 2);
         } else {
             return 0;
         }
     }
+
 
     /**
      * Get the total cost including tax

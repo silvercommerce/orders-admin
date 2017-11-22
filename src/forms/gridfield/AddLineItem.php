@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Forms\GridField;
+namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\View\ArrayData;
@@ -23,7 +23,7 @@ use LogicException;
  * order item and that auto completes all fields from a pre-defined
  * object (default Product).
  *
- * @package orders
+ * @package orders-admin
  *
  * @author ilateral <info@ilateral.co.uk>
  * @author Michael Strong <github@michaelstrong.co.uk>

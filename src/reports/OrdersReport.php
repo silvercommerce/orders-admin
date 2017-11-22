@@ -1,11 +1,11 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Reports;
+namespace SilverCommerce\OrdersAdmin\Reports;
 
 use SilverStripe\Reports\Report;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\DropdownField;
-use ilateral\SilverStripe\Orders\Model\Order;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
 
 // Only load this if reports are active
 if (class_exists(Report::class)) {
@@ -85,7 +85,7 @@ if (class_exists(Report::class)) {
 
             $limit = (isset($params['ResultsLimit']) && $params['ResultsLimit'] != 0) ? $params['ResultsLimit'] : '';
 
-            $orders = Order::get()
+            $orders = Invoice::get()
                 ->where(implode(' AND ', $where_filter))
                 ->limit($limit)
                 ->sort($sort);
@@ -98,14 +98,14 @@ if (class_exists(Report::class)) {
             $fields = new FieldList();
 
             // Check if any order exist
-            if (Order::get()->exists()) {
-                $first_order = Order::get()
+            if (Invoice::get()->exists()) {
+                $first_order = Invoice::get()
                     ->sort('Created ASC')
                     ->first();
                     
                 $months = array('All');
                 
-                $statuses = Order::config()->statuses;
+                $statuses = Invoice::config()->statuses;
                 array_unshift($statuses, 'All');
                 
                 for ($i = 1; $i <= 12; $i++) {

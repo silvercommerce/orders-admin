@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Forms\GridField;
+namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
 use Colymba\BulkManager\BulkManager;
 use SilverStripe\Control\HTTPResponse;
@@ -10,7 +10,7 @@ use SilverStripe\Core\Convert;
 /**
  * A {@link BulkManager} for bulk marking orders as dispatched
  *
- * @package orders
+ * @package orders-admin
  * @subpackage forms
  */
 class BulkActions extends BulkManager

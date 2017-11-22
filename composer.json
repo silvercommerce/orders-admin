@@ -1,15 +1,13 @@
 {
-  "name": "i-lateral/silverstripe-orders",
-  "description": "Silverstripe module for creating and managing generic 'Order' objects",
+  "name": "silvercommerce/orders-admin",
+  "description": "Silverstripe module for creating and managing invoice and estimate objects in the admin",
     "type": "silverstripe-vendormodule",
-    "homepage": "http://github.com/i-lateral/silverstripe-orders",
+    "homepage": "https://github.com/silvercommerce/orders-admin",
     "keywords": [
         "silverstripe",
-        "commerce",
-        "ecommerce",
         "orders",
-        "checkout",
-        "payment"
+        "invoices",
+        "estimates"
     ],
     "license": "BSD-3-Clause",
     "authors": [
@@ -23,14 +21,15 @@
         }
     ],
     "support": {
-        "issues": "http://github.com/i-lateral/silverstripe-orders/issues"
+        "issues": "https://github.com/silvercommerce/orders-admin/issues"
     },
     "require": {
         "silverstripe/framework": "~4.0",
         "silverstripe/siteconfig": "~4.0",
+        "silverstripe/admin": "~1.0",
         "colymba/gridfield-bulk-editing-tools": "dev-master",
         "symbiote/silverstripe-gridfieldextensions": "~3.0",
-        "silverstripe/silverstripe-omnipay": "dev-master"
+        "silvercommerce/tax-admin": "1.*@dev"
     },
     "extra": {
         "expose": [
@@ -39,7 +38,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ilateral\\SilverStripe\\Orders\\": "src/"
+            "SilverCommerce\\OrdersAdmin\\": "src/"
         }
     },
     "suggest": {

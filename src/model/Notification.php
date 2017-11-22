@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\DropdownField;
@@ -47,7 +47,7 @@ class Notification extends DataObject
         $status_field = DropdownField::create(
             "Status",
             $this->fieldLabel("Status"),
-            Order::config()->get("statuses")
+            Invoice::config()->get("statuses")
         );
         
         $fields->replaceField("Status", $status_field);

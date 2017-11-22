@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Tools;
+namespace SilverCommerce\OrdersAdmin\Tools;
 
 /**
  * Class designed to deal with decrypting strings sent to it, either using XOR

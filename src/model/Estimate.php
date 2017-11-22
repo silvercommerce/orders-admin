@@ -1,6 +1,6 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Model;
+namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TabSet;
@@ -18,11 +18,11 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use ilateral\SilverStripe\Orders\Forms\GridField\AddLineItem;
-use ilateral\SilverStripe\Orders\Forms\GridField\LineItemGridField;
-use ilateral\SilverStripe\Orders\Forms\OrderSidebar;
-use ilateral\SilverStripe\Orders\Forms\CustomerSidebar;
-use ilateral\SilverStripe\Orders\Forms\GridField\MapExistingAction;
+use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
+use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
+use SilverCommerce\OrdersAdmin\Forms\OrderSidebar;
+use SilverCommerce\OrdersAdmin\Forms\CustomerSidebar;
+use SilverCommerce\OrdersAdmin\Forms\GridField\MapExistingAction;
 
 class Estimate extends Invoice
 {

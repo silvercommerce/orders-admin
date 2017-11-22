@@ -1,15 +1,15 @@
 <?php
 
-namespace ilateral\SilverStripe\Orders\Extensions;
+namespace SilverCommerce\OrdersAdmin\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\Core\Config\Config;
-use ilateral\SilverStripe\Orders\Model\Invoice;
-use ilateral\SilverStripe\Orders\Model\Estimate;
-use ilateral\SilverStripe\Orders\Model\MemberAddress;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverCommerce\OrdersAdmin\Model\MemberAddress;
 
 /**
  * Add additional settings to a memeber object
