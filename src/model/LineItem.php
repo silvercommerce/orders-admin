@@ -16,9 +16,15 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
+use SilverStripe\Forms\DropdownField;
 
 /**
- * LineItem is a single line item on an order, extimate or even in
+ * A LineItem is a single line item on an order, extimate or even in
  * the shopping cart.
  * 
  * An item has a number of fields that describes a product:
@@ -66,7 +72,6 @@ class LineItem extends DataObject
         "Content"       => "HTMLText",
         "Quantity"      => "Int",
         "Price"         => "Currency",
-        "TaxRate"       => "Decimal",
         "Weight"        => "Decimal",
         "StockID"       => "Varchar(100)",
         "ProductClass"  => "Varchar",
@@ -83,7 +88,8 @@ class LineItem extends DataObject
      * @config
      */
     private static $has_one = [
-        "Parent"        => Invoice::class
+        "Parent"      => Invoice::class,
+        "Tax"         => TaxRate::class,
     ];
     
     /**
@@ -117,11 +123,11 @@ class LineItem extends DataObject
      * @config
      */
     private static $summary_fields = [
-        "Quantity" => "Quantity",
-        "Title" => "Title",
-        "StockID" => "Stock ID",
-        "Price" => "Item Price",
-        "TaxRate" => "Tax Rate (percentage)",
+        "Quantity"  => "Quantity",
+        "Title"     => "Title",
+        "StockID"   => "Stock ID",
+        "Price"     => "Item Price",
+        "TaxRate"   => "Tax Rate (percentage)",
         "CustomisationAndPriceList" => "Customisations"
     ];
     
@@ -132,11 +138,12 @@ class LineItem extends DataObject
      * @config
      */
     private static $casting = [
-        "Total" => "Currency",
         "UnitPrice" => "Currency",
-        "UnitTax" => "Currency",
-        "SubTotal" => "Currency",
-        "Tax" => "Currency"
+        "UnitTax"   => "Currency",
+        "SubTotal"  => "Currency",
+        "TaxRate"   => "Decimal",
+        "TaxTotal"  => "Currency",
+        "Total"     => "Currency"
     ];
 
     /**
@@ -147,14 +154,23 @@ class LineItem extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+        $config = SiteConfig::current_site_config();
 
         $fields->removeByName("Customisation");
 
-        $fields->addFieldsToTab(
+        $fields->addFieldToTab(
             "Root.Main",
-            array(
-                ReadonlyField::create("Key")
-            )
+            ReadonlyField::create("Key")
+        );
+
+        $fields->addFieldToTab(
+            "Root.Main",
+            DropdownField::create(
+                "TaxID",
+                $this->fieldLabel("TaxID"),
+                $config->TaxRates()->map()
+            ),
+            "Weight"
         );
 
         $fields->addFieldsToTab(
@@ -171,21 +187,36 @@ class LineItem extends DataObject
         if ($custom_field) {
             $config = $custom_field->getConfig();
             $config
-                ->removeComponentsByType("GridFieldDeleteAction")
-                ->removeComponentsByType("GridFieldAddNewButton")
-                ->removeComponentsByType("GridFieldDataColumns")
-                ->removeComponentsByType("GridFieldEditButton")
+                ->removeComponentsByType(GridFieldDeleteAction::class)
+                ->removeComponentsByType(GridFieldDataColumns::class)
+                ->removeComponentsByType(GridFieldEditButton::class)
+                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
                 ->addComponents(
                     new GridFieldEditableColumns(),
-                    new GridFieldAddNewInlineButton(),
                     new GridFieldEditButton(),
                     new GridFieldDeleteAction()
                 );
+            
+                $custom_field->setConfig($config);
         }
 
         $this->extend("updateCMSFields", $fields);
 
         return $fields;
+    }
+
+    /**
+     * Get the rate of tax for this item
+     * 
+     * @return float
+     */
+    public function getTaxRate()
+    {
+        $rate = ($this->Tax()->exists()) ? $this->Tax()->Rate : 0;
+
+        $this->extend("updateTaxRate", $rate);
+
+        return $rate;
     }
     
     /**
@@ -236,15 +267,15 @@ class LineItem extends DataObject
     }
 
     /**
-     * Get the amount of tax for a single unit of this item
+     * Get the total amount of tax for a single unit of this item
      * 
      * @return float
      */
-    public function getTax()
+    public function getTaxTotal()
     {
         $total = $this->UnitTax * $this->Quantity;
 
-        $this->extend("updateTax", $total);
+        $this->extend("updateTaxTotal", $total);
 
         return $total;
     }
