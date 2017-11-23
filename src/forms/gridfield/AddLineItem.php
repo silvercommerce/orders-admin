@@ -15,6 +15,7 @@ use SilverStripe\Forms\GridField\GridField_URLHandler;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\GridField\GridField_FormAction;
 use Doctrine\Instantiator\Exception\UnexpectedValueException;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
 use LogicException;
 
 
@@ -167,8 +168,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     protected $source_fields = [
         "Title" => "Title",
         "StockID" => "StockID",
-        "Price" => "Price",
-        "TaxRate" => "TaxPercent"
+        "Price" => "Price"
     ];
 
     /**
@@ -190,6 +190,32 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     public function setSourceFields($fields)
     {
         $this->source_fields = $fields;
+        return $this;
+    }
+
+    /**
+     * This is the field that we attempt to match a TAX rate to
+     * when setting up an order item 
+     *
+     * @var string
+     **/
+    protected $source_tax_field = "TaxRate";
+
+    /**
+     * @return array
+     */
+    public function getSourceTaxField()
+    {
+        return $this->source_tax_field;
+    }
+
+    /**
+     * @param  $field
+     * @return AddLineItem
+     */
+    public function setSourceTaxField($field)
+    {
+        $this->source_tax_field = $field;
         return $this;
     }
 
@@ -336,6 +362,13 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
                             $obj_field,
                             $source_item->$source_field
                         );
+                    }
+
+                    // Setup the tax
+                    $tax_field = $this->getSourceTaxField();
+                    $tax = TaxRate::get()->find("Rate", $source_item->$tax_field);
+                    if ($tax) {
+                        $obj->TaxID = $tax->ID;
                     }
                 } else {
                     $obj->setCastedField($this->getCreateField(), $string);
