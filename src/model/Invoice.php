@@ -36,7 +36,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\MapExistingAction;
 use SilverCommerce\OrdersAdmin\Forms\OrderSidebar;
 use SilverCommerce\OrdersAdmin\Forms\CustomerSidebar;
 use SilverCommerce\OrdersAdmin\Control\OrdersFront_Controller;
-use SilverCommerce\OrdersAdmin\Tools\Helpers;
+use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use DateTime;
 
 /**
@@ -886,7 +886,7 @@ class Invoice extends DataObject implements PermissionProvider
         
         $this->extend("updateTaxTotal", $total);
 
-        $total = Helpers::round_up($total, 2);
+        $total = MathsHelper::round_up($total, 2);
 
         return $total;
     }

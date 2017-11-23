@@ -4,7 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverCommerce\OrdersAdmin\Tools\Helpers;
+use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 
 /**
  * Postage objects list available postage costs and destination locations
@@ -52,7 +52,7 @@ class PostageArea extends DataObject
     public function getTaxAmount()
     {   
         if ($this->Cost && $this->Tax) {
-            return Helpers::round_up((($this->Cost / 100) * $this->Tax), 2);
+            return MathsHelper::round_up((($this->Cost / 100) * $this->Tax), 2);
         } else {
             return 0;
         }
