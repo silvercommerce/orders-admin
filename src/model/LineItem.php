@@ -160,7 +160,8 @@ class LineItem extends DataObject
 
         $fields->addFieldToTab(
             "Root.Main",
-            ReadonlyField::create("Key")
+            ReadonlyField::create("Key"),
+            "Title"
         );
 
         $fields->addFieldToTab(
