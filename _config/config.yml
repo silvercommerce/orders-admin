@@ -14,6 +14,7 @@ SilverStripe\Security\Member:
 SilverStripe\Security\Group:
   extensions:
     - SilverCommerce\OrdersAdmin\Extensions\GroupExtension
-SilverCommerce\OrdersAdmin\Model\Order:
+SilverCommerce\ContactAdmin\Model\Contact:
   extensions:
-    - SilverStripe\Omnipay\Extensions\Payable
+    - SilverCommerce\OrdersAdmin\Extensions\ContactExtension
+  

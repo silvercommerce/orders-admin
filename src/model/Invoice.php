@@ -37,6 +37,7 @@ use SilverCommerce\OrdersAdmin\Forms\OrderSidebar;
 use SilverCommerce\OrdersAdmin\Forms\CustomerSidebar;
 use SilverCommerce\OrdersAdmin\Control\OrdersFront_Controller;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
+use SilverCommerce\ContactAdmin\Model\Contact;
 use DateTime;
 
 /**
@@ -259,46 +260,6 @@ class Invoice extends DataObject implements PermissionProvider
      */
     private static $default_action = "post";
 
-    /**
-     * This is the class that can be auto mapped to an order/estimate.
-     * This is used to generate the gridfield under the customer details
-     * tab.
-     * 
-     * @var string
-     * @config
-     */
-    private static $existing_customer_class = Member::class;
-
-    /**
-     * The list of fields that will show in the existing customer
-     * gridfield.
-     * 
-     * If not set, will default to summary_fields
-     * 
-     * @var array
-     * @config
-     */
-    private static $existing_customer_fields = [];
-
-    /**
-     * Select the fields that will be copied from the source object to
-     * our order. We add these here so they can be easily altered 
-     * through config.
-     * 
-     * @var array
-     * @config
-     */
-    private static $existing_customer_map = [
-        "FirstName" => "FirstName",
-        "Surname" => "Surname",
-        "Email" => "Email",
-        "PhoneNumber" => "PhoneNumber",
-        "Address1" => "Address1",
-        "Address2" => "Address2",
-        "City" => "City",
-        "PostCode" => "PostCode"
-    ];
-
     private static $db = [
         'Status'            => "Varchar",
         'OrderNumber'       => 'Varchar',
@@ -342,7 +303,7 @@ class Invoice extends DataObject implements PermissionProvider
     ];
 
     private static $has_one = [
-        "Customer"          => Member::class
+        "Customer"          => Contact::class
     ];
 
     private static $has_many = [
@@ -413,9 +374,6 @@ class Invoice extends DataObject implements PermissionProvider
      */
     public function getCMSFields()
     {
-        $member = Member::currentUser();
-        $existing_customer = $this->config()->get("existing_customer_class");
-
         $fields = FieldList::create(
             $tab_root = TabSet::create(
                 "Root",
@@ -494,8 +452,16 @@ class Invoice extends DataObject implements PermissionProvider
                     'Customer',
                     HeaderField::create(
                         "BillingDetailsHeader",
-                        _t("Orders.BillingDetails", "Customer Details")
+                        _t("OrdersAdmin.BillingDetails", "Customer Details")
                     ),
+                    DropdownField::create(
+                        'CustomerID',
+                        _t('OrdersAdmin.ExistingCustomer', 'Existing Customer'),
+                        Contact::get()->map()
+                    )->setEmptyString(_t(
+                        "OrdersAdmin.SelectACustomer",
+                        "Select existing customer"
+                    )),
                     TextField::create("Company"),
                     TextField::create("FirstName"),
                     TextField::create("Surname"),
