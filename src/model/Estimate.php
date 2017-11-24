@@ -3,6 +3,7 @@
 namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
@@ -28,6 +29,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use SilverCommerce\ContactAdmin\Model\Contact;
+use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use DateTime;
 
 class Estimate extends DataObject implements PermissionProvider
@@ -37,17 +39,19 @@ class Estimate extends DataObject implements PermissionProvider
     private static $db = [
         'OrderNumber'       => 'Varchar',
         
-        // Billing Details
+        // Personal Details
         'Company'           => 'Varchar',
         'FirstName'         => 'Varchar',
         'Surname'           => 'Varchar',
+        'Email'             => 'Varchar',
+        'PhoneNumber'       => 'Varchar',
+        
+        // Billing Address
         'Address1'          => 'Varchar',
         'Address2'          => 'Varchar',
         'City'              => 'Varchar',
         'PostCode'          => 'Varchar',
         'Country'           => 'Varchar',
-        'Email'             => 'Varchar',
-        'PhoneNumber'       => 'Varchar',
         
         // Delivery Details
         'DeliveryCompany'   => 'Varchar',
@@ -80,6 +84,7 @@ class Estimate extends DataObject implements PermissionProvider
     ];
 
     private static $casting = [
+        "PersonalDetails"   => "Text",
         'BillingAddress'    => 'Text',
         'CountryFull'       => 'Varchar',
         'DeliveryAddress'   => 'Text',
@@ -131,6 +136,38 @@ class Estimate extends DataObject implements PermissionProvider
         "LastEdited" => "DESC",
         "Created" => "DESC"
     ];
+
+    /**
+     * Generate a string of the customer's personal details
+     *
+     * @return string
+     */
+    public function getPersonalDetails()
+    {
+        $return = [];
+
+        if ($this->Company) {
+            $return[] = $this->Company;
+        }
+
+        if ($this->FirstName) {
+            $return[] = $this->FirstName;
+        }
+
+        if ($this->Surname) {
+            $return[] = $this->Surname;
+        }
+
+        if ($this->Email) {
+            $return[] = $this->Email;
+        }
+
+        if ($this->PhoneNumber) {
+            $return[] = $this->PhoneNumber;
+        }
+
+        return implode(",\n", $return);
+    }
 
     /**
      * Get the complete billing address for this order
@@ -335,6 +372,7 @@ class Estimate extends DataObject implements PermissionProvider
     public function convertToOrder()
     {
         $this->ClassName = Invoice::class;
+        $this->OrderNumber = null;
     }
 
     /**
@@ -629,7 +667,8 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Check if the 
+     * Check if the currently generated order number
+     * is valid (not duplicated)
      *
      * @return boolean
      */
@@ -669,16 +708,35 @@ class Estimate extends DataObject implements PermissionProvider
         
         return $clone;
     }
-    
 
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
 
+        $contact = $this->Customer();
+
+        // If a contact is assigned and no customer details set
+        // then use contact details
+        if (!$this->PersonalDetails && $contact->exists()) {
+            foreach (Config::inst()->get(Contact::class, "db") as $param => $value) {
+                $this->$param = $contact->$param;
+            }
+        }
+
+        // if Billing Address is not set, use customer's default
+        // location 
+        if (!$this->BillingAddress && $contact->exists() && $contact->DefaultLocation()) {
+            $location = $contact->DefaultLocation();
+            foreach (Config::inst()->get(ContactLocation::class, "db") as $param => $value) {
+                $this->$param = $location->$param;
+            }
+        }
+
+
         // Is delivery address set, if not, set it here
-        if (!$this->DeliveryAddress1 && !$this->DeliveryPostCode) {
+        if (!$this->DeliveryAddress && $this->BillingAddress) {
             $this->DeliveryCompany = $this->Company;
-            $this->DeliveryFirstnames = $this->FirstName;
+            $this->DeliveryFirstName = $this->FirstName;
             $this->DeliverySurname = $this->Surname;
             $this->DeliveryAddress1 = $this->Address1;
             $this->DeliveryAddress2 = $this->Address2;
