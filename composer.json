@@ -29,7 +29,8 @@
         "silverstripe/admin": "~1.0",
         "colymba/gridfield-bulk-editing-tools": "dev-master",
         "symbiote/silverstripe-gridfieldextensions": "~3.0",
-        "silvercommerce/tax-admin": "1.*@dev"
+        "silvercommerce/tax-admin": "1.*@dev",
+        "silvercommerce/contact-admin": "1.*@dev"
     },
     "extra": {
         "expose": [
