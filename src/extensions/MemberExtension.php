@@ -6,7 +6,9 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Core\Config\Config;
+use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Model\MemberAddress;
@@ -20,138 +22,44 @@ use SilverCommerce\OrdersAdmin\Model\MemberAddress;
 class MemberExtension extends DataExtension
 {
 
-    private static $db = [
-        "PhoneNumber"   => "Varchar",
-        "Company"       => "Varchar(99)"
-    ];
-
-    private static $has_many = [
-        "Orders"        => Invoice::class,
-        "Estimates"     => Estimate::class,
-        "Addresses"     => MemberAddress::class
-    ];
-    
     private static $casting = [
-        'Address1'          => 'Varchar',
-        'Address2'          => 'Varchar',
-        'City'              => 'Varchar',
-        'PostCode'          => 'Varchar',
-        'Country'           => 'Varchar'
+        "ContactTitle" => "Varchar"
     ];
 
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->remove("PhoneNumber");
-
-        $fields->addFieldToTab(
-            "Root.Main",
-            TextField::create("PhoneNumber"),
-            "Password"
-        );
-
-        $fields->addFieldToTab(
-            "Root.Main",
-            TextField::create("Company"),
-            "FirstName"
-        );
-
-        return $fields;
+        if ($this->owner->ID) {
+            $fields->addFieldToTab(
+                "Root.Main",
+                ReadonlyField::create("ContactTitle")
+            );
+        }
     }
 
     /**
-     * Get all orders that have been generated and are marked as paid or
-     * processing
+     * Find a contact associated with this account
      *
-     * @return DataList
+     * @return Contact | null
      */
-    public function OutstandingOrders()
+    public function Contact()
     {
-        return $this
-            ->owner
-            ->Orders()
-            ->filter(array(
-                "Status" => Config::inst()->get(Invoice::class, "outstanding_statuses")
-            ));
+        return Contact::get()
+            ->find("MemberID", $this->owner->ID);
     }
 
     /**
-     * Get all orders that have been generated and are marked as dispatched or
-     * canceled
+     * The name of the contact assotiated with this account
      *
-     * @return DataList
+     * @return void
      */
-    public function HistoricOrders()
+    public function getContactTitle()
     {
-        return $this
-            ->owner
-            ->Orders()
-            ->filter(array(
-                "Status" => Config::inst()->get(Invoice::class, "historic_statuses")
-            ));
-    }
+        $contact = $this->owner->Contact();
 
-
-    public function DefaultAddress()
-    {
-        return $this
-            ->owner
-            ->Addresses()
-            ->sort("Default", "DESC")
-            ->first();
-    }
-    
-    /**
-     * Get address line one from our default address
-     * 
-     * @return String
-     */
-    public function getAddress1()
-    {
-        if ($address = $this->owner->getDefaultAddress()) {
-            return $address->Address1;
-        }
-    }
-    
-    /**
-     * Get address line two from our default address
-     * 
-     * @return String
-     */
-    public function getAddress2()
-    {
-        if ($address = $this->owner->getDefaultAddress()) {
-            return $address->Address2;
-        }
-    }
-    
-    /**
-     * Get city from our default address
-     * 
-     * @return String
-     */
-    public function getCity()
-    {
-        if ($address = $this->owner->getDefaultAddress()) {
-            return $address->City;
-        }
-    }
-    
-    public function getPostCode()
-    {
-        if ($address = $this->owner->getDefaultAddress()) {
-            return $address->PostCode;
-        }
-    }
-    
-    /**
-     * Get country from our default address
-     * 
-     * @return String
-     */
-    public function getCountry()
-    {
-        if ($address = $this->owner->getDefaultAddress()) {
-            return $address->Country;
+        if ($contact) {
+            return $contact->Title;
+        } else {
+            return "";
         }
     }
 
@@ -173,5 +81,25 @@ class MemberExtension extends DataExtension
         $discounts->sort("Amount", "DESC");
 
         return $discounts->first();
+    }
+
+    /**
+     * If no contact exists for this account, then create one
+     *
+     * @return void
+     */
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+
+        if (!$this->Contact()) {
+            $contact = Contact::create([
+                "FirstName" => $this->owner->FirstName,
+                "Surname" => $this->owner->Surname,
+                "Email" => $this->owner->Email
+            ]);
+            $contact->MemberID = $this->owner->ID;
+            $contact->write();
+        }
     }
 }

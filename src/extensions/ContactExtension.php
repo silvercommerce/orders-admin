@@ -4,8 +4,9 @@ namespace SilverCommerce\OrdersAdmin\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Member;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 
@@ -14,6 +15,10 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
  */
 class ContactExtension extends DataExtension
 {
+    private static $has_one = [
+        "Member" => Member::class
+    ];
+    
     private static $has_many = [
         "Invoices" => Invoice::class,
         "Estimates"=> Estimate::class
@@ -30,5 +35,50 @@ class ContactExtension extends DataExtension
             $list = $list->filter("ClassName", Invoice::class);
             $invoices_field->setList($list);
         }
+
+        // Add a dropdown to select user account
+        $fields->addFieldToTab(
+            "Root.Main",
+            DropdownField::create(
+                "MemberID",
+                _t(
+                    "OrdersAdmin.LinkContactToAccount",
+                    "Link this contact to a user account"
+                ),
+                Member::get()->map()
+            )->setEmptyString("")
+        );
+    }
+
+    /**
+     * Get all orders that have been generated and are marked as paid or
+     * processing
+     *
+     * @return DataList
+     */
+    public function OutstandingOrders()
+    {
+        return $this
+            ->owner
+            ->Invoices()
+            ->filter(array(
+                "Status" => Config::inst()->get(Invoice::class, "outstanding_statuses")
+            ));
+    }
+
+    /**
+     * Get all orders that have been generated and are marked as dispatched or
+     * canceled
+     *
+     * @return DataList
+     */
+    public function HistoricOrders()
+    {
+        return $this
+            ->owner
+            ->Invoices()
+            ->filter(array(
+                "Status" => Config::inst()->get(Invoice::class, "historic_statuses")
+            ));
     }
 }
