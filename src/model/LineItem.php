@@ -191,11 +191,11 @@ class LineItem extends DataObject
                 ->removeComponentsByType(GridFieldDeleteAction::class)
                 ->removeComponentsByType(GridFieldDataColumns::class)
                 ->removeComponentsByType(GridFieldEditButton::class)
-                //->removeComponentsByType(GridFieldAddNewButton::class)
+                ->removeComponentsByType(GridFieldAddNewButton::class)
                 ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
                 ->addComponents(
                     new GridFieldEditableColumns(),
-                    //new GridFieldAddNewInlineButton(),
+                    new GridFieldAddNewInlineButton(),
                     new GridFieldEditButton(),
                     new GridFieldDeleteAction()
                 );
