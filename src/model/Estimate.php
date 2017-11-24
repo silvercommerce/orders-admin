@@ -9,6 +9,7 @@ use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\FieldGroup;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_Base;
@@ -23,6 +24,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\OrdersAdmin\Forms\OrderSidebar;
 use SilverCommerce\OrdersAdmin\Forms\CustomerSidebar;
 use SilverCommerce\OrdersAdmin\Forms\GridField\MapExistingAction;
+use SilverCommerce\ContactAdmin\Model\Contact;
 
 class Estimate extends Invoice
 {
@@ -34,9 +36,9 @@ class Estimate extends Invoice
      * @var array
      * @config
      */
-    private static $db = array(
+    private static $db = [
         "Cart"      => "Boolean"
-    );
+    ];
 
     /**
      * Fields to show in summary views
@@ -44,7 +46,7 @@ class Estimate extends Invoice
      * @var array
      * @config
      */
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "ID"        => "#",
         'Company'   => 'Company',
         'FirstName' => 'First Name',
@@ -52,7 +54,7 @@ class Estimate extends Invoice
         "Total"     => "Total",
         "Created"   => "Created",
         "LastEdited"=> "Last Edited"
-    );
+    ];
 
     /**
      * Factory method to convert this estimate to an
@@ -135,6 +137,14 @@ class Estimate extends Invoice
                 // Main Tab Fields
                 $tab_customer = new Tab(
                     'Customer',
+                    DropdownField::create(
+                        'CustomerID',
+                        _t('OrdersAdmin.ExistingCustomer', 'Existing Customer'),
+                        Contact::get()->map()
+                    )->setEmptyString(_t(
+                        "OrdersAdmin.SelectACustomer",
+                        "Select existing customer"
+                    )),
                     TextField::create("Company"),
                     TextField::create("FirstName"),
                     TextField::create("Surname"),
