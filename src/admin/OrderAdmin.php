@@ -73,11 +73,7 @@ class OrderAdmin extends ModelAdmin
             $return = singleton($this->modelClass)->summaryFields();
         }
 
-        $extend = $this->extend("updateExportFields", $return);
-
-        if ($extend && is_array($extend)) {
-            $return = $extend;
-        }
+        $this->extend("updateExportFields", $return);
 
         return $return;
     }
@@ -165,9 +161,9 @@ class OrderAdmin extends ModelAdmin
         $list = parent::getList();
         
         // Ensure that we only show Order objects in the order tab
-        if ($this->modelClass == "ilateral-SilverStripe-Orders-Model-Order") {
+        if ($this->modelClass == Estimate::class) {
             $list = $list
-                ->addFilter(array("ClassName" => Invoice::class));
+                ->addFilter(array("ClassName" => Estimate::class));
         }
                 
         $this->extend("updateList", $list);
