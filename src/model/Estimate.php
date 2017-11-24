@@ -5,8 +5,6 @@ namespace SilverCommerce\OrdersAdmin\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ReadonlyField;
@@ -384,138 +382,147 @@ class Estimate extends DataObject implements PermissionProvider
     
     public function getCMSFields()
     {
+        $fields = parent::getCMSFields();
         $siteconfig = SiteConfig::current_site_config();
+
+        $fields->removeByName("OrderNumber");
+        $fields->removeByName("DiscountID");
+        $fields->removeByName("DiscountType");
+        $fields->removeByName("DiscountAmount");
+        $fields->removeByName("PostageType");
+        $fields->removeByName("PostageCost");
+        $fields->removeByName("PostageTax");
+        $fields->removeByName("Items");
         
-        $fields = FieldList::create(
-            $tab_root = TabSet::create(
-                "Root",
-                
-                // Main Tab Fields
-                $tab_main = Tab::create(
-                    'Main',
-                    
-                    // Items field
-                    LineItemGridField::create(
-                        "Items",
-                        "",
-                        $this->Items(),
-                        $config = GridFieldConfig::create()
-                            ->addComponents(
-                                new GridFieldButtonRow('before'),
-                                new GridFieldTitleHeader(),
-                                new GridFieldEditableColumns(),
-                                new GridFieldEditButton(),
-                                new GridFieldDetailForm(),
-                                new GridFieldDeleteAction(),
-                                new AddLineItem()
-                            )
-                    ),
-
-                    LiteralField::create(
-                        "ItemsDivider",
-                        '<div class="field form-group"></div>'
-                    ),
-                    
-                    // Discount
-                    HeaderField::create(
-                        "DiscountDetailsHeader",
-                        _t("Orders.DiscountDetails", "Discount")
-                    ),
-                    DropdownField::create(
-                        "DiscountID",
-                        $this->fieldLabel("DiscountID"),
-                        $siteconfig->Discounts()->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.ApplyADiscount",
-                        "Apply a discount"
-                    )),
-                    ReadonlyField::create("DiscountDetails"),
-                    
-                    // Sidebar
-                    FieldGroup::create(
-                        ReadonlyField::create("QuoteNumber", "#")
-                            ->setValue($this->OrderNumber),
-                        ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
-                            ->setValue($this->obj("SubTotal")->Nice()),
-                        ReadonlyField::create("DiscountValue",_t("Orders.Discount", "Discount"))
-                            ->setValue($this->dbObject("DiscountAmount")->Nice()),
-                        ReadonlyField::create("PostageValue",_t("Orders.Postage", "Postage"))
-                            ->setValue($this->dbObject("PostageCost")->Nice()),
-                        ReadonlyField::create("TaxValue",_t("Orders.Tax", "Tax"))
-                            ->setValue($this->obj("TaxTotal")->Nice()),
-                        ReadonlyField::create("TotalValue",_t("Orders.Total", "Total"))
-                            ->setValue($this->obj("Total")->Nice())
-                    )->setName("EstimateSidebar")
-                    ->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
-                    ->addExtraClass("order-admin-sidebar")
-                ),
-                
-                // Main Tab Fields
-                $tab_customer = Tab::create(
-                    'Customer',
-                    DropdownField::create(
-                        'CustomerID',
-                        _t('OrdersAdmin.ExistingCustomer', 'Existing Customer'),
-                        Contact::get()->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.SelectACustomer",
-                        "Select existing customer"
-                    )),
-                    TextField::create("Company"),
-                    TextField::create("FirstName"),
-                    TextField::create("Surname"),
-                    TextField::create("Address1"),
-                    TextField::create("Address2"),
-                    TextField::create("City"),
-                    TextField::create("PostCode"),
-                    DropdownField::create(
-                        'Country',
-                        _t('OrdersAdmin.Country', 'Country'),
-                        i18n::getData()->getCountries()
-                    )->setEmptyString(""),
-                    TextField::create("Email"),
-                    TextField::create("PhoneNumber")
+        $fields->addFieldsToTab(
+            "Root.Main",
+            [
+                // Items field
+                GridField::create(
+                    "Items",
+                    "",
+                    $this->Items(),
+                    $config = GridFieldConfig::create()
+                        ->addComponents(
+                            new GridFieldButtonRow('before'),
+                            new GridFieldTitleHeader(),
+                            new GridFieldEditableColumns(),
+                            new GridFieldEditButton(),
+                            new GridFieldDetailForm(),
+                            new GridFieldDeleteAction(),
+                            new AddLineItem()
+                        )
                 ),
 
-                // Delivery Tab
-                $tab_delivery = Tab::create(
-                    'Delivery',
-                    HeaderField::create(
-                        "DeliveryDetailsHeader",
-                        _t("Orders.DeliveryDetails", "Delivery Details")
-                    ),
-                    TextField::create("DeliveryCompany"),
-                    TextField::create("DeliveryFirstnames"),
-                    TextField::create("DeliverySurname"),
-                    TextField::create("DeliveryAddress1"),
-                    TextField::create("DeliveryAddress2"),
-                    TextField::create("DeliveryCity"),
-                    TextField::create("DeliveryPostCode"),
-                    DropdownField::create(
-                        'DeliveryCountry',
-                        _t('OrdersAdmin.Country', 'Country'),
-                        i18n::getData()->getCountries()
-                    )->setEmptyString(""),
+                LiteralField::create(
+                    "ItemsDivider",
+                    '<div class="field form-group"></div>'
+                ),
+                
+                // Discount
+                HeaderField::create(
+                    "DiscountDetailsHeader",
+                    _t("Orders.DiscountDetails", "Discount")
+                ),
+                DropdownField::create(
+                    "DiscountID",
+                    $this->fieldLabel("Discount"),
+                    $siteconfig->Discounts()->map()
+                )->setEmptyString(_t(
+                    "OrdersAdmin.ApplyADiscount",
+                    "Apply a discount"
+                )),
+                ReadonlyField::create("DiscountDetails"),
+                
+                // Sidebar
+                FieldGroup::create(
+                    ReadonlyField::create("OrderNumber", "#"),
+                    ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
+                        ->setValue($this->obj("SubTotal")->Nice()),
+                    ReadonlyField::create("DiscountValue",_t("Orders.Discount", "Discount"))
+                        ->setValue($this->dbObject("DiscountAmount")->Nice()),
+                    ReadonlyField::create("PostageValue",_t("Orders.Postage", "Postage"))
+                        ->setValue($this->dbObject("PostageCost")->Nice()),
+                    ReadonlyField::create("TaxValue",_t("Orders.Tax", "Tax"))
+                        ->setValue($this->obj("TaxTotal")->Nice()),
+                    ReadonlyField::create("TotalValue",_t("Orders.Total", "Total"))
+                        ->setValue($this->obj("Total")->Nice())
+                )->setName("OrdersSidebar")
+                ->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
+                ->addExtraClass("order-admin-sidebar")
+            ]
+        );
 
-                    // Postage
-                    HeaderField::create(
-                        "PostageDetailsHeader",
-                        _t("Orders.PostageDetails", "Postage Details")
-                    ),
-                    DropdownField::create(
-                        "PostageID",
-                        $this->fieldLabel("PostageID"),
-                        $siteconfig->PostageAreas()->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.SelectPostage",
-                        "Select Postage"
-                    )),
-                    ReadonlyField::create("PostageDetails")
-                )
-            )
+        $fields->addFieldsToTab(
+            "Root.Customer",
+            [
+                DropdownField::create(
+                    'CustomerID',
+                    _t('OrdersAdmin.ExistingCustomer', 'Existing Customer'),
+                    Contact::get()->map()
+                )->setEmptyString(_t(
+                    "OrdersAdmin.SelectACustomer",
+                    "Select existing customer"
+                )),
+                TextField::create("Company"),
+                TextField::create("FirstName"),
+                TextField::create("Surname"),
+                TextField::create("Address1"),
+                TextField::create("Address2"),
+                TextField::create("City"),
+                TextField::create("PostCode"),
+                DropdownField::create(
+                    'Country',
+                    _t('OrdersAdmin.Country', 'Country'),
+                    i18n::getData()->getCountries()
+                )->setEmptyString(""),
+                TextField::create("Email"),
+                TextField::create("PhoneNumber")
+            ]
+        );
+
+        $fields->addFieldsToTab(
+            "Root.Delivery",
+            [
+                HeaderField::create(
+                    "DeliveryDetailsHeader",
+                    _t("Orders.DeliveryDetails", "Delivery Details")
+                ),
+                TextField::create("DeliveryCompany"),
+                TextField::create("DeliveryFirstName"),
+                TextField::create("DeliverySurname"),
+                TextField::create("DeliveryAddress1"),
+                TextField::create("DeliveryAddress2"),
+                TextField::create("DeliveryCity"),
+                TextField::create("DeliveryPostCode"),
+                DropdownField::create(
+                    'DeliveryCountry',
+                    _t('OrdersAdmin.Country', 'Country'),
+                    i18n::getData()->getCountries()
+                )->setEmptyString(""),
+
+                // Postage
+                HeaderField::create(
+                    "PostageDetailsHeader",
+                    _t("Orders.PostageDetails", "Postage Details")
+                ),
+                DropdownField::create(
+                    "PostageID",
+                    $this->fieldLabel("PostageID"),
+                    $siteconfig->PostageAreas()->map()
+                )->setEmptyString(_t(
+                    "OrdersAdmin.SelectPostage",
+                    "Select Postage"
+                )),
+                ReadonlyField::create("PostageDetails")
+            ]
         );
         
-		$tab_root->addextraClass('orders-root');
+        $root = $fields->findOrMakeTab("Root");
+
+        if ($root) {
+            $root->addextraClass('orders-root');
+        }
 
         $this->extend("updateCMSFields", $fields);
         

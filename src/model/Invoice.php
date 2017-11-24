@@ -23,6 +23,7 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\ContactAdmin\Model\Contact;
@@ -268,9 +269,22 @@ class Invoice extends Estimate implements PermissionProvider
     {
         $fields = parent::getCMSFields();
 
-        $sidebar = $fields->dataFieldByName("EstimateSidebar");
-        
+        // Go through a convoluted process to find out field group
+        // as the default fieldlist doesn't seem to register it!
+        $main = $fields->findOrMakeTab("Root.Main");
+        $sidebar = null;
+
+        foreach ($main->getChildren() as $field) {
+            if ($field->getName() == "OrdersSidebar") {
+                $sidebar = $field;
+            }
+        }
+
         if ($sidebar) {
+            $sidebar->setTitle(_t(
+                "OrdersAdmin.InvoiceDetails",
+                "Invoice Details"
+            ));
             $sidebar->insertBefore(
                 "OrderNumber",
                 DropdownField::create(
