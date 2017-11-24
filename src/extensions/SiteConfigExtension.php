@@ -30,7 +30,8 @@ class SiteConfigExtension extends DataExtension
 {
     
     private static $db = [
-        "OrderNumberPrefix" => "Varchar(6)",
+        "EstimateNumberPrefix" => "Varchar(10)",
+        "InvoiceNumberPrefix" => "Varchar(10)",
         "InvoiceHeaderContent" => "HTMLText",
         "InvoiceFooterContent" => "HTMLText",
         "EstimateHeaderContent" => "HTMLText",
@@ -121,13 +122,22 @@ class SiteConfigExtension extends DataExtension
             _t("Orders.InvoiceQuoteCustomisation", "Invoice and Quote Customisation"),
             [
                 TextField::create(
-                    'OrderNumberPrefix',
-                    _t("Orders.OrderPrefix", "Add prefix to order numbers"),
+                    'EstimateNumberPrefix',
+                    _t("Orders.EstimatePrefix", "Add prefix to estimate numbers"),
                     null,
                     9
                 )->setAttribute(
                     "placeholder",
                     _t("Orders.OrderPrefixPlaceholder", "EG 'uk-123'")
+                ),
+                TextField::create(
+                    'InvoiceNumberPrefix',
+                    _t("Orders.InvoicePrefix", "Add prefix to invoice numbers"),
+                    null,
+                    9
+                )->setAttribute(
+                    "placeholder",
+                    _t("Orders.OrderPrefixPlaceholder", "EG 'es-123'")
                 ),
                 HTMLEditorField::create("InvoiceHeaderContent")
                     ->addExtraClass("stacked"),

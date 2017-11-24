@@ -88,7 +88,7 @@ class LineItem extends DataObject
      * @config
      */
     private static $has_one = [
-        "Parent"      => Invoice::class,
+        "Parent"      => Estimate::class,
         "Tax"         => TaxRate::class,
     ];
     
