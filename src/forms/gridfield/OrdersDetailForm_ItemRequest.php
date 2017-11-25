@@ -2,11 +2,11 @@
 
 namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
+use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
@@ -17,20 +17,11 @@ use SilverStripe\Core\Convert;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Control\PjaxResponseNegotiator;
 use SilverStripe\ORM\ValidationException;
+use SilverStripe\ORM\ValidationResult;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
 
-/**
- * Edit form specifically customised for the Orders module. This deals
- * with editing Order and Estimate objects specificaly and isn't really
- * intended to be more flexible in terms of support (though this might
- * be added later).
- *
- * @author ilateral
- */
-class DetailForm extends GridFieldDetailForm
-{
-}
-
-class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
+class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
 {
 
     private static $allowed_actions = [
@@ -42,25 +33,32 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
     public function edit($request)
     {
         $controller = $this->getToplevelController();
-        $form = $this->ItemEditForm($this->gridField, $request);
+        $form = $this->ItemEditForm();
 
-        $return = $this->customise(array(
-            'Backlink' => $controller->hasMethod('Backlink') ? $controller->Backlink() : $controller->Link(),
-            'ItemEditForm' => $form,
-        ))->renderWith($this->template);
-        
         // If this is a new record, we need to save it first
         if ($this->record->ID == 0) {
+            // ensure we populate any foreign keys first
+            $list = $this->gridField->getList();
+            if ($list instanceof HasManyList && !$this->record->isInDB()) {
+                $key = $list->getForeignKey();
+                $id = $list->getForeignID();
+                $this->record->$key = $id;
+            }
+
             $this->record->write();
             
             $controller
                 ->getRequest()
                 ->addHeader('X-Pjax', 'Content');
             
-            return $controller->redirect($this->Link());
+            return $controller->redirect($this->Link("edit"));
         }
-        
 
+        $return = $this->customise(array(
+            'Backlink' => $controller->hasMethod('Backlink') ? $controller->Backlink() : $controller->Link(),
+            'ItemEditForm' => $form,
+        ))->renderWith($this->getTemplates());
+        
         if ($request->isAjax()) {
             return $return;
         } else {
@@ -73,9 +71,7 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
     }
 
     public function ItemEditForm()
-    {
-        Requirements::javascript("orders/javascript/entwine.orders.js");
-        
+    {        
         $form = parent::ItemEditForm();
         $fields = $form->Fields();
         $actions = $form->Actions();
@@ -84,15 +80,15 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         
         $can_view = $this->record->canView();
         $can_edit = $this->record->canEdit();
-        $can_change_status = $this->record->canChangeStatus();
         $can_delete = $this->record->canDelete();
         $can_create = $this->record->canCreate();
         
-        // First remove the delete button
+        // First cache and remove the delete button
+        $delete_action = $actions->dataFieldByName("action_doDelete");
         $actions->removeByName("action_doDelete");
         
         // Deal with Estimate objects
-        if ($record->ClassName == "Estimate") {
+        if ($record->ClassName == Estimate::class) {
             if ($record->ID && $record->AccessKey) {
                 $html = '<a href="' . $record->QuoteLink() . '" ';
                 $html .= 'target="_blank" ';
@@ -110,14 +106,17 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
                     FormAction::create(
                         'doConvert',
                         _t('Orders.ConvertToOrder', 'Convert To Order')
-                    )->setUseButtonTag(true),
+                    )->setUseButtonTag(true)
+                    ->addExtraClass('btn-outline-primary btn-hide-outline font-icon-sync'),
                     "action_doSave"
                 );
             }
         }
-        
+
         // Deal with Order objects
-        if ($record->ClassName == "Order") {
+        if ($record->ClassName == Invoice::class) {
+            $can_change_status = $this->record->canChangeStatus();
+            
             // Set our status field as a dropdown (has to be here to
             // ignore canedit)
             // Allow users to change status (as long as they have permission)
@@ -141,7 +140,7 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             }
             
             // Setup order history
-            if (Permission::check(array('COMMERCE_ORDER_HISTORY', 'ADMIN'), 'any', $member)) {
+            if (Permission::check(array('ORDERS_EDIT_INVOICES', 'ADMIN'), 'any', $member)) {
                 $versions = $record->AllVersions();
                 $first_version = $versions->First();
                 $curr_version = ($first_version) ? $versions->First() : null;
@@ -151,9 +150,9 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
                     $i = $version->Version;
                     $name = "History_{$i}";
 
-                    if ($i > 0) {
-                        $frm = Versioned::get_version($record->class, $record->ID, $i - 1);
-                        $to = Versioned::get_version($record->class, $record->ID, $i);
+                    if ($i > 1) {
+                        $frm = Versioned::get_version($record->ClassName, $record->ID, $i - 1);
+                        $to = Versioned::get_version($record->ClassName, $record->ID, $i);
                         $diff = new DataDifferencer($frm, $to);
 
                         if ($version->Author()) {
@@ -186,28 +185,11 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             // Is user cannot edit, but can change status, add change
             // status button
             if ($record->ID && !$can_edit && $can_change_status) {
-                $actions
-                    ->push(FormAction::create('doChangeStatus', _t('Orders.Save', 'Save'))
-                    ->setUseButtonTag(true)
-                    ->addExtraClass('ss-ui-action-constructive')
-                    ->setAttribute('data-icon', 'accept'));
-            }
-            
-            if ($record->ID && $record->AccessKey) {
-                $html = '<a href="' . $record->InvoiceLink() . '" ';
-                $html .= 'target="_blank" ';
-                $html .= 'class="action ss-ui-button ui-button ui-corner-all open-external" ';
-                $html .= '>' . _t('Orders.ViewInvoice', 'View Invoice') . '</a>';
-                
-                $link_field = LiteralField::create('openQuote', $html);
-                
-                if ($actions->find("Name", "action_doSave")) {
-                    $actions->insertAfter($link_field, "action_doSave");
-                }
-                
-                if ($actions->find("Name", "action_doChangeStatus")) {
-                    $actions->insertAfter($link_field, "action_doChangeStatus");
-                }
+                $actions->push(
+                    FormAction::create('doChangeStatus', _t('Orders.Save', 'Save'))
+                        ->setUseButtonTag(true)
+                        ->addExtraClass('btn-primary font-icon-save')
+                );
             }
         }
         
@@ -217,7 +199,8 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             $duplicate_button = FormAction::create(
                 'doDuplicate',
                 _t('Orders.Duplicate', 'Duplicate')
-            )->setUseButtonTag(true);
+            )->setUseButtonTag(true)
+            ->addExtraClass('btn-outline-primary  btn-hide-outline font-icon-switch');
             
             if ($actions->find("Name", "action_doSave")) {
                 $actions->insertAfter($duplicate_button, "action_doSave");
@@ -230,14 +213,9 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         
         // Finally, if allowed, re-add the delete button (so it is last)
         if ($record->ID && $can_delete) {
-            $actions->push(FormAction::create('doDelete', _t('GridFieldDetailForm.Delete', 'Delete'))
-                ->setUseButtonTag(true)
-                ->addExtraClass('ss-ui-action-destructive action-delete'));
+            $actions->push($delete_action);
         }
-        
-        // Set our custom template
-        $form->setTemplate("OrdersItemEditForm");
-        
+
         $this->extend("updateItemEditForm", $form);
         
         return $form;
@@ -268,9 +246,9 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         $toplevelController = $this->getToplevelController();
         if ($toplevelController && $toplevelController instanceof LeftAndMain) {
             $backForm = $toplevelController->getEditForm();
-            $backForm->sessionMessage($message, 'good', false);
+            $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         } else {
-            $form->sessionMessage($message, 'good', false);
+            $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         }
         
         $toplevelController = $this->getToplevelController();
@@ -289,8 +267,8 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
 
         $form->saveInto($record);
         
-        $record->convertToOrder();
-        $record->write();
+        $record = $record->convertToInvoice();
+        $this->record = $record;
         
         $this->gridField->getList()->add($record);
 
@@ -303,9 +281,9 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         $toplevelController = $this->getToplevelController();
         if ($toplevelController && $toplevelController instanceof LeftAndMain) {
             $backForm = $toplevelController->getEditForm();
-            $backForm->sessionMessage($message, 'good', false);
+            $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         } else {
-            $form->sessionMessage($message, 'good', false);
+            $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
         }
         
         $toplevelController = $this->getToplevelController();
@@ -324,7 +302,7 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             $this->record->Status = $data["Status"];
             $this->record->write();
         } catch (ValidationException $e) {
-            $form->sessionMessage($e->getResult()->message(), 'bad', false);
+            $form->sessionMessage($e->getResult()->message(), 'bad', ValidationResult::CAST_HTML);
             
             $responseNegotiator = new PjaxResponseNegotiator(array(
                 'CurrentForm' => function () use (&$form) {
@@ -355,7 +333,7 @@ class DetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             )
         );
         
-        $form->sessionMessage($message, 'good', false);
+        $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
 
         if ($this->gridField->getList()->byId($this->record->ID)) {
             // Return new view, as we can't do a "virtual redirect" via the CMS Ajax

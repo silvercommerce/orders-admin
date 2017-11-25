@@ -6,7 +6,8 @@ use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverCommerce\OrdersAdmin\Forms\GridField\DetailForm as OrdersGridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
 use SilverCommerce\OrdersAdmin\Forms\GridField\BulkActions as OrdersBulkActions;
 
 use SilverStripe\Dev\Debug;
@@ -146,9 +147,9 @@ class OrderAdmin extends ModelAdmin
         // Set our default detailform and bulk manager
         if ($config) {
             $config
-                ->removeComponentsByType('GridFieldDetailForm')
+                ->removeComponentsByType(GridFieldDetailForm::class)
                 ->addComponent($manager)
-                ->addComponent(new OrdersGridFieldDetailForm());
+                ->addComponent(new OrdersDetailForm());
         }
 
         $this->extend("updateEditForm", $form);

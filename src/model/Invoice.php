@@ -449,8 +449,13 @@ class Invoice extends Estimate implements PermissionProvider
     {
         parent::onBeforeWrite();
         
-        $this->Status = (!$this->Status) ? $this->config()->get("default_status") : $this->Status;
-        $this->Action = (!$this->Action) ? $this->config()->get("default_action") :  $this->Action;
+        if (!$this->Status) {
+            $this->Status = $this->config()->get("default_status");
+        }
+
+        if (!$this->Action) {
+            $this->Action = $this->config()->get("default_action");
+        }
     }
 
     /**

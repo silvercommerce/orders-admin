@@ -364,15 +364,22 @@ class Estimate extends DataObject implements PermissionProvider
      * Factory method to convert this estimate to an
      * order.
      *
-     * At the moment this only changes the classname, but
-     * using a factory allows us to add more complex
-     * functionality in the future.
+     * This method writes and reloads the object so
+     * we are now working with the new object type
      *
+     * @return Invoice The currently converted 
      */
-    public function convertToOrder()
+    public function convertToInvoice()
     {
         $this->ClassName = Invoice::class;
-        $this->OrderNumber = null;
+        $this->write();
+
+        // Get our new Invoice
+        $record = Invoice::get()->byID($this->ID);
+        $record->OrderNumber = null;
+        $record->write();
+        
+        return $record;
     }
 
     /**
@@ -695,8 +702,11 @@ class Estimate extends DataObject implements PermissionProvider
         
         // Set up items
         if ($doWrite) {
+            $clone->OrderNumber = "";
+            $clone->write();
+
             foreach ($this->Items() as $item) {
-                $item_class = $item->class;
+                $item_class = $item->ClassName;
                 $clone_item = new $item_class($item->toMap(), false, $this->model);
                 $clone_item->ID = 0;
                 $clone_item->ParentID = $clone->ID;
