@@ -12,6 +12,7 @@ use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
@@ -38,6 +39,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     private static $db = [
         'OrderNumber'       => 'Varchar',
+        'Date'              => 'Date',
         
         // Personal Details
         'Company'           => 'Varchar',
@@ -113,7 +115,8 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
-        "OrderNumber"   => "#",
+        'OrderNumber'   => '#',
+        'Date'          => 'Date',
         'Company'       => 'Company',
         'FirstName'     => 'First Name',
         'Surname'       => 'Surname',
@@ -430,6 +433,7 @@ class Estimate extends DataObject implements PermissionProvider
         $fields = parent::getCMSFields();
         $siteconfig = SiteConfig::current_site_config();
 
+        $fields->removeByName("Date");
         $fields->removeByName("OrderNumber");
         $fields->removeByName("DiscountID");
         $fields->removeByName("DiscountType");
@@ -481,6 +485,7 @@ class Estimate extends DataObject implements PermissionProvider
                 
                 // Sidebar
                 FieldGroup::create(
+                    DateField::create("Date"),
                     ReadonlyField::create("OrderNumber", "#"),
                     ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
                         ->setValue($this->obj("SubTotal")->Nice()),
@@ -767,6 +772,11 @@ class Estimate extends DataObject implements PermissionProvider
             $this->PostageType = $postage->Title;
             $this->PostageCost = $postage->Cost;
             $this->PostageTax = $postage->TaxAmount;
+        }
+
+        // If date not set, make thie equal the created date
+        if (!$this->Date) {
+            $this->Date = $this->Created;
         }
     }
 
