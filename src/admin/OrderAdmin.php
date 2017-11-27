@@ -25,13 +25,17 @@ class OrderAdmin extends ModelAdmin
 
     private static $menu_priority = 4;
 
+    private static $menu_icon_class = 'font-icon-book-open';
+    
     private static $managed_models = [
         Invoice::class,
         Estimate::class
     ];
 
     private static $model_importers = [];
-    
+
+    public $showImportForm = [];
+
     /**
      * For an order, export all fields by default
      * 
