@@ -5,6 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\TextField;
@@ -31,6 +32,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\ContactAdmin\Model\ContactLocation;
+use SilverCommerce\OrdersAdmin\Control\DisplayController;
 use DateTime;
 
 class Estimate extends DataObject implements PermissionProvider
@@ -72,7 +74,10 @@ class Estimate extends DataObject implements PermissionProvider
         // Postage
         "PostageType"       => "Varchar",
         "PostageCost"       => "Currency",
-        "PostageTax"        => "Currency"
+        "PostageTax"        => "Currency",
+
+        // Access key (for viewing via non logged in users)
+        "AccessKey"         => "Varchar(40)"
     ];
 
     private static $has_one = [
@@ -123,12 +128,11 @@ class Estimate extends DataObject implements PermissionProvider
         'Email'         => 'Email',
         'PostCode'      => 'Post Code',
         "Total"         => "Total",
-        "Created"       => "Created",
         "LastEdited"    => "Last Edited"
     ];
 
     private static $extensions = [
-        Versioned::class
+        Versioned::class . '.versioned',
     ];
 
     private static $versioning = [
@@ -136,9 +140,23 @@ class Estimate extends DataObject implements PermissionProvider
     ];
 
     private static $default_sort = [
-        "LastEdited" => "DESC",
-        "Created" => "DESC"
+        "Date" => "DESC"
     ];
+
+    /**
+     * Generate a link to view the associated front end
+     * display for this order
+     *
+     * @return string
+     */
+    public function DisplayLink()
+    {
+        return Controller::join_links(
+            DisplayController::create()->AbsoluteLink("estimate"),
+            $this->ID,
+            $this->AccessKey
+        );
+    }
 
     /**
      * Generate a string of the customer's personal details
@@ -435,6 +453,7 @@ class Estimate extends DataObject implements PermissionProvider
 
         $fields->removeByName("Date");
         $fields->removeByName("OrderNumber");
+        $fields->removeByName("AccessKey");
         $fields->removeByName("DiscountID");
         $fields->removeByName("DiscountType");
         $fields->removeByName("DiscountAmount");
@@ -694,6 +713,21 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Check if the access key generated for this estimate is
+     * valid (exists on another object)
+     *
+     * @return boolean
+     */
+    protected function validAccessKey()
+    {
+        $existing = Estimate::get()
+            ->filter("AccessKey", $this->AccessKey)
+            ->first();
+        
+        return !($existing);
+    }
+
+    /**
      * Create a duplicate of this order/estimate as well as duplicating
      * associated items
      *
@@ -727,6 +761,15 @@ class Estimate extends DataObject implements PermissionProvider
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
+
+        // Ensure that this object has a non-conflicting Access Key
+        if (!$this->AccessKey) {
+            $this->AccessKey = $this->generate_random_string(40);
+            
+            while (!$this->validAccessKey()) {
+                $this->AccessKey = $this->generate_random_string(40);
+            }
+        }
 
         $contact = $this->Customer();
 

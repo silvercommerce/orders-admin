@@ -88,19 +88,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         $actions->removeByName("action_doDelete");
         
         // Deal with Estimate objects
-        if ($record->ClassName == Estimate::class) {
-            if ($record->ID && $record->AccessKey) {
-                $html = '<a href="' . $record->QuoteLink() . '" ';
-                $html .= 'target="_blank" ';
-                $html .= 'class="action ss-ui-button ui-button ui-corner-all open-external" ';
-                $html .= '>' . _t('Orders.ViewQuote', 'View Quote') . '</a>';
-                
-                $actions->insertAfter(
-                    LiteralField::create('openQuote', $html),
-                    "action_doSave"
-                );
-            }
-            
+        if ($record->ClassName == Estimate::class) {            
             if ($record->ID && $can_edit) {
                 $actions->insertAfter(
                     FormAction::create(
@@ -209,6 +197,16 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             if ($actions->find("Name", "action_doChangeStatus")) {
                 $actions->insertAfter($duplicate_button, "action_doChangeStatus");
             }
+        }
+
+        if ($record->ID) {
+            $html = '<a href="' . $record->DisplayLink() . '" ';
+            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-eye"';
+            $html .= '>' . _t('Orders.View', 'View') . '</a>';
+            
+            $link_field = LiteralField::create('ViewButton', $html);
+            
+            $actions->push($link_field, "action_doSave");
         }
         
         // Finally, if allowed, re-add the delete button (so it is last)

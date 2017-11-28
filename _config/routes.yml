@@ -1,0 +1,6 @@
+---
+Name: ordersadminroutes
+---
+SilverStripe\Control\Director:
+  rules:
+    'ordersadmin/display//$Action/$ID/$OtherID': 'SilverCommerce\OrdersAdmin\Control\DisplayController'

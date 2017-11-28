@@ -27,6 +27,7 @@ use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\ContactAdmin\Model\Contact;
+use SilverCommerce\OrdersAdmin\Control\DisplayController;
 
 /**
  * Order objects track all the details of an order and if they were completed or
@@ -258,6 +259,21 @@ class Invoice extends Estimate implements PermissionProvider
         parent::populateDefaults();
         $this->Status = $this->config()->get("default_status");
         $this->Action = $this->config()->get("default_action");
+    }
+
+    /**
+     * Generate a link to view the associated front end
+     * display for this order
+     *
+     * @return string
+     */
+    public function DisplayLink()
+    {
+        return Controller::join_links(
+            DisplayController::create()->AbsoluteLink("invoice"),
+            $this->ID,
+            $this->AccessKey
+        );
     }
 
     /**
