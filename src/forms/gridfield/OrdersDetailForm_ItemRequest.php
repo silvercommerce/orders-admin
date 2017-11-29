@@ -93,7 +93,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
                 $actions->insertAfter(
                     FormAction::create(
                         'doConvert',
-                        _t('Orders.ConvertToOrder', 'Convert To Order')
+                        _t('OrdersAdmin.ConvertToInvoice', 'Convert To Invoice')
                     )->setUseButtonTag(true)
                     ->addExtraClass('btn-outline-primary btn-hide-outline font-icon-sync'),
                     "action_doSave"
@@ -174,7 +174,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             // status button
             if ($record->ID && !$can_edit && $can_change_status) {
                 $actions->push(
-                    FormAction::create('doChangeStatus', _t('Orders.Save', 'Save'))
+                    FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
                         ->setUseButtonTag(true)
                         ->addExtraClass('btn-primary font-icon-save')
                 );
@@ -186,7 +186,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         if ($record->ID) {
             $duplicate_button = FormAction::create(
                 'doDuplicate',
-                _t('Orders.Duplicate', 'Duplicate')
+                _t('OrdersAdmin.Duplicate', 'Duplicate')
             )->setUseButtonTag(true)
             ->addExtraClass('btn-outline-primary  btn-hide-outline font-icon-switch');
             
@@ -202,11 +202,18 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         if ($record->ID) {
             $html = '<a href="' . $record->DisplayLink() . '" ';
             $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-eye"';
-            $html .= '>' . _t('Orders.View', 'View') . '</a>';
+            $html .= '>' . _t('OrdersAdmin.View', 'View') . '</a>';
             
-            $link_field = LiteralField::create('ViewButton', $html);
+            $view_field = LiteralField::create('ViewButton', $html);
+
+            $html = '<a href="' . $record->PDFLink() . '" ';
+            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-down-circled"';
+            $html .= '>' . _t('OrdersAdmin.Download', 'Download') . '</a>';
             
-            $actions->push($link_field, "action_doSave");
+            $download_field = LiteralField::create('DownloadButton', $html);
+            
+            $actions->push($view_field, "action_doSave");
+            $actions->push($download_field, "action_doSave");
         }
         
         // Finally, if allowed, re-add the delete button (so it is last)
@@ -236,7 +243,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         $this->gridField->getList()->add($new_record);
 
         $message = sprintf(
-            _t('Orders.Duplicated', 'Duplicated %s %s'),
+            _t('OrdersAdmin.Duplicated', 'Duplicated %s %s'),
             $this->record->singular_name(),
             '"'.Convert::raw2xml($this->record->Title).'"'
         );
@@ -271,7 +278,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
         $this->gridField->getList()->add($record);
 
         $message = sprintf(
-            _t('Orders.ConvertedToOrder', 'Converted %s %s'),
+            _t('OrdersAdmin.ConvertedToOrder', 'Converted %s %s'),
             $this->record->singular_name(),
             '"'.Convert::raw2xml($this->record->Title).'"'
         );
@@ -323,7 +330,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             . '"</a>';
 
         $message = _t(
-            'Orders.StatusChanged',
+            'OrdersAdmin.StatusChanged',
             'Status Changed {name} {link}',
             array(
                 'name' => $this->record->i18n_singular_name(),

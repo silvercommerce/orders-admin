@@ -277,6 +277,21 @@ class Invoice extends Estimate implements PermissionProvider
     }
 
     /**
+     * Generate a link to view the associated front end
+     * display for this order
+     *
+     * @return string
+     */
+    public function PDFLink()
+    {
+        return Controller::join_links(
+            DisplayController::create()->AbsoluteLink("invoicepdf"),
+            $this->ID,
+            $this->AccessKey
+        );
+    }
+
+    /**
      * Scaffold admin form feilds
      *
      * @return \SilverStripe\Forms\FieldList

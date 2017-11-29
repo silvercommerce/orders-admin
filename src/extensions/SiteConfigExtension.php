@@ -10,12 +10,14 @@ use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
 use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use SilverStripe\Assets\Image;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
@@ -40,6 +42,10 @@ class SiteConfigExtension extends DataExtension
         'PaymentFailerContent'  => 'HTMLText'
     ];
     
+    private static $has_one = [
+        "EstimateInvoiceLogo" => Image::class
+    ];
+
     private static $has_many = [
         "OrderNotifications"=> OrderNotification::class,
         'PostageAreas'      => PostageArea::class,
@@ -121,6 +127,7 @@ class SiteConfigExtension extends DataExtension
             'InvoiceQuoteCustomSettings',
             _t("Orders.InvoiceQuoteCustomisation", "Invoice and Quote Customisation"),
             [
+                UploadField::create('EstimateInvoiceLogo'),
                 TextField::create(
                     'EstimateNumberPrefix',
                     _t("Orders.EstimatePrefix", "Add prefix to estimate numbers"),

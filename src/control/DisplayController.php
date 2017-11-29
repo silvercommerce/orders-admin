@@ -4,11 +4,17 @@ namespace SilverCommerce\OrdersAdmin\Control;
 
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
+use SilverStripe\Assets\Image;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Security\Security;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverStripe\View\Requirements;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPStreamResponse;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
+use Dompdf\Dompdf;
 
 /**
  * Controller responsible for displaying either an rendered order or a
@@ -29,8 +35,17 @@ class DisplayController extends Controller
     
     private static $allowed_actions = array(
         "invoice",
-        "estimate"
+        "invoicepdf",
+        "estimate",
+        "estimatepdf"
     );
+
+    /**
+     * Ther object associated with this controller
+     *
+     * @var Estimate
+     */
+    protected $object;
 
     protected function init()
     {
@@ -38,6 +53,51 @@ class DisplayController extends Controller
 
         Requirements::css('silverstripe/admin: client/dist/styles/bundle.css');
         Requirements::css('silvercommerce/orders-admin: client/dist/css/display.css');
+
+        $member = Member::currentUser();
+        $object = Estimate::get()
+            ->byID($this->getrequest()->param("ID"));
+
+        if ($object && (
+            ($member && $object->canView($member)) ||
+            ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
+        )) {
+            $this->object = $object;
+        } else {
+            return Security::permissionFailure();
+        }
+    }
+
+    /**
+     * Generate a Dompdf object from the provided html
+     *
+     * @param string $html
+     * @return Dompdf
+     */
+    protected function gernerate_pdf($html)
+    {
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->set_option("compressed", true);
+        $dompdf->set_option('defaultFont', 'sans-serif');
+        $dompdf->set_option('isHtml5ParserEnabled', true);
+        return $dompdf;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function Logo()
+    {
+        $config = SiteConfig::current_site_config();
+        $image = $config->EstimateInvoiceLogo();
+
+        $this->extend("updateLogo", $image);
+        
+        return $image;
     }
     
     /**
@@ -76,47 +136,103 @@ class DisplayController extends Controller
         );
     }
 
-    public function invoice()
+    public function invoice(HTTPRequest $request)
     {
-        $member = Member::currentUser();
-        $object = Invoice::get()
-            ->byID($this->getrequest()->param("ID"));
+        $config = SiteConfig::current_site_config();
+        
+        $this->customise([
+            "Type" => "Invoice",
+            "HeaderContent" => $config->dbObject("InvoiceHeaderContent"),
+            "FooterContent" => $config->dbObject("InvoiceFooterContent"),
+            "Title" => _t("Orders.InvoiceTitle", "Invoice"),
+            "MetaTitle" => _t("Orders.InvoiceTitle", "Invoice"),
+            "Object" => $this->object
+        ]);
 
-        if ($object && (
-            ($member && $object->canView($member)) ||
-            ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
-        )) {
-            return $this
-                ->customise(array(
-                    "Type" => "Invoice",
-                    "SiteConfig" => SiteConfig::current_site_config(),
-                    "MetaTitle" => _t("Orders.InvoiceTitle", "Invoice"),
-                    "Object" => $object
-                ))->renderWith(["\\Orders\\Control\\DisplayController"]);
-        } else {
-            return $this->httpError(404);
-        }
+        $this->extend("updateInvoice");
+        
+        return $this->renderWith([
+            "\\Orders\\Control\\DisplayController"
+        ]);
+    }
+
+    /**
+     * Generate a PDF based on the invoice html output.
+     * 
+     * @todo At the moment this exits all execution after generating
+     * and streaming PDF. Ideally this should tap into
+     * @link http://api.silverstripe.org/4/SilverStripe/Control/HTTPStreamResponse.html 
+     *
+     * @param HTTPRequest $request
+     * @return void
+     */
+    public function invoicepdf(HTTPRequest $request)
+    {
+        /**
+         * Load custom CSS for PDF explicitly (as pass)
+         */
+        $loader = ModuleResourceLoader::singleton();
+        $style = file_get_contents($loader->resolvePath('silvercommerce/orders-admin: client/dist/css/pdf.css'));
+        Requirements::clear();
+        Requirements::customCSS(<<<CSS
+        $style
+CSS
+);
+        $result = $this->invoice($request);
+        $html = $result->getValue();
+        $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
+
+        $pdf = $this->gernerate_pdf($html);
+
+        $this->extend("updateInvoicePDF", $pdf);
+
+        $pdf->render();
+        $pdf->stream("{$this->object->OrderNumber}.pdf");
+        exit();
     }
     
-    public function estimate()
+    public function estimate(HTTPRequest $request)
     {
-        $member = Member::currentUser();
-        $object = Estimate::get()
-            ->byID($this->request->param("ID"));
+        $config = SiteConfig::current_site_config();
+        $this->customise(array(
+            "Type" => "Estimate",
+            "HeaderContent" => $config->dbObject("EstimateHeaderContent"),
+            "FooterContent" => $config->dbObject("EstimateFooterContent"),
+            "Title" => _t("Orders.EstimateTitle", "Estimate"),
+            "MetaTitle" => _t("Orders.EstimateTitle", "Estimate"),
+            "Object" => $this->object
+        ));
 
-        if ($object && (
-            ($member && $object->canView($member)) ||
-            ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
-        )) {
-            return $this
-                ->customise(array(
-                    "Type" => "Estimate",
-                    "SiteConfig" => SiteConfig::current_site_config(),
-                    "MetaTitle" => _t("Orders.QuoteTitle", "Quote"),
-                    "Object" => $object
-                ))->renderWith(["\\Orders\\Control\\DisplayController"]);
-        } else {
-            return $this->httpError(404);
-        }
+        $this->extend("updateEstimate");
+        
+        return $this->renderWith([
+            "\\Orders\\Control\\DisplayController"
+        ]);
     }
+
+    public function estimatepdf(HTTPRequest $request)
+    {
+        /**
+         * Load custom CSS for PDF explicitly (as pass)
+         */
+        $loader = ModuleResourceLoader::singleton();
+        $style = file_get_contents($loader->resolvePath('silvercommerce/orders-admin: client/dist/css/pdf.css'));
+        Requirements::clear();
+        Requirements::customCSS(<<<CSS
+        $style
+CSS
+);
+        $result = $this->estimate($request);
+        $html = $result->getValue();
+        $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
+
+        $pdf = $this->gernerate_pdf($html);        
+
+        $this->extend("updateEstimatePDF", $pdf);
+
+        $pdf->render();
+        $pdf->stream("{$this->object->OrderNumber}.pdf");
+        exit();
+    }
+    
 }

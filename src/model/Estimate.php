@@ -159,6 +159,21 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Generate a link to view the associated front end
+     * display for this order
+     *
+     * @return string
+     */
+    public function PDFLink()
+    {
+        return Controller::join_links(
+            DisplayController::create()->AbsoluteLink("estimatepdf"),
+            $this->ID,
+            $this->AccessKey
+        );
+    }
+
+    /**
      * Generate a string of the customer's personal details
      *
      * @return string
