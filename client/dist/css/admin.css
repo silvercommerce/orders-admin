@@ -4,7 +4,7 @@
   height: 100%;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
-  padding-right: 225px;
+  padding-right: 275px;
 }
 
 /** Order admin items tab */
@@ -27,14 +27,15 @@
 /** Order Admin items Sidebar */
 @media (min-width: 1025px) {
     .order-admin-sidebar {
-        width: 230px;
+        width: 275px;
         margin: 0 !important;
         border-right: none;
         position: absolute !important;
         /* overrides cms !imporant style */
         right: 0;
         bottom: 0;
-        height: 90%;
+        height: 92%;
+        background-color: rgb(246, 247, 248);        
         -webkit-box-sizing: unset;
                 box-sizing: unset;
     }
@@ -75,20 +76,3 @@
                         flex: 0 0 59%;
             }
 }
-
-#Root .order-admin-customer {
-  width: 100%;
-  padding-right: 590px;
-  position: absolute;
-  height: 100%;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-}
-    .order-admin-customer .field label.left { 
-        width: 135px;
-    }
-    .order-admin-customer .field .middleColumn {
-        margin-left: 145px;
-    }
