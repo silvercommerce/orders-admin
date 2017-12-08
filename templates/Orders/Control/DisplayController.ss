@@ -138,11 +138,13 @@
                                     <th class="text-right"><%t OrdersAdmin.Postage "Postage" %></th>
                                     <td class="text-right">$PostageCost.Nice</td>
                                 </tr>
-        
-                                <tr>
-                                    <th class="text-right"><%t OrdersAdmin.TotalTax "Total Tax" %></th>
-                                    <td class="text-right">$TaxTotal.Nice</td>
-                                </tr>
+                                
+                                <% loop $TaxList %>
+                                    <tr>
+                                        <th class="text-right">{$Rate.Title}</th>
+                                        <td class="text-right">$Total.Nice</td>
+                                    </tr>
+                                <% end_loop %>
         
                                 <tr>
                                     <th class="text-right"><%t OrdersAdmin.GrandTotal "Grand Total" %></th>

@@ -14,6 +14,9 @@ use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DateField;
+use SilverStripe\ORM\FieldType\DBCurrency;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
@@ -380,6 +383,41 @@ class Estimate extends DataObject implements PermissionProvider
         $total = MathsHelper::round_up($total, 2);
 
         return $total;
+    }
+
+    /**
+     * Get a list of all taxes used and and associated value
+     *
+     * @return ArrayList
+     */
+    public function getTaxList()
+    {
+        $taxes = ArrayList::create();
+
+        foreach ($this->Items() as $item) {
+            $existing = null;
+            $rate = $item->Tax();
+
+            if ($rate->exists()) {
+                $existing = $taxes->find("ID", $rate->ID);
+            }
+
+            if (!$existing) {
+                $currency = DBCurrency::create();
+                $currency->setValue($item->getTaxTotal());
+                $taxes->push(ArrayData::create([
+                    "ID" => $rate->ID,
+                    "Rate" => $rate,
+                    "Total" => $currency
+                ]));
+            } elseif($rate && $existing) {
+                $existing->Total->setValue(
+                    $existing->Total->getValue() + $item->getTaxTotal()
+                );
+            }
+        }
+
+        return $taxes;
     }
 
     /**
