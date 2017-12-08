@@ -91,7 +91,8 @@
                                 <th class="description text-left"><%t OrdersAdmin.Item "Item" %></th>
                                 <th class="qty text-center"><%t OrdersAdmin.Qty "Qty" %></th>
                                 <th class="unitprice text-right"><%t OrdersAdmin.UnitPrice "Unit Price" %></th>
-                                <th class="tax text-right"><%t OrdersAdmin.Tax "Tax" %></th>
+                                <th class="unittax text-right"><%t OrdersAdmin.UnitTax "Unit Tax" %></th>
+                                <th class="tax-type text-right"><%t OrdersAdmin.TaxType "Tax Type" %></th>
                             </tr>
                         </thead>
                         <tbody><% loop $Items %>
@@ -103,6 +104,7 @@
                                 <td class="text-center">{$Quantity}</td>
                                 <td class="text-right">{$UnitPrice.Nice}</td>
                                 <td class="text-right">{$UnitTax.Nice}</td>
+                                <td class="text-right">{$Tax.Title}</td>
                             </tr>
                         <% end_loop %></tbody>
                     </table>

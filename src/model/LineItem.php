@@ -127,7 +127,7 @@ class LineItem extends DataObject
         "Title"     => "Title",
         "StockID"   => "Stock ID",
         "Price"     => "Item Price",
-        "TaxRate"   => "Tax Rate (percentage)",
+        "TaxID"    => "Tax",
         "CustomisationAndPriceList" => "Customisations"
     ];
     
