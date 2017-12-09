@@ -2,7 +2,7 @@
 
 namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
-use Colymba\BulkManager\BulkManager;
+use Colymba\BulkManager\BulkAction\Handler as GridFieldBulkActionHandler;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Convert;
@@ -13,10 +13,10 @@ use SilverStripe\Core\Convert;
  * @package orders-admin
  * @subpackage forms
  */
-class BulkActions extends BulkManager
+class BulkActions extends GridFieldBulkActionHandler
 {
 
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'cancelled',
         'refunded',
         'pending',
@@ -25,9 +25,9 @@ class BulkActions extends BulkManager
         'processing',
         'dispatched',
         'collected'
-    );
+    ];
 
-    private static $url_handlers = array(
+    private static $url_handlers = [
         'cancelled' => 'cancelled',
         'refunded'  => 'refunded',
         'pending'   => 'pending',
@@ -36,11 +36,11 @@ class BulkActions extends BulkManager
         'processing'=> 'processing',
         'dispatched'=> 'dispatched',
         'collected' => 'collected'
-    );
+    ];
 
-    public function cancelled(SS_HTTPRequest $request)
+    public function cancelled(HTTPRequest $request)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($this->getRecords() as $record) {
             array_push($ids, $record->ID);
@@ -49,17 +49,17 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
         return $response;
     }
 
-    public function refunded(SS_HTTPRequest $request)
+    public function refunded(HTTPRequest $request)
     {
         $ids = array();
 
@@ -70,10 +70,10 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
@@ -91,10 +91,10 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
@@ -112,10 +112,10 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
@@ -133,10 +133,10 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
@@ -154,17 +154,17 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
         return $response;
     }
 
-    public function dispatched(SS_HTTPRequest $request)
+    public function dispatched(HTTPRequest $request)
     {
         $ids = array();
 
@@ -175,17 +175,17 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
         return $response;
     }
 
-    public function collected(SS_HTTPRequest $request)
+    public function collected(HTTPRequest $request)
     {
         $ids = array();
 
@@ -196,10 +196,10 @@ class BulkActions extends BulkManager
             $record->write();
         }
 
-        $response = new HTTPResponse(Convert::raw2json(array(
+        $response = new HTTPResponse(Convert::raw2json([
             'done' => true,
             'records' => $ids
-        )));
+        ]));
 
         $response->addHeader('Content-Type', 'text/json');
 
