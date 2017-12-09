@@ -42,9 +42,18 @@ class Estimate extends DataObject implements PermissionProvider
 {
     private static $table_name = 'Estimate';
 
+    /**
+     * The amount of days that by default that this estimate
+     * will end (cease to be valid).
+     *
+     * @var integer
+     */
+    private static $default_end = 30;
+
     private static $db = [
         'OrderNumber'       => 'Varchar',
-        'Date'              => 'Date',
+        'StartDate'         => 'Date',
+        'EndDate'           => 'Date',
         
         // Personal Details
         'Company'           => 'Varchar',
@@ -124,7 +133,8 @@ class Estimate extends DataObject implements PermissionProvider
      */
     private static $summary_fields = [
         'OrderNumber'   => '#',
-        'Date'          => 'Date',
+        'StartDate'     => 'Date',
+        'EndDate'       => 'Expires',
         'Company'       => 'Company',
         'FirstName'     => 'First Name',
         'Surname'       => 'Surname',
@@ -441,7 +451,7 @@ class Estimate extends DataObject implements PermissionProvider
      * This method writes and reloads the object so
      * we are now working with the new object type
      *
-     * @return Invoice The currently converted 
+     * @return Invoice The currently converted invoice
      */
     public function convertToInvoice()
     {
@@ -451,6 +461,8 @@ class Estimate extends DataObject implements PermissionProvider
         // Get our new Invoice
         $record = Invoice::get()->byID($this->ID);
         $record->OrderNumber = null;
+        $record->StartDate = null;
+        $record->EndDate = null;
         $record->write();
         
         return $record;
@@ -504,7 +516,8 @@ class Estimate extends DataObject implements PermissionProvider
         $fields = parent::getCMSFields();
         $siteconfig = SiteConfig::current_site_config();
 
-        $fields->removeByName("Date");
+        $fields->removeByName("StartDate");
+        $fields->removeByName("EndDate");
         $fields->removeByName("OrderNumber");
         $fields->removeByName("AccessKey");
         $fields->removeByName("DiscountID");
@@ -557,17 +570,18 @@ class Estimate extends DataObject implements PermissionProvider
                 
                 // Sidebar
                 FieldGroup::create(
-                    DateField::create("Date"),
+                    DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
+                    DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
                     ReadonlyField::create("OrderNumber", "#"),
-                    ReadonlyField::create("SubTotalValue",_t("Orders.SubTotal", "Sub Total"))
+                    ReadonlyField::create("SubTotalValue",_t("OrdersAdmin.SubTotal", "Sub Total"))
                         ->setValue($this->obj("SubTotal")->Nice()),
-                    ReadonlyField::create("DiscountValue",_t("Orders.Discount", "Discount"))
+                    ReadonlyField::create("DiscountValue",_t("OrdersAdmin.Discount", "Discount"))
                         ->setValue($this->dbObject("DiscountAmount")->Nice()),
-                    ReadonlyField::create("PostageValue",_t("Orders.Postage", "Postage"))
+                    ReadonlyField::create("PostageValue",_t("OrdersAdmin.Postage", "Postage"))
                         ->setValue($this->dbObject("PostageCost")->Nice()),
-                    ReadonlyField::create("TaxValue",_t("Orders.Tax", "Tax"))
+                    ReadonlyField::create("TaxValue",_t("OrdersAdmin.Tax", "Tax"))
                         ->setValue($this->obj("TaxTotal")->Nice()),
-                    ReadonlyField::create("TotalValue",_t("Orders.Total", "Total"))
+                    ReadonlyField::create("TotalValue",_t("OrdersAdmin.Total", "Total"))
                         ->setValue($this->obj("Total")->Nice())
                 )->setName("OrdersSidebar")
                 ->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
@@ -871,8 +885,14 @@ class Estimate extends DataObject implements PermissionProvider
         }
 
         // If date not set, make thie equal the created date
-        if (!$this->Date) {
-            $this->Date = $this->Created;
+        if (!$this->StartDate) {
+            $this->StartDate = $this->Created;
+        }
+
+        if (!$this->EndDate && $this->StartDate) {
+            $start = new DateTime($this->StartDate);
+            $start->modify("+ {$this->config()->default_end} days");
+            $this->EndDate = $start->format("Y-m-d");
         }
     }
 

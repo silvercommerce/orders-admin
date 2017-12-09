@@ -62,7 +62,15 @@
                                     </tr>
                                     <tr>
                                         <th><%t OrdersAdmin.IssueDate "Issue Date" %></th>
-                                        <td>$Date.Format('d/M/Y')</td>
+                                        <td>$StartDate.Format('d/M/Y')</td>
+                                    </tr>
+                                    <tr>
+                                        <th><% if $Top.Type == "Estimate" %>
+                                            <%t OrdersAdmin.ValidUntil "Valid Until" %>
+                                        <% else %>
+                                            <%t OrdersAdmin.DueOn "Due On" %>
+                                        <% end_if %></th>
+                                        <td>$EndDate.Format('d/M/Y')</td>
                                     </tr>
                                     <% if $Top.Type == "Invoice" %>
                                         <tr>

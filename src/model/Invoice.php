@@ -52,6 +52,14 @@ class Invoice extends Estimate implements PermissionProvider
     private static $table_name = 'Invoice';
 
     /**
+     * The amount of days that by default that this estimate
+     * will end (cease to be valid).
+     *
+     * @var integer
+     */
+    private static $default_end = 0;
+
+    /**
      * List of possible statuses this order can have. Rather than using
      * an enum, we load this as a config variable that can be changed
      * more freely.
@@ -304,6 +312,9 @@ class Invoice extends Estimate implements PermissionProvider
         // as the default fieldlist doesn't seem to register it!
         $main = $fields->findOrMakeTab("Root.Main");
         $sidebar = null;
+
+        $enddate_field = $fields->dataFieldByName("EndDate");
+        $enddate_field->setTitle(_t("OrdersAdmin.Due", "Due"));
 
         foreach ($main->getChildren() as $field) {
             if ($field->getName() == "OrdersSidebar") {
