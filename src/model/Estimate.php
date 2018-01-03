@@ -153,7 +153,7 @@ class Estimate extends DataObject implements PermissionProvider
     ];
 
     private static $default_sort = [
-        "Date" => "DESC"
+        "StartDate" => "DESC"
     ];
 
     /**
