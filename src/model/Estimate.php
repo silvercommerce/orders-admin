@@ -36,6 +36,7 @@ use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
 use DateTime;
 
 class Estimate extends DataObject implements PermissionProvider
@@ -617,6 +618,20 @@ class Estimate extends DataObject implements PermissionProvider
             ]
         );
 
+        // Try and calculate valid postage areas
+        $calc = new ShippingCalculator($this->DeliveryPostCode,$this->DeliveryCountry);
+        $calc
+            ->setCost($this->SubTotal)
+            ->setWeight($this->TotalWeight)
+            ->setItems($this->TotalItems)
+            ->setDiscount($this->Discount());
+        
+        $postage_areas = $calc->getPostageAreas();
+
+        if ($postage_areas->exists()) {
+            $postage_areas = $siteconfig->PostageAreas();
+        }
+
         $fields->addFieldsToTab(
             "Root.Delivery",
             [
@@ -645,7 +660,7 @@ class Estimate extends DataObject implements PermissionProvider
                 DropdownField::create(
                     "PostageID",
                     $this->fieldLabel("PostageID"),
-                    $siteconfig->PostageAreas()->map()
+                    $postage_areas->map()
                 )->setEmptyString(_t(
                     "OrdersAdmin.SelectPostage",
                     "Select Postage"
