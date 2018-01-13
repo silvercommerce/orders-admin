@@ -6,6 +6,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Control\ShoppingCart;
+use SilverCommerce\OrdersAdmin\Model\Discount;
 use SilverCommerce\OrdersAdmin\Model\PostageArea;
 
 /**
@@ -111,6 +112,24 @@ class ShippingCalculator
     {
         return $this->items;
     }
+
+    /**
+     * An {@link Discount} object
+     * 
+     * @var Discount
+     */
+    private $discount;
+    
+    public function setDiscount(Discount $value)
+    {
+        $this->discount = $value;
+        return $this;
+    }
+
+    public function getDiscount()
+    {
+        return $this->discount;
+    }
     
     /**
      * Should we also check for wildcards when doing location/
@@ -136,8 +155,8 @@ class ShippingCalculator
      * Simple constructor that sets the country code and zip. If no
      * country is set, this class attempts to autodetect.
      * 
-     * @param country_code 2 character country code
      * @param zipcode string of the zipo/postal code
+     * @param country_code 2 character country code
      */
     public function __construct($zipcode, $country_code = null)
     {
@@ -202,10 +221,9 @@ class ShippingCalculator
     {
         $return = ArrayList::create();
         $config = SiteConfig::current_site_config();
-        $cart = ShoppingCart::get();
-        $discount = $cart->getDiscount();
+        $discount = $this->getDiscount();
         $pc_match = "";
-        
+
         if ($this->include_wildcards) {
             $filter = array(
                 "Country:PartialMatch" => array($this->country_code, "*"),
@@ -215,7 +233,7 @@ class ShippingCalculator
                 "Country:PartialMatch" => $this->country_code
             );
         }
-        
+
         // Find any postage areas that match our filter
         $postage_areas = $config
             ->PostageAreas()
@@ -251,7 +269,7 @@ class ShippingCalculator
                 }
             }
         }
-            
+
         // Check if any discounts are set with free postage
         // This is a little hacky at the moment, need to find a nicer
         // way to add free shipping.
@@ -259,17 +277,17 @@ class ShippingCalculator
             $postage = $this->CreateFreePostageObject();
             $return->add($postage);
         }
-        
+
         // Before doing anything else, remove any wildcards (if needed)
         $exact_country = false;
-        
+
         // Find any countries that are exactly matched 
         foreach ($return as $location) {
             if ($location->Country != "*") {
                 $exact_country = true;
             }
         }
-        
+
         // If exactly matched, remove any wildcards
         foreach ($return as $location) {
             if ($exact_country && $location->Country == "*" && $location->ID != -1) {
