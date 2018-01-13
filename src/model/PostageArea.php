@@ -4,6 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverCommerce\TaxAdmin\Model\TaxCategory;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 
 /**
@@ -21,12 +22,12 @@ class PostageArea extends DataObject
         "ZipCode"       => "Text",
         "Calculation"   => "Enum('Price,Weight,Items','Weight')",
         "Unit"          => "Decimal",
-        "Cost"          => "Currency",
-        "Tax"           => "Decimal"
+        "Cost"          => "Currency"
     ];
 
     private static $has_one = [
-        "Site"          => SiteConfig::class
+        "Site"          => SiteConfig::class,
+        "TaxCategory"   => TaxCategory::class
     ];
 
     private static $summary_fields = [
@@ -36,13 +37,55 @@ class PostageArea extends DataObject
         "Calculation",
         "Unit",
         "Cost",
-        "Tax"
+        "TaxRate"
     ];
     
     private static $casting = [
+        "TaxRate"       => "Decimal",
         "TaxAmount"     => "Currency",
         "Total"         => "Currency"
     ];
+
+    /**
+     * Get the tax rate from the current category (or default) 
+     *
+     * @return TaxRate | null
+     */
+    public function getTaxFromCategory()
+    {
+        $cat = $this->TaxCategory();
+
+        if (!$cat->exists() || !$cat->Rates()->exists()) {
+            $config = SiteConfig::current_site_config();
+            $cat = $config
+                ->TaxCategories()
+                ->sort("Default", "DESC")
+                ->first();
+        }
+
+        if ($cat->exists() && $cat->Rates()->exists()) {
+            return $cat->Rates()->first();
+        }
+    }
+
+    /**
+     * Get tax rate for this postage object
+     *
+     * @return Float
+     */
+    public function getTaxRate()
+    {   
+        $tax = $this->getTaxFromCategory();
+        $rate = 0;
+        
+        if ($tax) {
+            $rate = $tax->Rate;
+        }
+        
+        $this->extend("updateTaxRate", $rate);
+
+        return $rate;
+    }
 
     /**
      * Get the amount of tax for this postage object.
@@ -51,11 +94,14 @@ class PostageArea extends DataObject
      */
     public function getTaxAmount()
     {   
-        if ($this->Cost && $this->Tax) {
-            return MathsHelper::round_up((($this->Cost / 100) * $this->Tax), 2);
-        } else {
-            return 0;
+        $tax = $this->TaxCategory();
+        $rate = 0;
+        
+        if ($tax) {
+            $rate = $tax->Rate;
         }
+        
+        return MathsHelper::round_up((($this->Cost / 100) * $rate), 2);
     }
 
 
@@ -66,19 +112,13 @@ class PostageArea extends DataObject
      *             specific size? If set will round the output. 
      * @return Float
      */
-    public function Total($decimal_size = null)
+    public function getTotal()
     {
-        if ($this->Cost && $this->Tax) {
-            $cost = $this->Cost + $this->getTaxAmount();
-        } else {
-            $cost = $this->Cost;
-        }
-        
-        if($decimal_size) {
-            $cost = number_format($cost, $decimal_size);
-        }
-        
-        return $cost;
+        $total = $this->Cost + $this->getTaxAmount();
+
+        $this->extend("updateTotal", $total);
+
+        return $total; 
     }
 
     public function canView($member = null, $context = [])
