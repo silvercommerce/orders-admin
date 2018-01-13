@@ -168,7 +168,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     protected $source_fields = [
         "Title" => "Title",
         "StockID" => "StockID",
-        "Price" => "Price"
+        "Price" => "BasePrice"
     ];
 
     /**
