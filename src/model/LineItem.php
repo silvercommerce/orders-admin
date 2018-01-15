@@ -532,6 +532,19 @@ class LineItem extends DataObject
     }
 
     /**
+     * Pre-write tasks
+     *
+     * @return void
+     */
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        // Generate a unique item key based on 
+        $this->Key = $this->StockID . ':' . base64_encode(json_encode($this->Customisations()->toArray()));
+    }
+
+    /**
      * Perform post-DB write functions
      *
      * @return void
