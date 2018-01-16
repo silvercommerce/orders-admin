@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<% require css('silverstripe/admin: client/dist/styles/bundle.css') %>
+<% require css('silvercommerce/orders-admin: client/dist/css/display.css') %>
+
 <html>
     <head>
         <meta charset="UTF-8">

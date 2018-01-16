@@ -51,9 +51,6 @@ class DisplayController extends Controller
     {
         parent::init();
 
-        Requirements::css('silverstripe/admin: client/dist/styles/bundle.css');
-        Requirements::css('silvercommerce/orders-admin: client/dist/css/display.css');
-
         $member = Member::currentUser();
         $object = Estimate::get()
             ->byID($this->getrequest()->param("ID"));
