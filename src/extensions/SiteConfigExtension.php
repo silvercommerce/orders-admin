@@ -37,9 +37,7 @@ class SiteConfigExtension extends DataExtension
         "InvoiceHeaderContent" => "HTMLText",
         "InvoiceFooterContent" => "HTMLText",
         "EstimateHeaderContent" => "HTMLText",
-        "EstimateFooterContent" => "HTMLText",
-        'PaymentSuccessContent' => 'HTMLText',
-        'PaymentFailerContent'  => 'HTMLText'
+        "EstimateFooterContent" => "HTMLText"
     ];
     
     private static $has_one = [
@@ -54,23 +52,6 @@ class SiteConfigExtension extends DataExtension
     
     public function updateCMSFields(FieldList $fields)
     {
-        // Payment options
-        $payment_fields = ToggleCompositeField::create(
-            'PaymentSettings',
-            _t("Orders.PaymentSettings", "Payment Settings"),
-            [
-                HTMLEditorField::create(
-                    'PaymentSuccessContent',
-                    _t("Orders.PaymentSuccessContent", "Payment success content")
-                )->addExtraClass('stacked'),
-                
-                HTMLEditorField::create(
-                    'PaymentFailerContent',
-                    _t("Orders.PaymentFailerContent", "Payment failer content")
-                )->addExtraClass('stacked')
-            ]
-        );
-
         // Postage Options
         $country_html = "<div class=\"field\">";
         $country_html .= "<p>First select valid countries using the 2 character ";
@@ -161,7 +142,6 @@ class SiteConfigExtension extends DataExtension
         $fields->addFieldsToTab(
             'Root.Orders',
             [
-                $payment_fields,
                 $postage_fields,
                 $discount_fields,
                 $notification_fields,
