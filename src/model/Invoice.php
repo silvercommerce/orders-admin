@@ -226,31 +226,8 @@ class Invoice extends Estimate implements PermissionProvider
      */
     private static $collected_status = "collected";
 
-    /**
-     * Actions on an order are to determine what will happen on
-     * completion (the defaults are post or collect).
-     * 
-     * @var array
-     * @config
-     */
-    private static $actions = [
-        "post" => "Post",
-        "collect" => "Collect"
-    ];
-
-    /**
-     * Set the default action on our order. If we were using this module
-     * for a more POS type solution, we would probably change this to
-     * collect.
-     * 
-     * @var string
-     * @config
-     */
-    private static $default_action = "post";
-
     private static $db = [
-        'Status'            => "Varchar",
-        "Action"            => "Varchar"
+        'Status'            => "Varchar"
     ];
 
     private static $casting = [
@@ -258,15 +235,13 @@ class Invoice extends Estimate implements PermissionProvider
     ];
 
     private static $summary_fields = [
-        "Status"        => "Status",
-        "Action"        => "Action",
+        "Status"        => "Status"
     ];
 
     public function populateDefaults()
     {
         parent::populateDefaults();
         $this->Status = $this->config()->get("default_status");
-        $this->Action = $this->config()->get("default_action");
     }
 
     /**
@@ -328,20 +303,11 @@ class Invoice extends Estimate implements PermissionProvider
                 "Invoice Details"
             ));
             $sidebar->insertBefore(
-                "OrderNumber",
+                "Action",
                 DropdownField::create(
                     'Status',
                     null,
                     $this->config()->get("statuses")
-                )
-            );
-
-            $sidebar->insertBefore(
-                "OrderNumber",
-                DropdownField::create(
-                    'Action',
-                    null,
-                    $this->config()->get("actions")
                 )
             );
         }
