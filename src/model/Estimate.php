@@ -503,6 +503,23 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Determine if the current estimate contains delivereable
+     * items.
+     *
+     * @return boolean
+     */
+    public function isDeliverable()
+    {
+        foreach ($this->Items() as $item) {
+            if ($item->Deliverable) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
      * Has this order got a discount applied?
      *
      * @return boolean
@@ -683,7 +700,7 @@ class Estimate extends DataObject implements PermissionProvider
         /**
      * Find the total discount based on discount items added.
      *
-     * @return Float
+     * @return float
      */
     protected function get_discount_amount()
     {
@@ -977,7 +994,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Only order creators or users with VIEW admin rights can view
      *
-     * @return Boolean
+     * @return boolean
      */
     public function canView($member = null)
     {
@@ -1001,7 +1018,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Anyone can create orders, even guest users
      *
-     * @return Boolean
+     * @return boolean
      */
     public function canCreate($member = null, $context = [])
     {
@@ -1025,7 +1042,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Only users with EDIT admin rights can view an order
      *
-     * @return Boolean
+     * @return boolean
      */
     public function canEdit($member = null)
     {
@@ -1049,7 +1066,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * No one should be able to delete an order once it has been created
      *
-     * @return Boolean
+     * @return boolean
      */
     public function canDelete($member = null)
     {
