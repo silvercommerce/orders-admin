@@ -16,7 +16,7 @@ use SilverStripe\Dev\Debug;
   *
   * @package Commerce
   */
-class OrdersAdmin extends ModelAdmin
+class OrderAdmin extends ModelAdmin
 {
 
     private static $url_segment = 'sales';
