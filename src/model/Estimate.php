@@ -625,6 +625,7 @@ class Estimate extends DataObject implements PermissionProvider
         $fields->removeByName("EndDate");
         $fields->removeByName("OrderNumber");
         $fields->removeByName("AccessKey");
+        $fields->removeByName("Action");
         $fields->removeByName("DiscountID");
         $fields->removeByName("DiscountType");
         $fields->removeByName("DiscountAmount");
