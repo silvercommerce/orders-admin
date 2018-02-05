@@ -854,6 +854,8 @@ class Estimate extends DataObject implements PermissionProvider
      */
     protected function generate_order_number()
     {
+        $config = SiteConfig::current_site_config();
+        $default_length = $config->OrderNumberLength;
         $length = strlen($this->ID);
         $i = $length;
         $prefix = $this->get_prefix();
@@ -863,7 +865,7 @@ class Estimate extends DataObject implements PermissionProvider
             $i++;
         }
 
-        $pad_amount = ($i >= 8) ? $i : 8;
+        $pad_amount = ($i >= $default_length) ? $i : $default_length;
         $id_base = str_pad($this->ID, $pad_amount, "0", STR_PAD_LEFT);
         $id_base = wordwrap($id_base, 4, "-", true);
 

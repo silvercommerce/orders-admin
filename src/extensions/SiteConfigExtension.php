@@ -10,6 +10,7 @@ use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\NumericField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
@@ -34,6 +35,7 @@ class SiteConfigExtension extends DataExtension
     private static $db = [
         "EstimateNumberPrefix" => "Varchar(10)",
         "InvoiceNumberPrefix" => "Varchar(10)",
+        "OrderNumberLength" => "Int",
         "InvoiceHeaderContent" => "HTMLText",
         "InvoiceFooterContent" => "HTMLText",
         "EstimateHeaderContent" => "HTMLText",
@@ -48,6 +50,10 @@ class SiteConfigExtension extends DataExtension
         "OrderNotifications"=> OrderNotification::class,
         'PostageAreas'      => PostageArea::class,
         'Discounts'         => Discount::class
+    ];
+
+    private static $defaults = [
+        "OrderNumberLength" => 4
     ];
     
     public function updateCMSFields(FieldList $fields)
@@ -127,6 +133,13 @@ class SiteConfigExtension extends DataExtension
                     "placeholder",
                     _t("Orders.OrderPrefixPlaceholder", "EG 'es-123'")
                 ),
+                NumericField::create(
+                    "OrderNumberLength",
+                    $this->owner->fieldLabel("OrderNumberLength")
+                )->setDescription(_t(
+                    "Orders.OrderNumberLengthDescription",
+                    "The default length invoice/estimate numbers are padded to"
+                )),
                 HTMLEditorField::create("InvoiceHeaderContent")
                     ->addExtraClass("stacked"),
                     HTMLEditorField::create("InvoiceFooterContent")
@@ -148,5 +161,12 @@ class SiteConfigExtension extends DataExtension
                 $invoice_customisation_fields
             ]
         );
+    }
+
+    public function onBeforeWrite()
+    {
+        if (!$this->owner->OrderNumberLength) {
+            $this->owner->OrderNumberLength = 4;
+        }
     }
 }
