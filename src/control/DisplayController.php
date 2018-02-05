@@ -148,9 +148,7 @@ class DisplayController extends Controller
 
         $this->extend("updateInvoice");
         
-        return $this->renderWith([
-            "\\Orders\\Control\\DisplayController"
-        ]);
+        return $this->render();
     }
 
     /**
@@ -202,9 +200,7 @@ CSS
 
         $this->extend("updateEstimate");
         
-        return $this->renderWith([
-            "\\Orders\\Control\\DisplayController"
-        ]);
+        return $this->render();
     }
 
     public function estimatepdf(HTTPRequest $request)

@@ -452,7 +452,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         $forTemplate->Fields = $fields;
 
         return [
-            $this->targetFragment => $forTemplate->renderWith("\\Orders\\Forms\\GridField\\AddLineItem")
+            $this->targetFragment => $forTemplate->renderWith(AddLineItem::class)
         ];
     }
     

@@ -1,4 +1,4 @@
-<% include \\Orders\\Email\\Includes\\EmailHead %>
+<% include \\SilverCommerce\\OrdersAdmin\\Email\\Includes\\EmailHead %>
 
 <% with $Order %>
     <% if $Status == 'failed' %>
@@ -106,4 +106,4 @@
     <% end_if %>
 <% end_with %>
 
-<% include \\Orders\\Email\\Includes\\EmailFooter %>
+<% include \\SilverCommerce\\OrdersAdmin\\Email\\Includes\\EmailFooter %>

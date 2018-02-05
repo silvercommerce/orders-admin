@@ -92,7 +92,7 @@ class Notification extends DataObject
             $email = Email::create()
                 ->setSubject($subject)
                 ->setTo($order->Email)
-                ->setHTMLTemplate("\\Orders\\Email\\OrderNotificationEmail_Customer")
+                ->setHTMLTemplate("\\SilverCommerce\\OrdersAdmin\\Email\\OrderNotificationEmail_Customer")
                 ->setData([
                     "Order" => $order,
                     "SiteConfig" => $this->Parent(),
@@ -119,7 +119,7 @@ class Notification extends DataObject
             $email = Email::create()
                 ->setSubject($subject)
                 ->setTo($this->VendorEmail)
-                ->setHTMLTemplate("\\Orders\\Email\\OrderNotificationEmail_Vendor")
+                ->setHTMLTemplate("\\SilverCommerce\\OrdersAdmin\\Email\\OrderNotificationEmail_Vendor")
                 ->setData([
                     "Order" => $order,
                     "Notification" => $this
