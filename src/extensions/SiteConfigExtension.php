@@ -140,7 +140,7 @@ class SiteConfigExtension extends DataExtension
 
         // Add config sets
         $fields->addFieldsToTab(
-            'Root.Orders',
+            'Root.Shop',
             [
                 $postage_fields,
                 $discount_fields,
