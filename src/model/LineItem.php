@@ -153,59 +153,59 @@ class LineItem extends DataObject
      */
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
-        $config = SiteConfig::current_site_config();
+        
+        $this->beforeUpdateCMSFields(function ($fields) {
+            $config = SiteConfig::current_site_config();
 
-        $fields->removeByName("Customisation");
+            $fields->removeByName("Customisation");
 
-        $fields->addFieldToTab(
-            "Root.Main",
-            ReadonlyField::create("Key"),
-            "Title"
-        );
+            $fields->addFieldToTab(
+                "Root.Main",
+                ReadonlyField::create("Key"),
+                "Title"
+            );
 
-        $fields->addFieldToTab(
-            "Root.Main",
-            DropdownField::create(
-                "TaxID",
-                $this->fieldLabel("TaxID"),
-                $config->TaxRates()->map()
-            ),
-            "Weight"
-        );
+            $fields->addFieldToTab(
+                "Root.Main",
+                DropdownField::create(
+                    "TaxID",
+                    $this->fieldLabel("TaxID"),
+                    $config->TaxRates()->map()
+                ),
+                "Weight"
+            );
 
-        $fields->addFieldsToTab(
-            "Root.Description",
-            array(
-                HTMLEditorField::create("Content")
-                    ->addExtraClass("stacked")
-            )
-        );
+            $fields->addFieldsToTab(
+                "Root.Description",
+                array(
+                    HTMLEditorField::create("Content")
+                        ->addExtraClass("stacked")
+                )
+            );
 
-        // Change unlink button to remove on customisation
-        $custom_field = $fields->dataFieldByName("Customisations");
+            // Change unlink button to remove on customisation
+            $custom_field = $fields->dataFieldByName("Customisations");
 
-        if ($custom_field) {
-            $config = $custom_field->getConfig();
-            $config
-                ->removeComponentsByType(GridFieldDeleteAction::class)
-                ->removeComponentsByType(GridFieldDataColumns::class)
-                ->removeComponentsByType(GridFieldEditButton::class)
-                ->removeComponentsByType(GridFieldAddNewButton::class)
-                ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
-                ->addComponents(
-                    new GridFieldEditableColumns(),
-                    new GridFieldAddNewInlineButton(),
-                    new GridFieldEditButton(),
-                    new GridFieldDeleteAction()
-                );
-            
-                $custom_field->setConfig($config);
-        }
+            if ($custom_field) {
+                $config = $custom_field->getConfig();
+                $config
+                    ->removeComponentsByType(GridFieldDeleteAction::class)
+                    ->removeComponentsByType(GridFieldDataColumns::class)
+                    ->removeComponentsByType(GridFieldEditButton::class)
+                    ->removeComponentsByType(GridFieldAddNewButton::class)
+                    ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
+                    ->addComponents(
+                        new GridFieldEditableColumns(),
+                        new GridFieldAddNewInlineButton(),
+                        new GridFieldEditButton(),
+                        new GridFieldDeleteAction()
+                    );
+                
+                    $custom_field->setConfig($config);
+            }
+        });
 
-        $this->extend("updateCMSFields", $fields);
-
-        return $fields;
+        return parent::getCMSFields();
     }
 
     /**
@@ -290,7 +290,7 @@ class LineItem extends DataObject
      */
     public function getTotal()
     {
-        $total = $this->SubTotal + $this->Tax;
+        $total = $this->SubTotal + $this->TaxTotal;
 
         $this->extend("updateTotal", $total);
 

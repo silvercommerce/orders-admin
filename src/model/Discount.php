@@ -80,21 +80,22 @@ class Discount extends DataObject
 
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
+        
+        $this->beforeUpdateCMSFields(function ($fields) {
+            if ($this->Code) {
+                $fields->addFieldToTab(
+                    "Root.Main",
+                    ReadonlyField::create(
+                        "DiscountURL",
+                        _t("OrdersAdmin.AddDiscountURL", "Add discount URL"),
+                        $this->AddLink()
+                    ),
+                    "Code"
+                );
+            }
+        });
 
-        if ($this->Code) {
-            $fields->addFieldToTab(
-                "Root.Main",
-                ReadonlyField::create(
-                    "DiscountURL",
-                    _t("OrdersAdmin.AddDiscountURL", "Add discount URL"),
-                    $this->AddLink()
-                ),
-                "Code"
-            );
-        }
-
-        return $fields;
+        return parent::getCMSFields();
     }
 
     public function onBeforeWrite()

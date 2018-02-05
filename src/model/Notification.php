@@ -42,35 +42,35 @@ class Notification extends DataObject
     
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
-        
-        $status_field = DropdownField::create(
-            "Status",
-            $this->fieldLabel("Status"),
-            Invoice::config()->get("statuses")
-        );
-        
-        $fields->replaceField("Status", $status_field);
-        
-        $vendor = $fields->dataFieldByName("VendorEmail");
-        
-        if ($vendor) {
-            $vendor->setDescription(_t(
-                "Orders.VendorEmailDescription",
-                "Only needed when notification sent to vendor (or both)"
-            ));
-        }
-        
-        $subject = $fields->dataFieldByName("CustomSubject");
-        
-        if ($subject) {
-            $subject->setDescription(_t(
-                "Orders.CustomSubjectDescription",
-                "Overwrite the default subject created in the notification email"
-            ));
-        }
-        
-        return $fields;
+        $this->beforeUpdateCMSFields(function ($fields) {
+            $status_field = DropdownField::create(
+                "Status",
+                $this->fieldLabel("Status"),
+                Invoice::config()->get("statuses")
+            );
+            
+            $fields->replaceField("Status", $status_field);
+            
+            $vendor = $fields->dataFieldByName("VendorEmail");
+            
+            if ($vendor) {
+                $vendor->setDescription(_t(
+                    "Orders.VendorEmailDescription",
+                    "Only needed when notification sent to vendor (or both)"
+                ));
+            }
+            
+            $subject = $fields->dataFieldByName("CustomSubject");
+            
+            if ($subject) {
+                $subject->setDescription(_t(
+                    "Orders.CustomSubjectDescription",
+                    "Overwrite the default subject created in the notification email"
+                ));
+            }
+        });
+
+        return parent::getCMSFields();
     }
     
     /**

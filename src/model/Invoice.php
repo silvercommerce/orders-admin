@@ -281,41 +281,38 @@ class Invoice extends Estimate implements PermissionProvider
      */
     public function getCMSFields()
     {
-        $fields = parent::getCMSFields();
+        $this->beforeUpdateCMSFields(function ($fields) {
+            // Go through a convoluted process to find out field group
+            // as the default fieldlist doesn't seem to register it!
+            $main = $fields->findOrMakeTab("Root.Main");
+            $sidebar = null;
 
-        // Go through a convoluted process to find out field group
-        // as the default fieldlist doesn't seem to register it!
-        $main = $fields->findOrMakeTab("Root.Main");
-        $sidebar = null;
+            $enddate_field = $fields->dataFieldByName("EndDate");
+            $enddate_field->setTitle(_t("OrdersAdmin.Due", "Due"));
 
-        $enddate_field = $fields->dataFieldByName("EndDate");
-        $enddate_field->setTitle(_t("OrdersAdmin.Due", "Due"));
-
-        foreach ($main->getChildren() as $field) {
-            if ($field->getName() == "OrdersSidebar") {
-                $sidebar = $field;
+            foreach ($main->getChildren() as $field) {
+                if ($field->getName() == "OrdersSidebar") {
+                    $sidebar = $field;
+                }
             }
-        }
 
-        if ($sidebar) {
-            $sidebar->setTitle(_t(
-                "OrdersAdmin.InvoiceDetails",
-                "Invoice Details"
-            ));
-            $sidebar->insertBefore(
-                "Action",
-                DropdownField::create(
-                    'Status',
-                    null,
-                    $this->config()->get("statuses")
-                )
-            );
-        }
+            if ($sidebar) {
+                $sidebar->setTitle(_t(
+                    "OrdersAdmin.InvoiceDetails",
+                    "Invoice Details"
+                ));
+                $sidebar->insertBefore(
+                    "Action",
+                    DropdownField::create(
+                        'Status',
+                        null,
+                        $this->config()->get("statuses")
+                    )
+                );
+            }
+        });
 
-        
-        $this->extend("updateCMSFields", $fields);
-
-        return $fields;
+        return parent::getCMSFields();
     }
 
     /**
