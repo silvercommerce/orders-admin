@@ -16,12 +16,12 @@ use SilverStripe\Dev\Debug;
   *
   * @package Commerce
   */
-class OrderAdmin extends ModelAdmin
+class OrdersAdmin extends ModelAdmin
 {
 
-    private static $url_segment = 'orders';
+    private static $url_segment = 'sales';
 
-    private static $menu_title = 'Orders';
+    private static $menu_title = 'Sales';
 
     private static $menu_priority = 4;
 
