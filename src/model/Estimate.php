@@ -739,7 +739,7 @@ class Estimate extends DataObject implements PermissionProvider
             
             $postage_areas = $calc->getPostageAreas();
 
-            if ($postage_areas->exists()) {
+            if (!$postage_areas->exists()) {
                 $postage_areas = $siteconfig->PostageAreas();
             }
 
