@@ -5,6 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Tools;
 use SilverStripe\Security\Member;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\i18n\i18n;
 use SilverCommerce\OrdersAdmin\Control\ShoppingCart;
 use SilverCommerce\OrdersAdmin\Model\Discount;
 use SilverCommerce\OrdersAdmin\Model\PostageArea;
