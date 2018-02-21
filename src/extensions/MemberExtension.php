@@ -39,12 +39,19 @@ class MemberExtension extends DataExtension
     /**
      * Find a contact associated with this account
      *
-     * @return Contact | null
+     * @return Contact
      */
     public function Contact()
     {
-        return Contact::get()
+        $contact = Contact::get()
             ->find("MemberID", $this->owner->ID);
+        
+        if (!$contact) {
+            $contact = Contact::create();
+            $contact->ID = -1;
+        }
+
+        return $contact;
     }
 
     /**
@@ -56,11 +63,7 @@ class MemberExtension extends DataExtension
     {
         $contact = $this->owner->Contact();
 
-        if ($contact) {
-            return $contact->Title;
-        } else {
-            return "";
-        }
+        return $contact->Title;
     }
 
     /**
@@ -92,7 +95,7 @@ class MemberExtension extends DataExtension
     {
         parent::onAfterWrite();
 
-        if (!$this->Contact()) {
+        if (!$this->Contact()->exists()) {
             $contact = Contact::create([
                 "FirstName" => $this->owner->FirstName,
                 "Surname" => $this->owner->Surname,
