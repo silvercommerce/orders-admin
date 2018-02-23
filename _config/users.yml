@@ -1,0 +1,10 @@
+---
+Name: ordersusers
+Only:
+  moduleexists: 'i-lateral/silverstripe-users'
+After: '#usersconfig'
+---
+# Setup default registration config for users module
+ilateral\SilverStripe\Users\Control\AccountController:
+  extensions:
+    - SilverCommerce\OrdersAdmin\Extensions\AccountControllerExtension

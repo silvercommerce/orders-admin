@@ -17,4 +17,3 @@ SilverStripe\Security\Group:
 SilverCommerce\ContactAdmin\Model\Contact:
   extensions:
     - SilverCommerce\OrdersAdmin\Extensions\ContactExtension
-  

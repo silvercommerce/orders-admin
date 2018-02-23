@@ -87,6 +87,34 @@ class MemberExtension extends DataExtension
     }
 
     /**
+     * Get all invoices from a contact that are designated
+     * "outstanding" 
+     *
+     * @return DataList
+     */
+    public function OutstandingInvoices()
+    {
+        return $this
+            ->owner
+            ->Contact()
+            ->OutstandingInvoices();
+    }
+
+    /**
+     * Get all invoices from a contact that are designated
+     * "historic"
+     *
+     * @return DataList
+     */
+    public function HistoricInvoices()
+    {
+        return $this
+            ->owner
+            ->Contact()
+            ->HistoricInvoices();
+    }
+
+    /**
      * If no contact exists for this account, then create one
      *
      * @return void

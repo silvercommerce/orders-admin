@@ -36,7 +36,7 @@ class ContactExtension extends DataExtension
             $invoices_field
                 ->getConfig()
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent(new OrdersDetailForm());
+                ->addComponent(OrdersDetailForm::create());
         }
 
         if ($estimate_field) {
@@ -46,7 +46,7 @@ class ContactExtension extends DataExtension
             $estimate_field
                 ->getConfig()
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent(new OrdersDetailForm());
+                ->addComponent(OrdersDetailForm::create());
         }
 
         // Add a dropdown to select user account
@@ -64,34 +64,30 @@ class ContactExtension extends DataExtension
     }
 
     /**
-     * Get all orders that have been generated and are marked as paid or
-     * processing
+     * Get all orders that have been generated and are marked
+     * as paid or processing
      *
      * @return DataList
      */
-    public function OutstandingOrders()
+    public function OutstandingInvoices()
     {
         return $this
             ->owner
             ->Invoices()
-            ->filter(array(
-                "Status" => Config::inst()->get(Invoice::class, "outstanding_statuses")
-            ));
+            ->filter("Status", Config::inst()->get(Invoice::class, "outstanding_statuses"));
     }
 
     /**
-     * Get all orders that have been generated and are marked as dispatched or
-     * canceled
+     * Get all orders that have been generated and are marked
+     * as dispatched or canceled
      *
      * @return DataList
      */
-    public function HistoricOrders()
+    public function HistoricInvoices()
     {
         return $this
             ->owner
             ->Invoices()
-            ->filter(array(
-                "Status" => Config::inst()->get(Invoice::class, "historic_statuses")
-            ));
+            ->filter("Status", Config::inst()->get(Invoice::class, "historic_statuses"));
     }
 }
