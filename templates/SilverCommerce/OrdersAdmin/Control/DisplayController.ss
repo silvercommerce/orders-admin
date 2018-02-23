@@ -79,7 +79,7 @@
                                     <% if $Top.Type == "Invoice" %>
                                         <tr>
                                             <th><%t OrdersAdmin.Status "Status" %></th>
-                                            <td>$Status</td>
+                                            <td>$TranslatedStatus</td>
                                         </tr>
                                         <tr>
                                             <th><%t OrdersAdmin.Action "Action" %></th>
