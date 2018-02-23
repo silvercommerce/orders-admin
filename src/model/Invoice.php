@@ -82,8 +82,8 @@ class Invoice extends Estimate implements PermissionProvider
     ];
 
     /**
-     * What statuses does an order need to be marked as "outstanding".
-     * At the moment this is only used against an @Member.
+     * What statuses does an invoice need to be considered
+     * "outstanding" (meaning not dispatched or complete]).
      * 
      * @var array
      * @config
@@ -95,8 +95,9 @@ class Invoice extends Estimate implements PermissionProvider
     ];
 
     /**
-     * What statuses does an order need to be marked as "historic".
-     * At the moment this is only used against an @Member.
+     * What statuses does an order need to be considered
+     * "historic" (meaning dispatched/completed, etc)
+     * 
      * 
      * @var array
      * @config
@@ -242,6 +243,16 @@ class Invoice extends Estimate implements PermissionProvider
     {
         parent::populateDefaults();
         $this->Status = $this->config()->get("default_status");
+    }
+
+    /**
+     * Generate a translated variant of the current status
+     *
+     * @return string
+     */
+    public function getTranslatedStatus()
+    {
+        return _t('Orders.' . $this->Status, $this->Status);
     }
 
     /**
