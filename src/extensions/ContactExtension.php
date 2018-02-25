@@ -90,4 +90,29 @@ class ContactExtension extends DataExtension
             ->Invoices()
             ->filter("Status", Config::inst()->get(Invoice::class, "historic_statuses"));
     }
+
+    public function canView($member)
+    {
+        // Members can view their own records
+        if ($member && $member->exists() && $member->ID == $this->owner->MemberID) {
+            return true;
+        }
+    }
+
+    public function canEdit($member)
+    {
+        // Members can edit their own records
+        if ($member && $member->exists() && $member->ID == $this->owner->MemberID) {
+            return true;
+        }
+    }
+
+    public function canDelete($member)
+    {
+        // Members can delete their own records
+        if ($member && $member->exists() && $member->ID == $this->owner->MemberID) {
+            return true;
+        }
+    }
+
 }
