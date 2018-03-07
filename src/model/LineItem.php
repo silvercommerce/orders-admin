@@ -140,6 +140,7 @@ class LineItem extends DataObject
     private static $casting = [
         "UnitPrice" => "Currency",
         "UnitTax"   => "Currency",
+        "UnitTotal" => "Currency",
         "SubTotal"  => "Currency",
         "TaxRate"   => "Decimal",
         "TaxTotal"  => "Currency",
@@ -251,6 +252,20 @@ class LineItem extends DataObject
         $total = ($this->UnitPrice / 100) * $this->TaxRate;
 
         $this->extend("updateUnitTax", $total);
+
+        return $total;
+    }
+
+    /**
+     * Get the total price and tax for a single unit
+     * 
+     * @return float
+     */
+    public function getUnitTotal()
+    {
+        $total = $this->UnitPrice + $this->UnitTax;
+
+        $this->extend("updateUnitTotal", $total);
 
         return $total;
     }
