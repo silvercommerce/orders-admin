@@ -194,6 +194,14 @@ class Invoice extends Estimate implements PermissionProvider
     private static $incomplete_status = "incomplete";
 
     /**
+     * The status which an order is being processed
+     * 
+     * @var string
+     * @config
+     */
+    private static $processing_status = "processing";
+
+    /**
      * The status which an order has been canceled.
      * 
      * @var string
@@ -389,6 +397,17 @@ class Invoice extends Estimate implements PermissionProvider
     public function markPending()
     {
         $this->Status = $this->config()->get("pending_status");
+        return $this;
+    }
+
+        /**
+     * Mark this order as "pending" (awaiting payment to clear/reconcile).
+     *
+     * @return Order
+     */
+    public function markProcessing()
+    {
+        $this->Status = $this->config()->get("processing_status");
         return $this;
     }
 

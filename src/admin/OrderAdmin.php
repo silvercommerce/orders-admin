@@ -6,11 +6,18 @@ use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
+use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
-use SilverCommerce\OrdersAdmin\Forms\GridField\BulkActions as OrdersBulkActions;
+use Colymba\BulkManager\BulkAction\EditHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\PendingHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\PartPaidHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\ProcessingHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\DispatchedHandler;
 
-use SilverStripe\Dev\Debug;
  /**
   * Add interface to manage orders through the CMS
   *
@@ -93,54 +100,20 @@ class OrderAdmin extends ModelAdmin
         
         // Bulk manager
         $manager = new BulkManager();
-        $manager->removeBulkAction("bulkEdit");
-        $manager->removeBulkAction("unLink");
+        $manager->removeBulkAction(EditHandler::class);
+        $manager->removeBulkAction(UnlinkHandler::class);
 
         // Manage orders
         if ($this->modelClass == Invoice::class && $gridfield) {
             $config = $gridfield->getConfig();
 
-            $manager->addBulkAction(
-                'cancelled',
-                'Mark Cancelled',
-                OrdersBulkActions::class
-            );
-            
-            $manager->addBulkAction(
-                'refunded',
-                'Mark Refunded',
-                OrdersBulkActions::class
-            );
-
-            $manager->addBulkAction(
-                'pending',
-                'Mark Pending',
-                OrdersBulkActions::class
-            );
-
-            $manager->addBulkAction(
-                'partpaid',
-                'Mark Part Paid',
-                OrdersBulkActions::class
-            );
-            
-            $manager->addBulkAction(
-                'paid',
-                'Mark Paid',
-                OrdersBulkActions::class
-            );
-
-            $manager->addBulkAction(
-                'processing',
-                'Mark Processing',
-                OrdersBulkActions::class
-            );
-
-            $manager->addBulkAction(
-                'dispatched',
-                'Mark Dispatched',
-                OrdersBulkActions::class
-            );
+            $manager->addBulkAction(CancelHandler::class);
+            $manager->addBulkAction(RefundHandler::class);
+            $manager->addBulkAction(PendingHandler::class);
+            $manager->addBulkAction(PartPaidHandler::class);
+            $manager->addBulkAction(PaidHandler::class);
+            $manager->addBulkAction(ProcessingHandler::class);
+            $manager->addBulkAction(DispatchedHandler::class);
         }
         
         // Manage Estimates
