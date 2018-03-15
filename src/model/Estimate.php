@@ -483,7 +483,7 @@ class Estimate extends DataObject implements PermissionProvider
      */
     public function getTotal()
     {   
-        $total = (($this->SubTotal + $this->Postage) - $this->DiscountAmount) + $this->TaxTotal;
+        $total = (($this->SubTotal + $this->PostageCost) - $this->DiscountAmount) + $this->TaxTotal;
         
         $this->extend("updateTotal", $total);
         
