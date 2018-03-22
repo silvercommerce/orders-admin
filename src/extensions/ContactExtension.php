@@ -36,7 +36,7 @@ class ContactExtension extends DataExtension
             $invoices_field
                 ->getConfig()
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent(OrdersDetailForm::create());
+                ->addComponent(new OrdersDetailForm());
         }
 
         if ($estimate_field) {
@@ -46,7 +46,7 @@ class ContactExtension extends DataExtension
             $estimate_field
                 ->getConfig()
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent(OrdersDetailForm::create());
+                ->addComponent(new OrdersDetailForm());
         }
 
         // Add a dropdown to select user account
