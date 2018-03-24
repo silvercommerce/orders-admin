@@ -96,7 +96,7 @@ class OrderAdmin extends ModelAdmin
         $fields = $form->Fields();
         $gridfield = $fields
             ->fieldByName($this->sanitiseClassName($this->modelClass));
-        $config = null;
+        $config = $gridfield->getConfig();
         
         // Bulk manager
         $manager = new BulkManager();
@@ -105,8 +105,6 @@ class OrderAdmin extends ModelAdmin
 
         // Manage orders
         if ($this->modelClass == Invoice::class && $gridfield) {
-            $config = $gridfield->getConfig();
-
             $manager->addBulkAction(CancelHandler::class);
             $manager->addBulkAction(RefundHandler::class);
             $manager->addBulkAction(PendingHandler::class);
@@ -114,11 +112,6 @@ class OrderAdmin extends ModelAdmin
             $manager->addBulkAction(PaidHandler::class);
             $manager->addBulkAction(ProcessingHandler::class);
             $manager->addBulkAction(DispatchedHandler::class);
-        }
-        
-        // Manage Estimates
-        if ($this->modelClass == Estimate::class) {
-            $config = $gridfield->getConfig();
         }
         
         // Set our default detailform and bulk manager

@@ -2,7 +2,6 @@
 
 namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
-use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
@@ -20,8 +19,9 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\ValidationResult;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverStripe\Versioned\VersionedGridFieldItemRequest;
 
-class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
+class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
 {
 
     private static $allowed_actions = [
@@ -71,22 +71,22 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
     }
 
     public function ItemEditForm()
-    {        
+    {
         $form = parent::ItemEditForm();
         $fields = $form->Fields();
         $actions = $form->Actions();
         $record = $this->record;
         $member = Member::currentUser();
-        
+
         $can_view = $this->record->canView();
         $can_edit = $this->record->canEdit();
         $can_delete = $this->record->canDelete();
         $can_create = $this->record->canCreate();
-        
+
         // First cache and remove the delete button
         $delete_action = $actions->dataFieldByName("action_doDelete");
         $actions->removeByName("action_doDelete");
-        
+
         // Deal with Estimate objects
         if ($record->ClassName == Estimate::class) {            
             if ($record->ID && $can_edit) {
@@ -127,6 +127,18 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
                 $fields->replaceField("Status", $status_field);
             }
             
+            // Is user cannot edit, but can change status, add change
+            // status button
+            if ($record->ID && !$can_edit && $can_change_status) {
+                $actions->push(
+                    FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
+                        ->setUseButtonTag(true)
+                        ->addExtraClass('btn-primary font-icon-save')
+                );
+            }
+        }
+
+        if ($record->ID) {
             // Setup order history
             if (Permission::check(array('ORDERS_EDIT_INVOICES', 'ADMIN'), 'any', $member)) {
                 $versions = $record->AllVersions();
@@ -169,21 +181,9 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
                     }
                 }
             }
-            
-            // Is user cannot edit, but can change status, add change
-            // status button
-            if ($record->ID && !$can_edit && $can_change_status) {
-                $actions->push(
-                    FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
-                        ->setUseButtonTag(true)
-                        ->addExtraClass('btn-primary font-icon-save')
-                );
-            }
-        }
-        
-        // Add a duplicate button, either after the save button or
-        // the change status "save" button.
-        if ($record->ID) {
+
+            // Add a duplicate button, either after the save button or
+            // the change status "save" button.
             $duplicate_button = FormAction::create(
                 'doDuplicate',
                 _t('OrdersAdmin.Duplicate', 'Duplicate')
@@ -197,9 +197,7 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             if ($actions->find("Name", "action_doChangeStatus")) {
                 $actions->insertAfter($duplicate_button, "action_doChangeStatus");
             }
-        }
 
-        if ($record->ID) {
             $html = '<a href="' . $record->DisplayLink() . '" ';
             $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-eye"';
             $html .= '>' . _t('OrdersAdmin.View', 'View') . '</a>';
@@ -215,14 +213,14 @@ class OrdersDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
             $actions->push($view_field, "action_doSave");
             $actions->push($download_field, "action_doSave");
         }
-        
+
         // Finally, if allowed, re-add the delete button (so it is last)
         if ($record->ID && $can_delete) {
             $actions->push($delete_action);
         }
 
         $this->extend("updateItemEditForm", $form);
-        
+
         return $form;
     }
     

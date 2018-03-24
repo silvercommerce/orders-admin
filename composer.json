@@ -27,6 +27,7 @@
         "silverstripe/framework": "~4.0",
         "silverstripe/siteconfig": "~4.0",
         "silverstripe/admin": "~1.0",
+        "silverstripe/versioned": "~1.0",
         "colymba/gridfield-bulk-editing-tools": "3.*@dev",
         "symbiote/silverstripe-gridfieldextensions": "^3.0",
         "dompdf/dompdf": "^0.8.2",
