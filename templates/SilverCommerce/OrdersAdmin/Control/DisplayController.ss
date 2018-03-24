@@ -100,6 +100,7 @@
                     <table class="table">
                         <thead>
                             <tr>
+                                <th class="stock-id text-left"><%t OrdersAdmin.StockID "Stock ID" %></th>
                                 <th class="description text-left"><%t OrdersAdmin.Item "Item" %></th>
                                 <th class="qty text-center"><%t OrdersAdmin.Qty "Qty" %></th>
                                 <th class="unitprice text-right"><%t OrdersAdmin.UnitPrice "Unit Price" %></th>
@@ -109,6 +110,7 @@
                         </thead>
                         <tbody><% loop $Items %>
                             <tr>
+                                <td class="text-left">{$StockID}</td>
                                 <td class="text-left">
                                     <strong>{$Title}</strong><br/>
                                     $Content
