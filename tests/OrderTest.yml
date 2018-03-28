@@ -1,4 +1,4 @@
-LineItem:
+SilverCommerce\OrdersAdmin\Model\LineItem:
     notaxitem:
         Title: "A cheap item"
         Quantity: 2
@@ -35,7 +35,7 @@ LineItem:
         Weight: 0.75
         Price: 3.99
         TaxRate: 20 # tax per item of 0.598 (after discount)
-Order:
+SilverCommerce\OrdersAdmin\Model\Invoice:
     addressdetails:
         Status: incomplete
         Address1: "123 Street Name"
@@ -53,21 +53,21 @@ Order:
         PostageType: "Standard Postage"
         PostageCost: 2.00
         PostageTax: 0
-        Items: =>LineItem.notaxitem
+        Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notaxitem
     standardtax:
         Status: paid
         OrderNumber: 123456
         PostageType: "Standard Postage"
         PostageCost: 2.00
         PostageTax: 0.40
-        Items: =>LineItem.taxitemone
+        Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
     complextax:
         Status: paid
         OrderNumber: 123456
         PostageType: "Standard Postage"
         PostageCost: 2.00
         PostageTax: 0.40
-        Items: =>LineItem.taxitemtwo,=>LineItem.taxitemthree
+        Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo,=>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemthree
     discount:
         Status: incomplete
         OrderNumber: 123456
@@ -76,4 +76,4 @@ Order:
         PostageTax: 0.40
         Discount: "£3 Off"
         DiscountAmount: 3.00
-        Items: =>LineItem.discounttaxitem1,=>LineItem.discounttaxitem2
+        Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.discounttaxitem1,=>SilverCommerce\OrdersAdmin\Model\LineItem.discounttaxitem2

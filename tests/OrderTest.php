@@ -1,4 +1,10 @@
 <?php
+
+namespace SilverCommerce\OrdersAdmin\Tests;
+
+use SilverStripe\Dev\SapphireTest;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+
 /**
  * Test functionality of an order
  *
@@ -44,7 +50,7 @@ class OrderTest extends SapphireTest
 	 */
 	public function testLocationDetails()
     {
-		$order = $this->objFromFixture('Order', 'addressdetails');
+		$order = $this->objFromFixture(Invoice::class, 'addressdetails');
 
 		$bil_country = "United Kingdom";
 		$del_country = "United Kingdom";
@@ -65,7 +71,7 @@ class OrderTest extends SapphireTest
 	 */
 	public function testStatusDetails()
     {
-		$order = $this->objFromFixture('Order', 'addressdetails');
+		$order = $this->objFromFixture(Invoice::class, 'addressdetails');
 		$order->markComplete();
 
 		$this->assertTrue($order->isPaid());
@@ -79,7 +85,7 @@ class OrderTest extends SapphireTest
 	 */
 	public function testItemSummary()
 	{
-		$order = $this->objFromFixture('Order', 'discount');
+		$order = $this->objFromFixture(Invoice::class, 'discount');
 
 		$text = "2 x An item to discount;\n1 x Another item to discount;\n";
 		$html = "2 x An item to discount;<br />\n1 x Another item to discount;<br />\n";
@@ -96,7 +102,7 @@ class OrderTest extends SapphireTest
 	 */
 	public function testDiscount()
     {
-		$order = $this->objFromFixture('Order', 'standardnotax');
+		$order = $this->objFromFixture(Invoice::class, 'standardnotax');
 
 		$this->assertFalse($order->hasDiscount());
 		$order->setDiscount("A Discount", 5.00);
@@ -115,8 +121,8 @@ class OrderTest extends SapphireTest
 	 */
 	public function testPostage()
     {
-		$no_tax_order = $this->objFromFixture('Order', 'standardnotax');
-		$tax_order = $this->objFromFixture('Order', 'standardtax');
+		$no_tax_order = $this->objFromFixture(Invoice::class, 'standardnotax');
+		$tax_order = $this->objFromFixture(Invoice::class, 'standardtax');
 
 		$no_tax_order->setPostage("Different Postage", 0.50);
 		$tax_order->setPostage("Different Tax Postage", 1.00, 0.20);
@@ -140,9 +146,9 @@ class OrderTest extends SapphireTest
 	 */
 	public function testTotalCalculations()
     {
-		$no_tax_order = $this->objFromFixture('Order', 'standardnotax');
-		$tax_order = $this->objFromFixture('Order', 'standardtax');
-		$discount_order = $this->objFromFixture('Order', 'discount');
+		$no_tax_order = $this->objFromFixture(Invoice::class, 'standardnotax');
+		$tax_order = $this->objFromFixture(Invoice::class, 'standardtax');
+		$discount_order = $this->objFromFixture(Invoice::class, 'discount');
 
 		$this->assertEquals(2, $no_tax_order->TotalItems);
 		$this->assertEquals(1, $no_tax_order->TotalWeight);
@@ -160,10 +166,10 @@ class OrderTest extends SapphireTest
 	 */
 	public function testTaxCalculations()
     {
-		$no_tax_order = $this->objFromFixture('Order', 'standardnotax');
-		$tax_order_one = $this->objFromFixture('Order', 'standardtax');
-		$tax_order_two = $this->objFromFixture('Order', 'complextax');
-		$discount_order = $this->objFromFixture('Order', 'discount');
+		$no_tax_order = $this->objFromFixture(Invoice::class, 'standardnotax');
+		$tax_order_one = $this->objFromFixture(Invoice::class, 'standardtax');
+		$tax_order_two = $this->objFromFixture(Invoice::class, 'complextax');
+		$discount_order = $this->objFromFixture(Invoice::class, 'discount');
 
 		$this->assertEquals(0, $no_tax_order->TaxTotal);
 		$this->assertEquals(1.60, $tax_order_one->TaxTotal);
@@ -179,10 +185,10 @@ class OrderTest extends SapphireTest
 	 */
 	public function testCurrencyCalculations()
     {
-		$no_tax_order = $this->objFromFixture('Order', 'standardnotax');
-		$tax_order_one = $this->objFromFixture('Order', 'standardtax');
-		$tax_order_two = $this->objFromFixture('Order', 'complextax');
-		$discount_order = $this->objFromFixture('Order', 'discount');
+		$no_tax_order = $this->objFromFixture(Invoice::class, 'standardnotax');
+		$tax_order_one = $this->objFromFixture(Invoice::class, 'standardtax');
+		$tax_order_two = $this->objFromFixture(Invoice::class, 'complextax');
+		$discount_order = $this->objFromFixture(Invoice::class, 'discount');
 
 		$this->assertEquals(11.98, $no_tax_order->SubTotal);
 		$this->assertEquals(13.98, $no_tax_order->Total);

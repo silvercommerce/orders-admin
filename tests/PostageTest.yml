@@ -1,4 +1,4 @@
-PostageArea:
+SilverCommerce\OrdersAdmin\Model\PostageArea:
   ukpostageone:
     Title: "Basic UK Postage"
     Country: "GB"
@@ -53,7 +53,7 @@ PostageArea:
     Cost: 25.00
     Tax: 0
     SiteID: 1
-LineItem:
+SilverCommerce\OrdersAdmin\Model\LineItem:
   noweightitem:
     Title: "No weight item"
     Quantity: 1
@@ -96,7 +96,7 @@ LineItem:
     Weight: 5
     Price: 10.99
     TaxRate: 0
-Order:
+SilverCommerce\OrdersAdmin\Model\Invoice:
   noweightorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -108,7 +108,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "SO98 9XZ"
     DeliveryCountry: "GB"
-    Items: =>LineItem.noweightitem
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.noweightitem
   lightorderone:
     Status: incomplete
     Address1: "123 Street Name"
@@ -120,7 +120,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "SO98 9XZ"
     DeliveryCountry: "GB"
-    Items: =>LineItem.weightitemone
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.weightitemone
   lightordertwo:
     Status: incomplete
     Address1: "123 Street Name"
@@ -132,7 +132,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "IG12 3AB"
     DeliveryCountry: "GB"
-    Items: =>LineItem.weightitemtwo
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.weightitemtwo
   heavyorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -144,7 +144,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "BA12 3AB"
     DeliveryCountry: "GB"
-    Items: =>LineItem.weightitemthree
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.weightitemthree
   offshoreorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -156,7 +156,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "IV55 3AB"
     DeliveryCountry: "GB"
-    Items: =>LineItem.offshoreitem
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.offshoreitem
   wildcardorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -168,7 +168,7 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "PO30 1BA"
     DeliveryCountry: "GB"
-    Items: =>LineItem.wildcarditem
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.wildcarditem
   globalorder:
     Status: incomplete
     Address1: "123 Street Name"
@@ -180,4 +180,4 @@ Order:
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "12345 12345"
     DeliveryCountry: "US"
-    Items: =>LineItem.globalitem
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.globalitem

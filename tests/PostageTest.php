@@ -1,5 +1,11 @@
 <?php
 
+namespace SilverCommerce\OrdersAdmin\Tests;
+
+use SilverStripe\Dev\SapphireTest;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
+
 /**
  * Test functionality of the postage table
  *
@@ -44,7 +50,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testNoWeight()
     {
-		$order = $this->objFromFixture('Order', 'noweightorder');
+		$order = $this->objFromFixture(Invoice::class, 'noweightorder');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -65,7 +71,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testFirstLight()
     {
-		$order = $this->objFromFixture('Order', 'lightorderone');
+		$order = $this->objFromFixture(Invoice::class, 'lightorderone');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -86,7 +92,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testSecondLight()
     {
-		$order = $this->objFromFixture('Order', 'lightordertwo');
+		$order = $this->objFromFixture(Invoice::class, 'lightordertwo');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -107,7 +113,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testHeavy()
     {
-		$order = $this->objFromFixture('Order', 'heavyorder');
+		$order = $this->objFromFixture(Invoice::class, 'heavyorder');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -129,7 +135,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testOffshore()
     {
-		$order = $this->objFromFixture('Order', 'offshoreorder');
+		$order = $this->objFromFixture(Invoice::class, 'offshoreorder');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -151,7 +157,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testWildcardPostcode()
     {
-		$order = $this->objFromFixture('Order', 'wildcardorder');
+		$order = $this->objFromFixture(Invoice::class, 'wildcardorder');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas
@@ -173,7 +179,7 @@ class PostageTest extends SapphireTest
 	 */
 	public function testGlobal()
     {
-		$order = $this->objFromFixture('Order', 'globalorder');
+		$order = $this->objFromFixture(Invoice::class, 'globalorder');
 
         $postage_areas = new ShippingCalculator($order->DeliveryPostCode, $order->DeliveryCountry);
         $postage_areas

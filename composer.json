@@ -42,7 +42,8 @@
     },
     "autoload": {
         "psr-4": {
-            "SilverCommerce\\OrdersAdmin\\": "src/"
+            "SilverCommerce\\OrdersAdmin\\": "src/",
+            "SilverCommerce\\OrdersAdmin\\Tests\\": "tests/"
         }
     },
     "suggest": {
