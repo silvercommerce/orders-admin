@@ -39,6 +39,10 @@ use SilverCommerce\OrdersAdmin\Control\DisplayController;
 use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
 use DateTime;
 
+/**
+ * Represents an estimate (an unofficial quotation that has not yet been paid for)
+ * 
+ */
 class Estimate extends DataObject implements PermissionProvider
 {
     private static $table_name = 'Estimate';
@@ -89,6 +93,12 @@ class Estimate extends DataObject implements PermissionProvider
      */
     private static $collect_action = "collect";
 
+    /**
+     * Standard DB columns
+     * 
+     * @var array
+     * @config
+     */
     private static $db = [
         'OrderNumber'       => 'Varchar',
         'StartDate'         => 'Date',
@@ -127,15 +137,33 @@ class Estimate extends DataObject implements PermissionProvider
         "AccessKey"         => "Varchar(40)"
     ];
 
+    /**
+     * Foreign key associations
+     * 
+     * @var array
+     * @config
+     */
     private static $has_one = [
         "Discount"  => Discount::class,
         "Customer"  => Contact::class
     ];
 
+    /**
+     * One to many assotiations
+     * 
+     * @var array
+     * @config
+     */
     private static $has_many = [
         'Items'     => LineItem::class
     ];
 
+    /**
+     * Cast methods for templates
+     * 
+     * @var array
+     * @config
+     */
     private static $casting = [
         "PersonalDetails"   => "Text",
         'BillingAddress'    => 'Text',
@@ -153,6 +181,12 @@ class Estimate extends DataObject implements PermissionProvider
         'DiscountDetails'   => "Varchar"
     ];
 
+    /**
+     * Assign default values
+     * 
+     * @var array
+     * @config
+     */
     private static $defaults = [
         'DiscountAmount'    => 0
     ];
@@ -176,14 +210,32 @@ class Estimate extends DataObject implements PermissionProvider
         "LastEdited"    => "Last Edited"
     ];
 
+    /**
+     * Add extension classes
+     * 
+     * @var array
+     * @config
+     */
     private static $extensions = [
         Versioned::class . '.versioned',
     ];
 
+    /**
+     * Declare version history
+     * 
+     * @var array
+     * @config
+     */
     private static $versioning = [
         "History"
     ];
 
+    /**
+     * Default sort order for ORM
+     * 
+     * @var array
+     * @config
+     */
     private static $default_sort = [
         "StartDate" => "DESC"
     ];
@@ -330,7 +382,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Find the total quantity of items in the shopping cart
      *
-     * @return Int
+     * @return int
      */
     public function getTotalItems()
     {
@@ -417,7 +469,7 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Get a list of all taxes used and and associated value
+     * Get a list of all taxes used and an associated value
      *
      * @return ArrayList
      */
@@ -472,7 +524,7 @@ class Estimate extends DataObject implements PermissionProvider
      * This method writes and reloads the object so
      * we are now working with the new object type
      *
-     * @return Invoice The currently converted invoice
+     * @return Invoice
      */
     public function convertToInvoice()
     {
@@ -541,7 +593,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Mark this Estimate for collection?
      *
-     * @return boolean
+     * @return self
      */
     public function MarkForCollection()
     {
@@ -552,7 +604,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Mark this Estimate for collection?
      *
-     * @return boolean
+     * @return self
      */
     public function MarkForPost()
     {
@@ -589,7 +641,12 @@ class Estimate extends DataObject implements PermissionProvider
     {
         return (ceil($this->DiscountAmount)) ? true : false;
     }
-    
+
+    /**
+     * Scaffold CMS form fields
+     * 
+     * @return FieldList
+     */
     public function getCMSFields()
     {
         
@@ -865,13 +922,13 @@ class Estimate extends DataObject implements PermissionProvider
      * Create a duplicate of this order/estimate as well as duplicating
      * associated items
      *
-     * @param $doWrite Perform a write() operation before returning the object.  If this is true, it will create the
-     *                 duplicate in the database.
+     * @param bool $doWrite Perform a write() operation before returning the object.
+     * @param array|null|false $relations List of relations to duplicate.
      * @return DataObject A duplicate of this node. The exact type will be the type of this node.
      */
-    public function duplicate($doWrite = true, $manyMany = 'many_many')
+    public function duplicate($doWrite = true, $relations = null)
     {
-        $clone = parent::duplicate($doWrite, $manyMany);
+        $clone = parent::duplicate($doWrite, $relations);
         
         // Set up items
         if ($doWrite) {

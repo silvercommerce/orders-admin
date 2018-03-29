@@ -44,7 +44,6 @@ use SilverCommerce\OrdersAdmin\Control\DisplayController;
  *
  * Any user can create an order (this allows us to support "guest" users).
  *
- * @author ilateral (http://www.ilateral.co.uk)
  */
 class Invoice extends Estimate implements PermissionProvider
 {
@@ -288,7 +287,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Scaffold admin form feilds
      *
-     * @return \SilverStripe\Forms\FieldList
+     * @return FieldList
      */
     public function getCMSFields()
     {
@@ -350,7 +349,7 @@ class Invoice extends Estimate implements PermissionProvider
      * Mark this order as "paid"
      *
      * @param string $reference the unique reference from the gateway
-     * @return Order
+     * @return self
      */
     public function markPaid()
     {
@@ -361,7 +360,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "part paid".
      *
-     * @return Order
+     * @return self
      */
     public function markPartPaid()
     {
@@ -372,7 +371,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "pending" (awaiting payment to clear/reconcile).
      *
-     * @return Order
+     * @return self
      */
     public function markPending()
     {
@@ -383,7 +382,7 @@ class Invoice extends Estimate implements PermissionProvider
         /**
      * Mark this order as "pending" (awaiting payment to clear/reconcile).
      *
-     * @return Order
+     * @return self
      */
     public function markProcessing()
     {
@@ -394,7 +393,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "canceled".
      *
-     * @return Order
+     * @return self
      */
     public function markCanceled()
     {
@@ -405,7 +404,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "refunded".
      *
-     * @return Order
+     * @return self
      */
     public function markRefunded()
     {
@@ -416,7 +415,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "dispatched".
      *
-     * @return Order
+     * @return self
      */
     public function markDispatched()
     {
@@ -427,7 +426,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Mark this order as "collected".
      *
-     * @return Order
+     * @return self
      */
     public function markCollected()
     {
