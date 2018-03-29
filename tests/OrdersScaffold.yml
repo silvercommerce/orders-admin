@@ -1,0 +1,107 @@
+SilverCommerce\OrdersAdmin\Tests\Model\TestProduct:
+  socks:
+    Title: "Socks"
+    StockID: "so1"
+    Price: 5.99
+    StockLevel: 10
+SilverCommerce\TaxAdmin\Model\TaxRate:
+  vat:
+    Title: "VAT"
+    Rate: 20
+  reduced:
+    Title: "Reduced Rate"
+    Rate: 5
+  zero:
+    Title: "Zero Rate"
+    Rate: 0
+SilverCommerce\OrdersAdmin\Model\LineItemCustomisation:
+  freecustomisation:
+    Title: "Customisation"
+    Value: "Free"
+    OrderNumber: 123456
+    Price: 0
+  expensivecustomisation:
+    Title: "Customisation"
+    Value: "Expensive"
+    Price: 100
+SilverCommerce\OrdersAdmin\Model\LineItem:
+  deliverable:
+    Title: "Deliverable Item"
+    Deliverable: true
+  notdeliverable:
+    Title: "Non Deliverable Item"
+    Deliverable: false
+  notaxitem:
+    Title: "A cheap item"
+    Quantity: 2
+    Weight: 0.5
+    Price: 5.99
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero
+  reducedtaxitem:
+    Title: "An item with reduced tax"
+    Quantity: 2
+    Weight: 0.5
+    Price: 5.99 # 0.2995 tax per item
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.reduced
+  taxitemone:
+    Title: "A tax item"
+    Quantity: 2
+    Weight: 0.75
+    Price: 5.99 # 1.198 tax per item
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat
+  taxitemtwo:
+    Title: "Another tax item"
+    Quantity: 2
+    Weight: 0.75
+    Price: 5.99 # 1.198 tax per item
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat
+  taxitemthree:
+    Title: "Two cheap items"
+    Quantity: 2
+    Weight: 0.75
+    Price: 3.99 # 0.798 tax per item
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat
+  sockitem:
+    Title: "Socks"
+    Quantity: 1
+    Weight: 0.5
+    Price: 5.99
+    StockID: "so1"
+    ProductClass: SilverCommerce\OrdersAdmin\Tests\Model\TestProduct
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero
+  customitem:
+    Title: "Socks"
+    Quantity: 1
+    Weight: 0.5
+    Price: 5.99
+    Tax: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero
+    Customisations: =>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.freecustomisation,=>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.expensivecustomisation
+SilverCommerce\OrdersAdmin\Model\Estimate:
+  addressdetails:
+    Address1: "123 Street Name"
+    Address2: "A Place"
+    City: "A City"
+    PostCode: "AB12 3AB"
+    Country: "GB"
+    DeliveryAddress1: "321 Street Name"
+    DeliveryCity: "Delivery City"
+    DeliveryPostCode: "ZX98 9XZ"
+    DeliveryCountry: "GB"
+  deliverable:
+    OrderNumber: 123456
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable,=>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
+  notdeliverable:
+    OrderNumber: 123456
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
+  standardnotax:
+    OrderNumber: 123456
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notaxitem
+  standardtax:
+    OrderNumber: 123456
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
+  complextax:
+    OrderNumber: 123456
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem,=>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
+SilverCommerce\OrdersAdmin\Model\Invoice:
+  unpaid:
+    OrderNumber: 123456
