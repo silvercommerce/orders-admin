@@ -117,6 +117,24 @@ class LineItem extends DataObject
     ];
 
     /**
+     * Function to DB Object conversions
+     * 
+     * @var array
+     * @config
+     */
+    private static $casting = [
+        "UnitPrice" => "Currency",
+        "UnitTax" => "Currency",
+        "UnitTotal" => "Currency",
+        "SubTotal" => "Currency",
+        "TaxRate" => "Decimal",
+        "TaxTotal" => "Currency",
+        "Total" => "Currency",
+        "CustomisationList" => "Text",
+        "CustomisationAndPriceList" => "Text",
+    ];
+
+    /**
      * Fields to display in list tables
      * 
      * @var array
@@ -129,22 +147,6 @@ class LineItem extends DataObject
         "Price"     => "Item Price",
         "TaxID"    => "Tax",
         "CustomisationAndPriceList" => "Customisations"
-    ];
-    
-    /**
-     * Function to DB Object conversions
-     * 
-     * @var array
-     * @config
-     */
-    private static $casting = [
-        "UnitPrice" => "Currency",
-        "UnitTax"   => "Currency",
-        "UnitTotal" => "Currency",
-        "SubTotal"  => "Currency",
-        "TaxRate"   => "Decimal",
-        "TaxTotal"  => "Currency",
-        "Total"     => "Currency"
     ];
 
     /**
@@ -337,24 +339,20 @@ class LineItem extends DataObject
      *
      * @return string
      */
-    public function CustomisationList()
+    public function getCustomisationList()
     {
-        $return = "";
+        $return = [];
         $items = $this->Customisations();
-        
+
         if ($items && $items->exists()) {
-            $map = [];
-
             foreach ($items as $item) {
-                $map[] = $item->Title . ': ' . $item->Value;
+                $return[] = $item->Title . ': ' . $item->Value;
             }
-
-            $return = implode(", ", $map);
         }
 
         $this->extend("updateCustomisationList", $return);
-        
-        return $return;
+
+        return implode(", ", $return);
     }
 
     /**
@@ -363,28 +361,24 @@ class LineItem extends DataObject
      *
      * @return string
      */
-    public function CustomisationAndPriceList()
+    public function getCustomisationAndPriceList()
     {
-        $return = "";
+        $return = [];
         $items = $this->Customisations();
-        
+
         if ($items && $items->exists()) {
-            $map = [];
-
             foreach ($items as $item) {
-                $map[] = $item->Title . ': ' . $item->Value . ' (' . $item->dbObject("Price")->Nice() . ')';
+                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->dbObject("Price")->Nice() . ')';
             }
-
-            $return = implode(", ", $map);
         }
 
         $this->extend("updateCustomisationAndPriceList", $return);
-        
-        return $return;
+
+        return implode(", ", $return);
     }
     
     /**
-     * Unserialise the list of customisations and rendering into a basic
+     * Get list of customisations rendering into a basic
      * HTML string
      *
      * @return HTMLText
