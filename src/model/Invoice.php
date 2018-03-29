@@ -150,14 +150,6 @@ class Invoice extends Estimate implements PermissionProvider
     private static $default_status = "incomplete";
 
     /**
-     * The status which an order is considered "complete".
-     * 
-     * @var string
-     * @config
-     */
-    private static $completion_status = "paid";
-
-    /**
      * The status which an order has been marked pending
      * (meaning we are awaiting payment).
      * 
@@ -260,7 +252,7 @@ class Invoice extends Estimate implements PermissionProvider
      */
     public function getTranslatedStatus()
     {
-        return _t('Orders.' . $this->Status, $this->Status);
+        return _t(self::class . "." . $this->Status, $this->Status);
     }
 
     /**
@@ -352,18 +344,6 @@ class Invoice extends Estimate implements PermissionProvider
         } else {
             return in_array($this->Status, $statuses);
         }
-    }
-
-    /**
-     * Mark this order as "complete" which generally is intended
-     * to mean "paid for, ready for processing".
-     *
-     * @return Order
-     */
-    public function markComplete()
-    {
-        $this->Status = $this->config()->get("completion_status");
-        return $this;
     }
 
     /**
