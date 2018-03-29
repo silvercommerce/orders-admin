@@ -150,13 +150,11 @@ class Estimate extends DataObject implements PermissionProvider
         'ItemSummary'       => 'Text',
         'ItemSummaryHTML'   => 'HTMLText',
         'TranslatedStatus'  => 'Varchar',
-        'PostageDetails'    => "Varchar",
         'DiscountDetails'   => "Varchar"
     ];
 
     private static $defaults = [
-        'DiscountAmount'    => 0,
-        "PostageCost"       => 0
+        'DiscountAmount'    => 0
     ];
 
     /**
@@ -316,21 +314,6 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Generate a string outlining the details of selected
-     * postage
-     *
-     * @return string
-     */
-    public function getPostageDetails()
-    {
-        if ($this->PostageType) {
-            return $this->PostageType . " (" . $this->dbObject("PostageCost")->Nice() . ")";
-        } else {
-            return "";
-        }      
-    }
-
-    /**
-     * Generate a string outlining the details of selected
      * discount
      *
      * @return string
@@ -426,10 +409,6 @@ class Estimate extends DataObject implements PermissionProvider
             $total += $tax * $item->Quantity;
         }
         
-        if ($this->PostageTax) {
-            $total += $this->PostageTax;
-        }
-        
         $this->extend("updateTaxTotal", $total);
 
         $total = MathsHelper::round_up($total, 2);
@@ -473,13 +452,13 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Total of order including postage
+     * Total value of order
      *
      * @return float
      */
     public function getTotal()
     {   
-        $total = (($this->SubTotal + $this->PostageCost) - $this->DiscountAmount) + $this->TaxTotal;
+        $total = ($this->SubTotal - $this->DiscountAmount) + $this->TaxTotal;
         
         $this->extend("updateTotal", $total);
         
@@ -625,9 +604,6 @@ class Estimate extends DataObject implements PermissionProvider
             $fields->removeByName("DiscountID");
             $fields->removeByName("DiscountType");
             $fields->removeByName("DiscountAmount");
-            $fields->removeByName("PostageType");
-            $fields->removeByName("PostageCost");
-            $fields->removeByName("PostageTax");
             $fields->removeByName("Items");
             
             $fields->addFieldsToTab(
@@ -684,8 +660,6 @@ class Estimate extends DataObject implements PermissionProvider
                             ->setValue($this->obj("SubTotal")->Nice()),
                         ReadonlyField::create("DiscountValue",_t("OrdersAdmin.Discount", "Discount"))
                             ->setValue($this->dbObject("DiscountAmount")->Nice()),
-                        ReadonlyField::create("PostageValue",_t("OrdersAdmin.Postage", "Postage"))
-                            ->setValue($this->dbObject("PostageCost")->Nice()),
                         ReadonlyField::create("TaxValue",_t("OrdersAdmin.Tax", "Tax"))
                             ->setValue($this->obj("TaxTotal")->Nice()),
                         ReadonlyField::create("TotalValue",_t("OrdersAdmin.Total", "Total"))
@@ -967,14 +941,6 @@ class Estimate extends DataObject implements PermissionProvider
         if ($this->Discount()->exists()) {
             $this->DiscountAmount = $this->get_discount_amount();
             $this->DiscountType = $this->Discount()->Title;
-        }
-
-        // Assign postage info if set
-        if ($this->Postage()->exists()) {
-            $postage = $this->Postage();
-            $this->PostageType = $postage->Title;
-            $this->PostageCost = $postage->Cost;
-            $this->PostageTax = $postage->TaxAmount;
         }
 
         // If date not set, make thie equal the created date
