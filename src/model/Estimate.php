@@ -100,7 +100,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $db = [
-        'OrderNumber'       => 'Varchar',
+        'Number'       => 'Varchar',
         'StartDate'         => 'Date',
         'EndDate'           => 'Date',
         "Action"            => "Varchar",
@@ -198,7 +198,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
-        'OrderNumber'   => '#',
+        'Number'   => '#',
         'StartDate'     => 'Date',
         'EndDate'       => 'Expires',
         'Company'       => 'Company',
@@ -533,7 +533,7 @@ class Estimate extends DataObject implements PermissionProvider
 
         // Get our new Invoice
         $record = Invoice::get()->byID($this->ID);
-        $record->OrderNumber = null;
+        $record->Number = null;
         $record->StartDate = null;
         $record->EndDate = null;
         $record->write();
@@ -655,7 +655,7 @@ class Estimate extends DataObject implements PermissionProvider
 
             $fields->removeByName("StartDate");
             $fields->removeByName("EndDate");
-            $fields->removeByName("OrderNumber");
+            $fields->removeByName("Number");
             $fields->removeByName("AccessKey");
             $fields->removeByName("Action");
             $fields->removeByName("DiscountID");
@@ -712,7 +712,7 @@ class Estimate extends DataObject implements PermissionProvider
                             $this->fieldLabel("Action"),
                             $this->config()->get("actions")
                         ),
-                        ReadonlyField::create("OrderNumber", "#"),
+                        ReadonlyField::create("Number", "#"),
                         ReadonlyField::create("SubTotalValue",_t("OrdersAdmin.SubTotal", "Sub Total"))
                             ->setValue($this->obj("SubTotal")->Nice()),
                         ReadonlyField::create("DiscountValue",_t("OrdersAdmin.Discount", "Discount"))
@@ -897,7 +897,7 @@ class Estimate extends DataObject implements PermissionProvider
     protected function validOrderNumber()
     {
         $existing = Estimate::get()
-            ->filterAny("OrderNumber", $this->OrderNumber)
+            ->filterAny("Number", $this->Number)
             ->first();
         
         return !($existing);
@@ -932,7 +932,7 @@ class Estimate extends DataObject implements PermissionProvider
         
         // Set up items
         if ($doWrite) {
-            $clone->OrderNumber = "";
+            $clone->Number = "";
             $clone->write();
 
             foreach ($this->Items() as $item) {
@@ -1021,11 +1021,11 @@ class Estimate extends DataObject implements PermissionProvider
         parent::onAfterWrite();
 
         // Check if an order number has been generated, if not, add it and save again
-        if (!$this->OrderNumber) {
-            $this->OrderNumber = $this->generate_order_number();
+        if (!$this->Number) {
+            $this->Number = $this->generate_order_number();
             
             while (!$this->validOrderNumber()) {
-                $this->OrderNumber = $this->generate_order_number();
+                $this->Number = $this->generate_order_number();
             }
             $this->write();
         }

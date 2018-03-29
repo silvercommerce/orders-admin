@@ -18,7 +18,7 @@ SilverCommerce\OrdersAdmin\Model\LineItemCustomisation:
   freecustomisation:
     Title: "Customisation"
     Value: "Free"
-    OrderNumber: 123456
+    Number: 123456
     Price: 0
   expensivecustomisation:
     Title: "Customisation"
@@ -88,20 +88,20 @@ SilverCommerce\OrdersAdmin\Model\Estimate:
     DeliveryPostCode: "ZX98 9XZ"
     DeliveryCountry: "GB"
   deliverable:
-    OrderNumber: 123456
+    Number: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable,=>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
   notdeliverable:
-    OrderNumber: 123456
+    Number: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
   standardnotax:
-    OrderNumber: 123456
+    Number: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notaxitem
   standardtax:
-    OrderNumber: 123456
+    Number: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
   complextax:
-    OrderNumber: 123456
+    Number: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem,=>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
 SilverCommerce\OrdersAdmin\Model\Invoice:
   unpaid:
-    OrderNumber: 123456
+    Number: 123456

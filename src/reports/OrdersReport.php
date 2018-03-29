@@ -25,7 +25,7 @@ if (class_exists(Report::class)) {
         public function columns()
         {
             return [
-                'OrderNumber' => '#',
+                'Number' => '#',
                 'Created' => 'Date',
                 'SubTotal' => 'Sub Total',
                 'TaxTotal' => 'Tax',

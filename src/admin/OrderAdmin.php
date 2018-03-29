@@ -51,7 +51,7 @@ class OrderAdmin extends ModelAdmin
     {
         if ($this->modelClass == Invoice::class) {
             $return = array(
-                "OrderNumber"       => "#",
+                "Number"            => "#",
                 "Status"            => "Status",
                 "Created"           => "Created",
                 "Company"           => "Company Name",

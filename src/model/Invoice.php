@@ -437,7 +437,7 @@ class Invoice extends Estimate implements PermissionProvider
     protected function validOrderNumber()
     {
         $existing = Invoice::get()
-            ->filterAny("OrderNumber", $this->OrderNumber)
+            ->filterAny("Number", $this->Number)
             ->first();
         
         return !($existing);

@@ -11,7 +11,7 @@
         <tbody>
             <% loop $List %>
                 <tr>
-                    <td><a href="{$DisplayLink}">{$OrderNumber}</a></td>
+                    <td><a href="{$DisplayLink}">{$Number}</a></td>
                     <td><a href="{$DisplayLink}">{$Created.Nice}</a></td>
                     <td><a href="{$DisplayLink}">{$Total.Nice}</a></td>
                     <td><a href="{$DisplayLink}">{$TranslatedStatus}</a></td>
