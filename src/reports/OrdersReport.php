@@ -28,7 +28,6 @@ if (class_exists(Report::class)) {
                 'OrderNumber' => '#',
                 'Created' => 'Date',
                 'SubTotal' => 'Sub Total',
-                'PostageCost' => 'Postage',
                 'TaxTotal' => 'Tax',
                 'Total' => 'Total',
                 'FirstName' => 'First Name(s)',

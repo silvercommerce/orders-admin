@@ -61,7 +61,6 @@ class OrderAdmin extends ModelAdmin
                 "PhoneNumber"       => "Phone Number",
                 "ItemSummary"       => "Items Ordered",
                 "SubTotal"          => "SubTotal",
-                "Postage"           => "Postage",
                 "TaxTotal"          => "TaxTotal",
                 "Total"             => "Total",
                 "Address1"          => "Billing Address 1",
@@ -76,10 +75,7 @@ class OrderAdmin extends ModelAdmin
                 "DeliveryCity"      => "Delivery City",
                 "DeliveryPostCode"  => "Delivery Post Code",
                 "DeliveryCountryFull"=> "Delivery Country",
-                "DiscountAmount"    => "Discount Amount",
-                "PostageType"       => "Postage Type",
-                "PostageCost"       => "Postage Cost",
-                "PostageTax"        => "Postage Tax",
+                "DiscountAmount"    => "Discount Amount"
             );
         } else {
             $return = singleton($this->modelClass)->summaryFields();
