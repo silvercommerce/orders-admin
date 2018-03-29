@@ -148,10 +148,12 @@
                                     </tr>
                                 <% end_if %>
                                 
-                                <tr>
-                                    <th class="text-right"><%t OrdersAdmin.Postage "Postage" %></th>
-                                    <td class="text-right">$PostageCost.Nice</td>
-                                </tr>
+                                <% if $PostageCost.RAW > 0 %>
+                                    <tr>
+                                        <th class="text-right"><%t OrdersAdmin.Postage "Postage" %></th>
+                                        <td class="text-right">$PostageCost.Nice</td>
+                                    </tr>
+                                <% end_if %>
                                 
                                 <% loop $TaxList %>
                                     <tr>
