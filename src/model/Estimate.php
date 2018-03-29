@@ -288,7 +288,8 @@ class Estimate extends DataObject implements PermissionProvider
     public function getCountryFull()
     {
         $list = i18n::getData()->getCountries();
-        return (array_key_exists($this->Country, $list)) ? $list[$this->Country] : $this->Country;
+        $country = strtolower($this->Country);
+        return (array_key_exists($country, $list)) ? $list[$country] : $country;
     }
 
     /**
@@ -315,7 +316,8 @@ class Estimate extends DataObject implements PermissionProvider
     public function getDeliveryCountryFull()
     {
         $list = i18n::getData()->getCountries();
-        return (array_key_exists($this->DeliveryCountry, $list)) ? $list[$this->DeliveryCountry] : $this->DeliveryCountry;
+        $country = strtolower($this->DeliveryCountry);
+        return (array_key_exists($country, $list)) ? $list[$country] : $country;
     }
 
     /**
@@ -521,26 +523,25 @@ class Estimate extends DataObject implements PermissionProvider
      */
     public function getItemSummary()
     {
-        $return = '';
+        $return = [];
 
         foreach ($this->Items() as $item) {
-            $return .= "{$item->Quantity} x {$item->Title};\n";
+            $return[] = "{$item->Quantity} x {$item->Title}";
         }
 
         $this->extend("updateItemSummary", $return);
 
-        return $return;
+        return implode("\n", $return);
     }
 
     /**
      * Return a list string summarising each item in this order
      *
-     * @return HTMLText
+     * @return string
      */
     public function getItemSummaryHTML()
     {
-        $html = new HTMLText("ItemSummary");
-        $html->setValue(nl2br($this->ItemSummary));
+        $html = nl2br($this->ItemSummary);
         
         $this->extend("updateItemSummaryHTML", $html);
 
@@ -790,7 +791,7 @@ class Estimate extends DataObject implements PermissionProvider
         return parent::getCMSFields();
     }
 
-        /**
+    /**
      * Find the total discount based on discount items added.
      *
      * @return float
