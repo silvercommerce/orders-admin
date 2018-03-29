@@ -122,11 +122,6 @@ class Estimate extends DataObject implements PermissionProvider
         // Discount Provided
         "DiscountType"      => "Varchar",
         "DiscountAmount"    => "Currency",
-        
-        // Postage
-        "PostageType"       => "Varchar",
-        "PostageCost"       => "Currency",
-        "PostageTax"        => "Currency",
 
         // Access key (for viewing via non logged in users)
         "AccessKey"         => "Varchar(40)"
@@ -134,7 +129,6 @@ class Estimate extends DataObject implements PermissionProvider
 
     private static $has_one = [
         "Discount"  => Discount::class,
-        "Postage"   => PostageArea::class,
         "Customer"  => Contact::class
     ];
 
@@ -730,20 +724,6 @@ class Estimate extends DataObject implements PermissionProvider
                 ]
             );
 
-            // Try and calculate valid postage areas
-            $calc = new ShippingCalculator($this->DeliveryPostCode,$this->DeliveryCountry);
-            $calc
-                ->setCost($this->SubTotal)
-                ->setWeight($this->TotalWeight)
-                ->setItems($this->TotalItems)
-                ->setDiscount($this->Discount());
-            
-            $postage_areas = $calc->getPostageAreas();
-
-            if (!$postage_areas->exists()) {
-                $postage_areas = $siteconfig->PostageAreas();
-            }
-
             $fields->addFieldsToTab(
                 "Root.Delivery",
                 [
@@ -762,22 +742,7 @@ class Estimate extends DataObject implements PermissionProvider
                         'DeliveryCountry',
                         _t('OrdersAdmin.Country', 'Country'),
                         i18n::getData()->getCountries()
-                    )->setEmptyString(""),
-
-                    // Postage
-                    HeaderField::create(
-                        "PostageDetailsHeader",
-                        _t("Orders.PostageDetails", "Postage Details")
-                    ),
-                    DropdownField::create(
-                        "PostageID",
-                        $this->fieldLabel("PostageID"),
-                        $postage_areas->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.SelectPostage",
-                        "Select Postage"
-                    )),
-                    ReadonlyField::create("PostageDetails")
+                    )->setEmptyString("")
                 ]
             );
             

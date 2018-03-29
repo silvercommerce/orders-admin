@@ -23,7 +23,6 @@ use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Model\Notification as OrderNotification;
-use SilverCommerce\OrdersAdmin\Model\PostageArea;
 use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
@@ -48,7 +47,6 @@ class SiteConfigExtension extends DataExtension
 
     private static $has_many = [
         "OrderNotifications"=> OrderNotification::class,
-        'PostageAreas'      => PostageArea::class,
         'Discounts'         => Discount::class
     ];
 
@@ -58,29 +56,6 @@ class SiteConfigExtension extends DataExtension
     
     public function updateCMSFields(FieldList $fields)
     {
-        // Postage Options
-        $country_html = "<div class=\"field\">";
-        $country_html .= "<p>First select valid countries using the 2 character ";
-        $country_html .= "shortcode (see http://fasteri.com/list/2/short-names-of-countries-and-iso-3166-codes).</p>";
-        $country_html .= "<p>You can add multiple countries seperating them with";
-        $country_html .= "a comma or use a '*' for all countries.</p>";
-        $country_html .= "</div><br/>";
-
-        $country_html_field = LiteralField::create("CountryDescription", $country_html);
-        
-        $postage_fields = ToggleCompositeField::create(
-            'PostageSettings',
-            _t("Orders.PostageSettings", "Postage Settings"),
-            [
-                $country_html_field,
-                GridField::create(
-                    'PostageAreas',
-                    '',
-                    $this->owner->PostageAreas()
-                )->setConfig(GridFieldConfig_RecordEditor::create())
-            ]
-        );
-
         // Discount options
         $discount_fields = ToggleCompositeField::create(
             'DiscountSettings',
@@ -155,7 +130,6 @@ class SiteConfigExtension extends DataExtension
         $fields->addFieldsToTab(
             'Root.Shop',
             [
-                $postage_fields,
                 $discount_fields,
                 $notification_fields,
                 $invoice_customisation_fields
