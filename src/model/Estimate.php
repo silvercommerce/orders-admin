@@ -100,7 +100,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $db = [
-        'Number'       => 'Varchar',
+        'Number'            => 'Varchar',
         'StartDate'         => 'Date',
         'EndDate'           => 'Date',
         "Action"            => "Varchar",
@@ -116,6 +116,7 @@ class Estimate extends DataObject implements PermissionProvider
         'Address1'          => 'Varchar',
         'Address2'          => 'Varchar',
         'City'              => 'Varchar',
+        'County'            => 'Varchar',
         'PostCode'          => 'Varchar',
         'Country'           => 'Varchar',
         
@@ -126,6 +127,7 @@ class Estimate extends DataObject implements PermissionProvider
         'DeliveryAddress1'  => 'Varchar',
         'DeliveryAddress2'  => 'Varchar',
         'DeliveryCity'      => 'Varchar',
+        'DeliveryCounty'    => 'Varchar',
         'DeliveryPostCode'  => 'Varchar',
         'DeliveryCountry'   => 'Varchar',
         
