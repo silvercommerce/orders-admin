@@ -746,11 +746,15 @@ class Estimate extends DataObject implements PermissionProvider
                     TextField::create("Address1"),
                     TextField::create("Address2"),
                     TextField::create("City"),
+                    TextField::create("County"),
                     TextField::create("PostCode"),
                     DropdownField::create(
                         'Country',
                         _t('OrdersAdmin.Country', 'Country'),
-                        i18n::getData()->getCountries()
+                        array_change_key_case(
+                            i18n::getData()->getCountries(),
+                            CASE_UPPER
+                        )
                     )->setEmptyString(""),
                     TextField::create("Email"),
                     TextField::create("PhoneNumber")
@@ -770,11 +774,15 @@ class Estimate extends DataObject implements PermissionProvider
                     TextField::create("DeliveryAddress1"),
                     TextField::create("DeliveryAddress2"),
                     TextField::create("DeliveryCity"),
+                    TextField::create("DeliveryCounty"),
                     TextField::create("DeliveryPostCode"),
                     DropdownField::create(
                         'DeliveryCountry',
                         _t('OrdersAdmin.Country', 'Country'),
-                        i18n::getData()->getCountries()
+                        array_change_key_case(
+                            i18n::getData()->getCountries(),
+                            CASE_UPPER
+                        )
                     )->setEmptyString("")
                 ]
             );
