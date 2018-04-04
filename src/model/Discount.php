@@ -14,28 +14,28 @@ class Discount extends DataObject
 {
     private static $table_name = 'Discount';
 
-    private static $db = array(
+    private static $db = [
         "Title"     => "Varchar",
         "Type"      => "Enum('Fixed,Percentage,Free Shipping','Percentage')",
         "Code"      => "Varchar(299)",
         "Amount"    => "Decimal",
         "Country"   => "Varchar(255)",
         "Expires"   => "Date"
-    );
+    ];
 
-    private static $has_one = array(
+    private static $has_one = [
         "Site"      => SiteConfig::class
-    );
+    ];
 
-    private static $many_many = array(
+    private static $many_many = [
         "Groups"    => Group::class
-    );
+    ];
 
-    private static $summary_fields = array(
+    private static $summary_fields = [
         "Title",
         "Code",
         "Expires"
-    );
+    ];
 
     /**
      * Generate a random string that we can use for the code by default

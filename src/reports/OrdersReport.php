@@ -102,7 +102,7 @@ if (class_exists(Report::class)) {
                     ->sort('Created ASC')
                     ->first();
                     
-                $months = array('All');
+                $months = ['All'];
                 
                 $statuses = Invoice::config()->statuses;
                 array_unshift($statuses, 'All');
@@ -115,19 +115,19 @@ if (class_exists(Report::class)) {
                 $firstyear = new SSDatetime('FirstDate');
                 $firstyear->setValue($first_order->Created);
                 
-                $years = array();
+                $years = [];
                 for ($i = date('Y'); $i >= $firstyear->Year(); $i--) {
                     $years[$i] = $i;
                 }
 
                 //Result Limit
-                $result_limit_options = array(
+                $result_limit_options = [
                     0 => 'All',
                     50 => 50,
                     100 => 100,
                     200 => 200,
                     500 => 500,
-                );
+                ];
 
                 $fields->push(DropdownField::create(
                     'Filter_Month',

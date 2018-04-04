@@ -19,13 +19,13 @@ use Dompdf\Dompdf;
 /**
  * Controller responsible for displaying either an rendered order or a
  * rendered quote that can be emailed or printed.
- * 
+ *
  * @package Orders
  */
 class DisplayController extends Controller
 {
     /**
-     * ClassName of Order object 
+     * ClassName of Order object
      *
      * @var string
      * @config
@@ -33,12 +33,12 @@ class DisplayController extends Controller
     private static $url_segment = "ordersadmin/display";
     
     
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         "invoice",
         "invoicepdf",
         "estimate",
         "estimatepdf"
-    );
+    ];
 
     /**
      * Ther object associated with this controller
@@ -99,16 +99,17 @@ class DisplayController extends Controller
     
     /**
      * Get a relative link to anorder or invoice
-     * 
+     *
      * NOTE: this controller will always require an ID of an order and
-     * access key to be passed (as well as an action). 
-     * 
+     * access key to be passed (as well as an action).
+     *
      * @param $action Action we would like to view.
      * @param $id ID or the order we want to view.
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function Link($action = "invoice") {
+    public function Link($action = "invoice")
+    {
         return Controller::join_links(
             $this->config()->url_segment,
             $action
@@ -117,16 +118,17 @@ class DisplayController extends Controller
     
     /**
      * Get an absolute link to an order or invoice
-     * 
+     *
      * NOTE: this controller will always require an ID of an order and
-     * access key to be passed (as well as an action). 
-     * 
+     * access key to be passed (as well as an action).
+     *
      * @param $action Action we would like to view.
      * @param $id ID or the order we want to view.
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function AbsoluteLink($action = "invoice") {
+    public function AbsoluteLink($action = "invoice")
+    {
         return Controller::join_links(
             Director::absoluteBaseURL(),
             $this->Link($action)
@@ -153,10 +155,10 @@ class DisplayController extends Controller
 
     /**
      * Generate a PDF based on the invoice html output.
-     * 
+     *
      * @todo At the moment this exits all execution after generating
      * and streaming PDF. Ideally this should tap into
-     * @link http://api.silverstripe.org/4/SilverStripe/Control/HTTPStreamResponse.html 
+     * @link http://api.silverstripe.org/4/SilverStripe/Control/HTTPStreamResponse.html
      *
      * @param HTTPRequest $request
      * @return void
@@ -172,7 +174,7 @@ class DisplayController extends Controller
         Requirements::customCSS(<<<CSS
         $style
 CSS
-);
+        );
         $result = $this->invoice($request);
         $html = $result->getValue();
         $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
@@ -189,14 +191,14 @@ CSS
     public function estimate(HTTPRequest $request)
     {
         $config = SiteConfig::current_site_config();
-        $this->customise(array(
+        $this->customise([
             "Type" => "Estimate",
             "HeaderContent" => $config->dbObject("EstimateHeaderContent"),
             "FooterContent" => $config->dbObject("EstimateFooterContent"),
             "Title" => _t("Orders.EstimateTitle", "Estimate"),
             "MetaTitle" => _t("Orders.EstimateTitle", "Estimate"),
             "Object" => $this->object
-        ));
+        ]);
 
         $this->extend("updateEstimate");
         
@@ -214,12 +216,12 @@ CSS
         Requirements::customCSS(<<<CSS
         $style
 CSS
-);
+        );
         $result = $this->estimate($request);
         $html = $result->getValue();
         $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
 
-        $pdf = $this->gernerate_pdf($html);        
+        $pdf = $this->gernerate_pdf($html);
 
         $this->extend("updateEstimatePDF", $pdf);
 
@@ -227,5 +229,4 @@ CSS
         $pdf->stream("{$this->object->Number}.pdf");
         exit();
     }
-    
 }

@@ -6,7 +6,7 @@ use SilverStripe\ORM\DataObject;
 
 /**
  * A single customisation that can be applied to a LineItem.
- * 
+ *
  * A customisation by default allows the following details:
  *  - Title: The name of the customisation (eg. "Colour")
  *  - Value: The data associated with thie customisation (eg. "Red")

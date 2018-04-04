@@ -155,7 +155,7 @@ class StringDecryptor
      */
     private function simplexor()
     {
-        $KeyList = array();
+        $KeyList = [];
         $output = "";
 
         // Convert $Key into array of ASCII values

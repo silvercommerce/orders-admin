@@ -7,7 +7,7 @@ use SilverStripe\View\Requirements;
 
 /**
  * Inject extra requirements into the CMS
- * 
+ *
  * @package orders-admin
  */
 class AdminExtension extends Extension

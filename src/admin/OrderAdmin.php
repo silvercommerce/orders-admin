@@ -45,12 +45,12 @@ class OrderAdmin extends ModelAdmin
 
     /**
      * For an order, export all fields by default
-     * 
+     *
      */
     public function getExportFields()
     {
         if ($this->modelClass == Invoice::class) {
-            $return = array(
+            $return = [
                 "Number"            => "#",
                 "Status"            => "Status",
                 "Created"           => "Created",
@@ -76,7 +76,7 @@ class OrderAdmin extends ModelAdmin
                 "DeliveryPostCode"  => "Delivery Post Code",
                 "DeliveryCountryFull"=> "Delivery Country",
                 "DiscountAmount"    => "Discount Amount"
-            );
+            ];
         } else {
             $return = singleton($this->modelClass)->summaryFields();
         }
@@ -130,7 +130,7 @@ class OrderAdmin extends ModelAdmin
         // Ensure that we only show Order objects in the order tab
         if ($this->modelClass == Estimate::class) {
             $list = $list
-                ->addFilter(array("ClassName" => Estimate::class));
+                ->addFilter(["ClassName" => Estimate::class]);
         }
                 
         $this->extend("updateList", $list);

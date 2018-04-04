@@ -38,7 +38,7 @@ use SilverCommerce\OrdersAdmin\Control\DisplayController;
  *   VIEW
  *   EDIT
  *   DELETE
- * 
+ *
  * You can define an order prefix by using the "order_prefix" config
  * variable
  *
@@ -62,7 +62,7 @@ class Invoice extends Estimate implements PermissionProvider
      * List of possible statuses this order can have. Rather than using
      * an enum, we load this as a config variable that can be changed
      * more freely.
-     * 
+     *
      * @var array
      * @config
      */
@@ -83,7 +83,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * What statuses does an invoice need to be considered
      * "outstanding" (meaning not dispatched or complete]).
-     * 
+     *
      * @var array
      * @config
      */
@@ -96,8 +96,8 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * What statuses does an order need to be considered
      * "historic" (meaning dispatched/completed, etc)
-     * 
-     * 
+     *
+     *
      * @var array
      * @config
      */
@@ -110,7 +110,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * What statuses are considered "paid for". Meaning
      * they are complete, ready for processing, etc.
-     * 
+     *
      * @var array
      * @config
      */
@@ -124,8 +124,8 @@ class Invoice extends Estimate implements PermissionProvider
 
     /**
      * List of statuses that allow editing of an order. We can use this
-     * to fix certain orders in the CMS 
-     * 
+     * to fix certain orders in the CMS
+     *
      * @var array
      * @config
      */
@@ -142,7 +142,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * Set the default status for a new order, if this is set to null or
      * blank, it will not be used.
-     * 
+     *
      * @var string
      * @config
      */
@@ -151,7 +151,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order has been marked pending
      * (meaning we are awaiting payment).
-     * 
+     *
      * @var string
      * @config
      */
@@ -160,7 +160,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order is considered "paid" (meaning
      * ready for processing, dispatch, etc).
-     * 
+     *
      * @var string
      * @config
      */
@@ -169,7 +169,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order is considered "part paid" (meaning
      * partially paid, possibly deposit paid).
-     * 
+     *
      * @var string
      * @config
      */
@@ -178,7 +178,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order has not been completed (meaning
      * it is not ready for processing, dispatch, etc).
-     * 
+     *
      * @var string
      * @config
      */
@@ -186,7 +186,7 @@ class Invoice extends Estimate implements PermissionProvider
 
     /**
      * The status which an order is being processed
-     * 
+     *
      * @var string
      * @config
      */
@@ -194,7 +194,7 @@ class Invoice extends Estimate implements PermissionProvider
 
     /**
      * The status which an order has been canceled.
-     * 
+     *
      * @var string
      * @config
      */
@@ -202,7 +202,7 @@ class Invoice extends Estimate implements PermissionProvider
 
     /**
      * The status which an order has been refunded.
-     * 
+     *
      * @var string
      * @config
      */
@@ -211,7 +211,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order has been dispatched
      * (sent to customer).
-     * 
+     *
      * @var string
      * @config
      */
@@ -220,7 +220,7 @@ class Invoice extends Estimate implements PermissionProvider
     /**
      * The status which an order has been marked collected
      * (meaning goods collected from store).
-     * 
+     *
      * @var string
      * @config
      */
@@ -329,7 +329,7 @@ class Invoice extends Estimate implements PermissionProvider
      * Has this order been paid for? We determine this
      * by checking one of the pre-defined "paid_statuses"
      * in the config variable:
-     * 
+     *
      *   # Order.paid_statuses
      *
      * @return boolean
@@ -593,8 +593,7 @@ class Invoice extends Estimate implements PermissionProvider
             $member = Member::currentUser();
         }
 
-        if (
-            $member &&
+        if ($member &&
             Permission::checkMember($member->ID, ["ADMIN", "ORDERS_EDIT_INVOICES"]) &&
             in_array($this->Status, $this->config()->editable_statuses)
         ) {

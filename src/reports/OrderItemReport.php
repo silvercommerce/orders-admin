@@ -89,7 +89,7 @@ if (class_exists(Report::class)) {
 
             foreach ($orders as $order) {
                 // Setup a filter for our order items
-                $filter = array();
+                $filter = [];
 
                 if (!empty($params['Filter_ProductName'])) {
                     $filter["Title:PartialMatch"] = $params['Filter_ProductName'];
@@ -133,7 +133,7 @@ if (class_exists(Report::class)) {
             // Check if any order exist
             if ($first_order) {
                 // List all months
-                $months = array('All');
+                $months = ['All'];
                 for ($i = 1; $i <= 12; $i++) {
                     $months[] = date("F", mktime(0, 0, 0, $i + 1, 0, 0));
                 }
@@ -141,7 +141,7 @@ if (class_exists(Report::class)) {
                 // Get the first order, then count down from current year to that
                 $firstyear = new SSDatetime('FirstDate');
                 $firstyear->setValue($first_order->Created);
-                $years = array();
+                $years = [];
                 for ($i = date('Y'); $i >= $firstyear->Year(); $i--) {
                     $years[$i] = $i;
                 }

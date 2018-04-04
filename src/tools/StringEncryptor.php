@@ -152,7 +152,7 @@ class StringEncryptor
      */
     private function simplexor()
     {
-        $KeyList = array();
+        $KeyList = [];
         $output = "";
 
         // Convert $Key into array of ASCII values
@@ -197,7 +197,7 @@ class StringEncryptor
         $padding = "";
 
        // Pad input to an even block size boundary
-       $padlength = $blocksize - (strlen($this->data) % $blocksize);
+        $padlength = $blocksize - (strlen($this->data) % $blocksize);
         for ($i = 1; $i <= $padlength; $i++) {
             $padding .= chr($padlength);
         }

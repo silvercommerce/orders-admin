@@ -15,7 +15,7 @@ use SilverCommerce\OrdersAdmin\Model\MemberAddress;
 
 /**
  * Add additional settings to a memeber object
- * 
+ *
  * @package orders-admin
  * @subpackage extensions
  */
@@ -88,7 +88,7 @@ class MemberExtension extends DataExtension
 
     /**
      * Get all invoices from a contact that are designated
-     * "outstanding" 
+     * "outstanding"
      *
      * @return DataList
      */

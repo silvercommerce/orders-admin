@@ -26,7 +26,7 @@ use SilverCommerce\OrdersAdmin\Model\Notification as OrderNotification;
 use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
- * Add additional settings to the default siteconfig 
+ * Add additional settings to the default siteconfig
  */
 class SiteConfigExtension extends DataExtension
 {

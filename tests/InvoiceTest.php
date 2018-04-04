@@ -6,65 +6,64 @@ use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
 
-
 class InvoiceTest extends SapphireTest
 {
-	/**
-	 * Add some scaffold order records
-	 *
-	 * @var string
-	 */
-	protected static $fixture_file = 'OrdersScaffold.yml';
+    /**
+     * Add some scaffold order records
+     *
+     * @var string
+     */
+    protected static $fixture_file = 'OrdersScaffold.yml';
 
-	/**
-	 * Setup test only objects
-	 * 
-	 * @var array
-	 */
+    /**
+     * Setup test only objects
+     *
+     * @var array
+     */
     protected static $extra_dataobjects = [
         TestProduct::class
-	];
+    ];
 
-	/**
-	 * Add some extra functionality on construction
-	 *
-	 * @return void
-	 */	
-	public function setUp()
+    /**
+     * Add some extra functionality on construction
+     *
+     * @return void
+     */
+    public function setUp()
     {
-		parent::setUp();
-	}
+        parent::setUp();
+    }
 
-	/**
-	 * Clean up after tear down
-	 *
-	 * @return void
-	 */	
-	public function tearDown()
+    /**
+     * Clean up after tear down
+     *
+     * @return void
+     */
+    public function tearDown()
     {
-		parent::tearDown();
-	}
+        parent::tearDown();
+    }
 
-	/**
-	 * Test that mark paid flags the order as paid
-	 *
-	 * @return void
-	 */
-	public function testMarkPaid()
+    /**
+     * Test that mark paid flags the order as paid
+     *
+     * @return void
+     */
+    public function testMarkPaid()
     {
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markPaid();
 
-		$this->assertEquals("paid", $invoice->Status);
-		$this->assertTrue($invoice->isPaid());
-	}
+        $this->assertEquals("paid", $invoice->Status);
+        $this->assertTrue($invoice->isPaid());
+    }
     
     public function testMarkPartPaid()
     {
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markPartPaid();
 
-		$this->assertEquals("part-paid", $invoice->Status);
+        $this->assertEquals("part-paid", $invoice->Status);
     }
 
     public function testMarkPending()
@@ -72,7 +71,7 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markPending();
 
-		$this->assertEquals("pending", $invoice->Status);
+        $this->assertEquals("pending", $invoice->Status);
     }
 
     public function testMarkProcessing()
@@ -80,7 +79,7 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markProcessing();
 
-		$this->assertEquals("processing", $invoice->Status);
+        $this->assertEquals("processing", $invoice->Status);
     }
 
     public function testMarkCanceled()
@@ -88,7 +87,7 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markCanceled();
 
-		$this->assertEquals("canceled", $invoice->Status);
+        $this->assertEquals("canceled", $invoice->Status);
     }
 
     public function testMarkRefunded()
@@ -96,7 +95,7 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markRefunded();
 
-		$this->assertEquals("refunded", $invoice->Status);
+        $this->assertEquals("refunded", $invoice->Status);
     }
 
     public function testMarkDispatched()
@@ -104,7 +103,7 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markDispatched();
 
-		$this->assertEquals("dispatched", $invoice->Status);
+        $this->assertEquals("dispatched", $invoice->Status);
     }
 
     public function testMarkCollected()
@@ -112,6 +111,6 @@ class InvoiceTest extends SapphireTest
         $invoice = $this->objFromFixture(Invoice::class, 'unpaid');
         $invoice->markCollected();
 
-		$this->assertEquals("collected", $invoice->Status);
+        $this->assertEquals("collected", $invoice->Status);
     }
 }

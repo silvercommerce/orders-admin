@@ -26,9 +26,9 @@ use SilverStripe\Forms\DropdownField;
 /**
  * A LineItem is a single line item on an order, extimate or even in
  * the shopping cart.
- * 
+ *
  * An item has a number of fields that describes a product:
- * 
+ *
  * - Key: ID used to detect this item
  * - Title: Title of the item
  * - Content: Description of this object
@@ -52,7 +52,7 @@ class LineItem extends DataObject
     /**
      * The name of the param used on a related product to
      * track Stock Levels.
-     * 
+     *
      * Defaults to StockLevel
      *
      * @var string
@@ -62,7 +62,7 @@ class LineItem extends DataObject
 
     /**
      * Standard database columns
-     * 
+     *
      * @var array
      * @config
      */
@@ -83,7 +83,7 @@ class LineItem extends DataObject
 
     /**
      * Foreign key associations in DB
-     * 
+     *
      * @var array
      * @config
      */
@@ -118,7 +118,7 @@ class LineItem extends DataObject
 
     /**
      * Function to DB Object conversions
-     * 
+     *
      * @var array
      * @config
      */
@@ -136,7 +136,7 @@ class LineItem extends DataObject
 
     /**
      * Fields to display in list tables
-     * 
+     *
      * @var array
      * @config
      */
@@ -180,10 +180,10 @@ class LineItem extends DataObject
 
             $fields->addFieldsToTab(
                 "Root.Description",
-                array(
+                [
                     HTMLEditorField::create("Content")
                         ->addExtraClass("stacked")
-                )
+                ]
             );
 
             // Change unlink button to remove on customisation
@@ -213,7 +213,7 @@ class LineItem extends DataObject
 
     /**
      * Get the rate of tax for this item
-     * 
+     *
      * @return float
      */
     public function getTaxRate()
@@ -228,7 +228,7 @@ class LineItem extends DataObject
     /**
      * Get the price for a single line item (unit), minus any
      * tax
-     * 
+     *
      * @return float
      */
     public function getUnitPrice()
@@ -246,7 +246,7 @@ class LineItem extends DataObject
 
     /**
      * Get the amount of tax for a single unit of this item
-     * 
+     *
      * @return float
      */
     public function getUnitTax()
@@ -260,7 +260,7 @@ class LineItem extends DataObject
 
     /**
      * Get the total price and tax for a single unit
-     * 
+     *
      * @return float
      */
     public function getUnitTotal()
@@ -274,7 +274,7 @@ class LineItem extends DataObject
 
     /**
      * Get the value of this item, minus any tax
-     * 
+     *
      * @return float
      */
     public function getSubTotal()
@@ -288,7 +288,7 @@ class LineItem extends DataObject
 
     /**
      * Get the total amount of tax for a single unit of this item
-     * 
+     *
      * @return float
      */
     public function getTaxTotal()
@@ -302,7 +302,7 @@ class LineItem extends DataObject
 
     /**
      * Get the value of this item, minus any tax
-     * 
+     *
      * @return float
      */
     public function getTotal()
@@ -317,7 +317,7 @@ class LineItem extends DataObject
     /**
      * Get an image object associated with this line item.
      * By default this is retrieved from the base product.
-     * 
+     *
      * @return Image | null
      */
     public function Image()
@@ -405,7 +405,7 @@ class LineItem extends DataObject
     /**
      * Match this item to another object in the Database, by the
      * provided details.
-     * 
+     *
      * @param $relation_name = The class name of the related dataobject
      * @param $relation_col = The column name of the related object
      * @param $match_col = The column we use to match the two objects
@@ -416,7 +416,7 @@ class LineItem extends DataObject
         // Try to determine relation name
         if (!$relation_name && !$this->ProductClass) {
             $relation_name = "Product";
-        } elseif(!$relation_name && $this->ProductClass) {
+        } elseif (!$relation_name && $this->ProductClass) {
             $relation_name = $this->ProductClass;
         }
         
@@ -428,10 +428,10 @@ class LineItem extends DataObject
     /**
      * Find our original stock item (useful for adding links back to the
      * original product).
-     * 
+     *
      * This function is a synonym for @Link Match (as a result of) merging
      * LineItem
-     * 
+     *
      * @return DataObject
      */
     public function FindStockItem()
@@ -442,7 +442,7 @@ class LineItem extends DataObject
     /**
      * Check stock levels for this item, will return the actual number
      * of remaining stock after removing the current quantity
-     * 
+     *
      * @param $qty The quantity we want to check against
      * @return Int
      */
@@ -549,7 +549,7 @@ class LineItem extends DataObject
     {
         parent::onBeforeWrite();
 
-        // Generate a unique item key based on 
+        // Generate a unique item key based on
         $this->Key = $this->StockID . ':' . base64_encode(json_encode($this->Customisations()->toArray()));
     }
 

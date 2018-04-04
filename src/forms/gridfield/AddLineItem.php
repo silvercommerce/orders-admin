@@ -18,7 +18,6 @@ use Doctrine\Instantiator\Exception\UnexpectedValueException;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use LogicException;
 
-
 /**
  * A specific gridfield field designed to allow the creation of a new
  * order item and that auto completes all fields from a pre-defined
@@ -71,9 +70,9 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
 
     /**
      * When we check for existing items, should we check based on all
-     * filters or any of the chosen (setting this to true uses 
+     * filters or any of the chosen (setting this to true uses
      * $list->filter() where as false uses $list->filterAny())
-     * 
+     *
      * @var boolean
      */
     protected $strict_filter = true;
@@ -195,7 +194,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
 
     /**
      * This is the field that we attempt to match a TAX rate to
-     * when setting up an order item 
+     * when setting up an order item
      *
      * @var string
      **/
@@ -221,7 +220,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
 
     /**
      * Number of results to appear in autocomplete
-     * 
+     *
      * @var int
      */
     protected $results_limit = 20;
@@ -284,7 +283,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
             $objClass = $grid->getModelClass();
             $source_class = $this->getSourceClass();
             $source_item = null;
-            $filter = array();
+            $filter = [];
 
             // Has the user used autocomplete
             if (isset($data['relationID']) && $data['relationID']) {
@@ -341,14 +340,14 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
                 
                 $obj->setCastedField(
                     "Quantity",
-                     $curr_qty + 1
+                    $curr_qty + 1
                 );
                 
                 $id = $grid->getList()->add($obj);
             }
             
             if (!$obj->ID && $obj->canCreate()) {
-                // If source item not set, try and get one or get a 
+                // If source item not set, try and get one or get a
                 // an existing record
                 if (!$source_item && class_exists($source_class)) {
                     $source_item = $source_class::get()
@@ -414,10 +413,10 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
                     "GridFieldAddLineItem.TypeToAdd",
                     "Type to add by {Filters} or {Title}",
                     "Inform the user what to add based on",
-                    array(
+                    [
                         "Filters" => implode(", ", $this->getFilterFields()),
                         "Title" => $this->getCreateField()
-                    )
+                    ]
                 )
             )->addExtraClass("relation-search no-change-track")
             ->setAttribute(
@@ -428,9 +427,11 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         $find_action = GridField_FormAction::create(
             $grid,
             'gridfield_relationfind',
-			_t('GridField.Find', "Find"), 'find', 'find'
+            _t('GridField.Find', "Find"),
+            'find',
+            'find'
         );
-		$find_action->setAttribute('data-icon', 'relationfind');
+        $find_action->setAttribute('data-icon', 'relationfind');
 
         $add_action = GridField_FormAction::create(
             $grid,
@@ -466,7 +467,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     public function doSearch($gridField, $request)
     {
         $product_class = $this->getSourceClass();
-        $params = array();
+        $params = [];
         
         // Do we have filter fields setup?
         if ($this->getAutocompleteFields()) {
@@ -477,8 +478,10 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         
         if (!$search_fields) {
             throw new LogicException(
-                sprintf('GridFieldAddExistingAutocompleter: No searchable fields could be found for class "%s"',
-                $product_class)
+                sprintf(
+                    'GridFieldAddExistingAutocompleter: No searchable fields could be found for class "%s"',
+                    $product_class
+                )
             );
         }
         
@@ -487,7 +490,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
             $params[$name] = $request->getVar('gridfieldaddbydbfield');
         }
 
-        $json = array();
+        $json = [];
 
         if (class_exists($product_class)) {
             $results = DataList::create($product_class)

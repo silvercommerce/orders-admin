@@ -114,5 +114,4 @@ class ContactExtension extends DataExtension
             return true;
         }
     }
-
 }

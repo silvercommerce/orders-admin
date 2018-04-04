@@ -25,7 +25,7 @@ use ilateral\SilverStripe\Users\Control\AccountController;
 /**
  * Add extra fields to a user account (if the users module is
  * installed) to allow logged in users to see their invoices.
- * 
+ *
  * @package orders
  */
 class AccountControllerExtension extends Extension
@@ -144,7 +144,7 @@ class AccountControllerExtension extends Extension
 
         /**
      * Form used for adding or editing addresses
-     * 
+     *
      * @return Form
      */
     public function AddressForm()
@@ -208,7 +208,7 @@ class AccountControllerExtension extends Extension
 
         /**
      * Display all addresses associated with the current user
-     * 
+     *
      * @return HTMLText
      */
     public function addresses()
@@ -241,7 +241,7 @@ class AccountControllerExtension extends Extension
 
     /**
      * Display all addresses associated with the current user
-     * 
+     *
      * @return HTMLText
      */
     public function addaddress()
@@ -277,7 +277,7 @@ class AccountControllerExtension extends Extension
 
     /**
      * Display all addresses associated with the current user
-     * 
+     *
      * @return HTMLText
      */
     public function editaddress()
@@ -297,11 +297,11 @@ class AccountControllerExtension extends Extension
                 
             $this
                 ->owner
-                ->customise(array(
+                ->customise([
                     "Title" => _t("ContactAdmin.EditAddress", "Edit Address"),
                     "MenuTitle" => _t("ContactAdmin.EditAddress", "Edit Address"),
                     "Form" => $form
-                ));
+                ]);
 
             $this->owner->extend("updateEditAddress");
             
@@ -321,7 +321,7 @@ class AccountControllerExtension extends Extension
 
     /**
      * Remove an addresses by the given ID (if allowed)
-     * 
+     *
      * @return HTMLText
      */
     public function removeaddress()

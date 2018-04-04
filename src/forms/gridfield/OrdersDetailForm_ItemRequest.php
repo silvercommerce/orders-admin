@@ -54,19 +54,19 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
             return $controller->redirect($this->Link("edit"));
         }
 
-        $return = $this->customise(array(
+        $return = $this->customise([
             'Backlink' => $controller->hasMethod('Backlink') ? $controller->Backlink() : $controller->Link(),
             'ItemEditForm' => $form,
-        ))->renderWith($this->getTemplates());
+        ])->renderWith($this->getTemplates());
         
         if ($request->isAjax()) {
             return $return;
         } else {
             // If not requested by ajax, we need to render it within the controller context+template
-            return $controller->customise(array(
+            return $controller->customise([
                 // TODO CMS coupling
                 'Content' => $return,
-            ));
+            ]);
         }
     }
 
@@ -88,7 +88,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         $actions->removeByName("action_doDelete");
 
         // Deal with Estimate objects
-        if ($record->ClassName == Estimate::class) {            
+        if ($record->ClassName == Estimate::class) {
             if ($record->ID && $can_edit) {
                 $actions->insertAfter(
                     FormAction::create(
@@ -140,7 +140,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
 
         if ($record->ID) {
             // Setup order history
-            if (Permission::check(array('ORDERS_EDIT_INVOICES', 'ADMIN'), 'any', $member)) {
+            if (Permission::check(['ORDERS_EDIT_INVOICES', 'ADMIN'], 'any', $member)) {
                 $versions = $record->AllVersions();
                 $first_version = $versions->First();
                 $curr_version = ($first_version) ? $versions->First() : null;
@@ -307,14 +307,14 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         } catch (ValidationException $e) {
             $form->sessionMessage($e->getResult()->message(), 'bad', ValidationResult::CAST_HTML);
             
-            $responseNegotiator = new PjaxResponseNegotiator(array(
+            $responseNegotiator = new PjaxResponseNegotiator([
                 'CurrentForm' => function () use (&$form) {
                     return $form->forTemplate();
                 },
                 'default' => function () use (&$controller) {
                     return $controller->redirectBack();
                 }
-            ));
+            ]);
             
             if ($controller->getRequest()->isAjax()) {
                 $controller->getRequest()->addHeader('X-Pjax', 'CurrentForm');
@@ -330,10 +330,10 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         $message = _t(
             'OrdersAdmin.StatusChanged',
             'Status Changed {name} {link}',
-            array(
+            [
                 'name' => $this->record->i18n_singular_name(),
                 'link' => $link
-            )
+            ]
         );
         
         $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);

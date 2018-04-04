@@ -41,7 +41,7 @@ use DateTime;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
- * 
+ *
  */
 class Estimate extends DataObject implements PermissionProvider
 {
@@ -58,7 +58,7 @@ class Estimate extends DataObject implements PermissionProvider
     /**
      * Actions on an order are to determine what will happen on
      * completion (the defaults are post or collect).
-     * 
+     *
      * @var array
      * @config
      */
@@ -71,7 +71,7 @@ class Estimate extends DataObject implements PermissionProvider
      * Set the default action on our order. If we were using this module
      * for a more POS type solution, we would probably change this to
      * collect.
-     * 
+     *
      * @var string
      * @config
      */
@@ -79,7 +79,7 @@ class Estimate extends DataObject implements PermissionProvider
     
     /**
      * What is the action string for a order to be posted
-     * 
+     *
      * @var string
      * @config
      */
@@ -87,7 +87,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * What is the action string for a order to be collected
-     * 
+     *
      * @var string
      * @config
      */
@@ -95,7 +95,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Standard DB columns
-     * 
+     *
      * @var array
      * @config
      */
@@ -141,7 +141,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Foreign key associations
-     * 
+     *
      * @var array
      * @config
      */
@@ -152,7 +152,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * One to many assotiations
-     * 
+     *
      * @var array
      * @config
      */
@@ -162,7 +162,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Cast methods for templates
-     * 
+     *
      * @var array
      * @config
      */
@@ -185,7 +185,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Assign default values
-     * 
+     *
      * @var array
      * @config
      */
@@ -214,7 +214,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Add extension classes
-     * 
+     *
      * @var array
      * @config
      */
@@ -224,7 +224,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Declare version history
-     * 
+     *
      * @var array
      * @config
      */
@@ -234,7 +234,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Default sort order for ORM
-     * 
+     *
      * @var array
      * @config
      */
@@ -328,7 +328,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Get the rendered name of the billing country, based on the local
-     * 
+     *
      * @return string
      */
     public function getCountryFull()
@@ -356,8 +356,8 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Get the rendered name of the delivery country, based on the local
-     * 
-     * @return string 
+     *
+     * @return string
      */
     public function getDeliveryCountryFull()
     {
@@ -378,7 +378,7 @@ class Estimate extends DataObject implements PermissionProvider
             return $this->DiscountType . " (" . $this->dbObject("DiscountAmount")->Nice() . ")";
         } else {
             return "";
-        }      
+        }
     }
 
     /**
@@ -495,7 +495,7 @@ class Estimate extends DataObject implements PermissionProvider
                     "Rate" => $rate,
                     "Total" => $currency
                 ]));
-            } elseif($rate && $existing) {
+            } elseif ($rate && $existing) {
                 $existing->Total->setValue(
                     $existing->Total->getValue() + $item->getTaxTotal()
                 );
@@ -511,7 +511,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @return float
      */
     public function getTotal()
-    {   
+    {
         $total = ($this->SubTotal - $this->DiscountAmount) + $this->TaxTotal;
         
         $this->extend("updateTotal", $total);
@@ -646,7 +646,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Scaffold CMS form fields
-     * 
+     *
      * @return FieldList
      */
     public function getCMSFields()
@@ -715,13 +715,13 @@ class Estimate extends DataObject implements PermissionProvider
                             $this->config()->get("actions")
                         ),
                         ReadonlyField::create("Number", "#"),
-                        ReadonlyField::create("SubTotalValue",_t("OrdersAdmin.SubTotal", "Sub Total"))
+                        ReadonlyField::create("SubTotalValue", _t("OrdersAdmin.SubTotal", "Sub Total"))
                             ->setValue($this->obj("SubTotal")->Nice()),
-                        ReadonlyField::create("DiscountValue",_t("OrdersAdmin.Discount", "Discount"))
+                        ReadonlyField::create("DiscountValue", _t("OrdersAdmin.Discount", "Discount"))
                             ->setValue($this->dbObject("DiscountAmount")->Nice()),
-                        ReadonlyField::create("TaxValue",_t("OrdersAdmin.Tax", "Tax"))
+                        ReadonlyField::create("TaxValue", _t("OrdersAdmin.Tax", "Tax"))
                             ->setValue($this->obj("TaxTotal")->Nice()),
-                        ReadonlyField::create("TotalValue",_t("OrdersAdmin.Total", "Total"))
+                        ReadonlyField::create("TotalValue", _t("OrdersAdmin.Total", "Total"))
                             ->setValue($this->obj("Total")->Nice())
                     )->setName("OrdersSidebar")
                     ->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
@@ -846,14 +846,14 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Generate a randomised order number for this order.
-     * 
+     *
      * The order number is generated based on the current order
      * ID and is padded to a multiple of 4 and we add "-" every
      * 4 characters.
-     * 
+     *
      * We then add an order prefix (if one is set) or the current
      * year.
-     * 
+     *
      * This keeps a consistent order number structure that allows
      * for a large number of orders before changing.
      *
@@ -983,7 +983,7 @@ class Estimate extends DataObject implements PermissionProvider
         }
 
         // if Billing Address is not set, use customer's default
-        // location 
+        // location
         if (!$this->BillingAddress && $contact->exists() && $contact->DefaultLocation()) {
             $location = $contact->DefaultLocation();
             foreach (Config::inst()->get(ContactLocation::class, "db") as $param => $value) {

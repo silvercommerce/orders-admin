@@ -9,7 +9,7 @@ use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
  * Overwrite group object so we can setup default groups
- * 
+ *
  * @package orders-admin
  */
 class GroupExtension extends DataExtension

@@ -77,7 +77,7 @@ class Notification extends DataObject
      * Deal with sending a notification. This is assumed to be an email
      * by default, but can be extended through "augmentSend" to allow
      * adding of additional notification types (such as SMS, XML, etc)
-     * 
+     *
      */
     public function sendNotification($order)
     {
