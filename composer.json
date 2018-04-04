@@ -35,6 +35,9 @@
         "silvercommerce/tax-admin": "~1.0",
         "silvercommerce/contact-admin": "~1.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    },
     "extra": {
         "expose": [
             "client/dist"
