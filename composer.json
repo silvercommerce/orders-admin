@@ -46,6 +46,10 @@
             "SilverCommerce\\OrdersAdmin\\Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "lint": "phpcs -s src/ tests/",
+        "lint-clean": "phpcbf src/ tests/"
+    },
     "suggest": {
         "silverstripe/cms": "Add full content management support to your site",
         "i-lateral/silverstripe-middleman": "Add CMS vars, such as menu, searchform, etc to your site",
