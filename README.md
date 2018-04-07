@@ -1,6 +1,9 @@
 Silverstripe Orders Module
 ==========================
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/badges/quality-score.png?b=1.0)](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/?branch=1.0)
+[![Build Status](https://travis-ci.org/silvercommerce/orders-admin.svg?branch=1.0)](https://travis-ci.org/silvercommerce/orders-admin)
+
 Provides a simple order managemend interface, as well as an order object
 that can be easily worked with from your own code.
 
