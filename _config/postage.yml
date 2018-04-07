@@ -1,0 +1,10 @@
+---
+Name: orderspostage
+Only:
+  moduleexists: 'silvercommerce/postage'
+After: '#postageconfig'
+---
+# Add postage support to an estimate/invoice (if installed)
+SilverCommerce\OrdersAdmin\Model\Estimate:
+  extensions:
+    - SilverCommerce\Postage\Extensions\PostageExtension
