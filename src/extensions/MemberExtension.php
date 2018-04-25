@@ -22,6 +22,10 @@ use SilverCommerce\OrdersAdmin\Model\MemberAddress;
 class MemberExtension extends DataExtension
 {
 
+    private static $belongs_to = [
+        'Contact' => Contact::class . '.Member'
+    ];
+
     private static $casting = [
         "ContactTitle" => "Varchar"
     ];
@@ -34,24 +38,6 @@ class MemberExtension extends DataExtension
                 ReadonlyField::create("ContactTitle")
             );
         }
-    }
-
-    /**
-     * Find a contact associated with this account
-     *
-     * @return Contact
-     */
-    public function Contact()
-    {
-        $contact = Contact::get()
-            ->find("MemberID", $this->owner->ID);
-        
-        if (!$contact) {
-            $contact = Contact::create();
-            $contact->ID = -1;
-        }
-
-        return $contact;
     }
 
     /**
