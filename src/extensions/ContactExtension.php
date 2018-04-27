@@ -16,11 +16,7 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
  * Add additional functions to a contact
  */
 class ContactExtension extends DataExtension
-{
-    private static $has_one = [
-        "Member" => Member::class
-    ];
-    
+{   
     private static $has_many = [
         "Invoices" => Invoice::class,
         "Estimates"=> Estimate::class
@@ -48,19 +44,6 @@ class ContactExtension extends DataExtension
                 ->removeComponentsByType(GridFieldDetailForm::class)
                 ->addComponent(new OrdersDetailForm());
         }
-
-        // Add a dropdown to select user account
-        $fields->addFieldToTab(
-            "Root.Main",
-            DropdownField::create(
-                "MemberID",
-                _t(
-                    "OrdersAdmin.LinkContactToAccount",
-                    "Link this contact to a user account"
-                ),
-                Member::get()->map()
-            )->setEmptyString("")
-        );
     }
 
     /**

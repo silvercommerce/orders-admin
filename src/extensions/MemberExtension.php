@@ -21,37 +21,6 @@ use SilverCommerce\OrdersAdmin\Model\MemberAddress;
  */
 class MemberExtension extends DataExtension
 {
-
-    private static $belongs_to = [
-        'Contact' => Contact::class . '.Member'
-    ];
-
-    private static $casting = [
-        "ContactTitle" => "Varchar"
-    ];
-
-    public function updateCMSFields(FieldList $fields)
-    {
-        if ($this->owner->ID) {
-            $fields->addFieldToTab(
-                "Root.Main",
-                ReadonlyField::create("ContactTitle")
-            );
-        }
-    }
-
-    /**
-     * The name of the contact assotiated with this account
-     *
-     * @return void
-     */
-    public function getContactTitle()
-    {
-        $contact = $this->owner->Contact();
-
-        return $contact->Title;
-    }
-
     /**
      * Get a discount from the groups this member is in
      *
@@ -70,6 +39,32 @@ class MemberExtension extends DataExtension
         $discounts->sort("Amount", "DESC");
 
         return $discounts->first();
+    }
+
+    /**
+     * Get all invoices from a contact
+     *
+     * @return DataList
+     */
+    public function Invoices()
+    {
+        return $this
+            ->owner
+            ->Contact()
+            ->Invoices();
+    }
+
+    /**
+     * Get all estimates from a contact
+     *
+     * @return DataList
+     */
+    public function Estimates()
+    {
+        return $this
+            ->owner
+            ->Contact()
+            ->Estimates();
     }
 
     /**
@@ -98,25 +93,5 @@ class MemberExtension extends DataExtension
             ->owner
             ->Contact()
             ->HistoricInvoices();
-    }
-
-    /**
-     * If no contact exists for this account, then create one
-     *
-     * @return void
-     */
-    public function onAfterWrite()
-    {
-        parent::onAfterWrite();
-
-        if (!$this->Contact()->exists()) {
-            $contact = Contact::create([
-                "FirstName" => $this->owner->FirstName,
-                "Surname" => $this->owner->Surname,
-                "Email" => $this->owner->Email
-            ]);
-            $contact->MemberID = $this->owner->ID;
-            $contact->write();
-        }
     }
 }
