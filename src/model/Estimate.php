@@ -2,42 +2,43 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
-use SilverStripe\ORM\DataObject;
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Versioned\Versioned;
-use SilverStripe\Control\Controller;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\Forms\FieldGroup;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\DateField;
-use SilverStripe\ORM\FieldType\DBCurrency;
+use DateTime;
+use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
+use SilverStripe\Forms\DateField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\FieldGroup;
+use SilverStripe\Forms\HeaderField;
+use SilverStripe\Control\Controller;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Security\Permission;
+use SilverStripe\Versioned\Versioned;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\ORM\FieldType\DBCurrency;
 use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Security\PermissionProvider;
+use SilverCommerce\ContactAdmin\Model\Contact;
+use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
-use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverCommerce\ContactAdmin\Model\ContactLocation;
+use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use SilverStripe\Security\Member;
-use SilverStripe\Security\Permission;
-use SilverStripe\Security\PermissionProvider;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\i18n\i18n;
+use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
+use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
-use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
-use SilverCommerce\ContactAdmin\Model\Contact;
-use SilverCommerce\ContactAdmin\Model\ContactLocation;
-use SilverCommerce\OrdersAdmin\Control\DisplayController;
-use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
-use DateTime;
+use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -651,8 +652,9 @@ class Estimate extends DataObject implements PermissionProvider
      */
     public function getCMSFields()
     {
-        
-        $this->beforeUpdateCMSFields(function ($fields) {
+        $self = $this;
+   
+        $this->beforeUpdateCMSFields(function ($fields) use ($self) {
             $siteconfig = SiteConfig::current_site_config();
 
             $fields->removeByName("StartDate");
@@ -785,6 +787,15 @@ class Estimate extends DataObject implements PermissionProvider
                         )
                     )->setEmptyString("")
                 ]
+            );
+
+            $fields->addFieldToTab(
+                "Root.History",
+                VersionHistoryField::create(
+                    "History",
+                    _t("SilverCommerce\VersionHistoryField.History", "History"),
+                    $self
+                )->addExtraClass("stacked")
             );
             
             $root = $fields->findOrMakeTab("Root");

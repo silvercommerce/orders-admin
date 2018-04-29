@@ -139,49 +139,6 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         }
 
         if ($record->ID) {
-            // Setup order history
-            if (Permission::check(['ORDERS_EDIT_INVOICES', 'ADMIN'], 'any', $member)) {
-                $versions = $record->AllVersions();
-                $first_version = $versions->First();
-                $curr_version = ($first_version) ? $versions->First() : null;
-                $message = "";
-
-                foreach ($versions as $version) {
-                    $i = $version->Version;
-                    $name = "History_{$i}";
-
-                    if ($i > 1) {
-                        $frm = Versioned::get_version($record->ClassName, $record->ID, $i - 1);
-                        $to = Versioned::get_version($record->ClassName, $record->ID, $i);
-                        $diff = new DataDifferencer($frm, $to);
-
-                        if ($version->Author()) {
-                            $message = "<p>{$version->Author()->FirstName} ({$version->LastEdited})</p>";
-                        } else {
-                            $message = "<p>Unknown ({$version->LastEdited})</p>";
-                        }
-
-                        if ($diff->ChangedFields()->exists()) {
-                            $message .= "<ul>";
-
-                            // Now loop through all changed fields and track as message
-                            foreach ($diff->ChangedFields() as $change) {
-                                if ($change->Name != "LastEdited") {
-                                    $message .= "<li>{$change->Title}: {$change->Diff}</li>";
-                                }
-                            }
-
-                            $message .= "</ul>";
-                        }
-                        
-                        $fields->addFieldToTab("Root.History", LiteralField::create(
-                            $name,
-                            "<div class=\"field\">{$message}</div>"
-                        ));
-                    }
-                }
-            }
-
             // Add a duplicate button, either after the save button or
             // the change status "save" button.
             $duplicate_button = FormAction::create(
