@@ -37,7 +37,7 @@ use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
-use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
+use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 
 /**
@@ -671,7 +671,7 @@ class Estimate extends DataObject implements PermissionProvider
                 "Root.Main",
                 [
                     // Items field
-                    GridField::create(
+                    ReadOnlyGridField::create(
                         "Items",
                         "",
                         $this->Items(),
