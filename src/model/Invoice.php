@@ -25,7 +25,6 @@ use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
-use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemGridField;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 
