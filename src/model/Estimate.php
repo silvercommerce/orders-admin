@@ -201,7 +201,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
-        'Number'   => '#',
+        'Number'        => '#',
         'StartDate'     => 'Date',
         'EndDate'       => 'Expires',
         'Company'       => 'Company',
@@ -211,6 +211,44 @@ class Estimate extends DataObject implements PermissionProvider
         'PostCode'      => 'Post Code',
         "Total"         => "Total",
         "LastEdited"    => "Last Edited"
+    ];
+
+    /**
+     * Fields to show in summary views
+     *
+     * @var array
+     * @config
+     */
+    private static $export_fields = [
+        "ID",
+        "Number",
+        "Created",
+        "StartDate",
+        "EndDate",
+        "ItemSummary",
+        "SubTotal",
+        "TaxTotal",
+        "Total",
+        "Company",
+        "FirstName",
+        "Surname",
+        "Email",
+        "PhoneNumber",
+        "Address1",
+        "Address2",
+        "City",
+        "PostCode",
+        "Country",
+        "County",
+        "DeliveryCompany",
+        "DeliveryFirstName",
+        "DeliverySurname",
+        "DeliveryAddress1",
+        "DeliveryAddress2",
+        "DeliveryCity",
+        "DeliveryCountry",
+        "DeliveryCounty",
+        "DeliveryPostCode",
     ];
 
     /**

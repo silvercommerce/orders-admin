@@ -237,6 +237,16 @@ class Invoice extends Estimate implements PermissionProvider
         "Status"        => "Status"
     ];
 
+    /**
+     * Fields to use when exporting from `OrdersAdmin`
+     *
+     * @var array
+     * @config
+     */
+    private static $export_fields = [
+        "Status"
+    ];
+
     public function populateDefaults()
     {
         parent::populateDefaults();

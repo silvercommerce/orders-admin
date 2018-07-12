@@ -4,19 +4,20 @@ namespace SilverCommerce\OrdersAdmin\Admin;
 
 use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
+use SilverStripe\Core\Config\Config;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
+use Colymba\BulkManager\BulkAction\EditHandler;
 use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
-use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
-use Colymba\BulkManager\BulkAction\EditHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\PendingHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\PartPaidHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\ProcessingHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\DispatchedHandler;
+use SilverCommerce\CatalogueAdmin\BulkManager\ProcessingHandler;
+use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
 
  /**
   * Add interface to manage orders through the CMS
@@ -44,46 +45,22 @@ class OrderAdmin extends ModelAdmin
     public $showImportForm = [];
 
     /**
-     * For an order, export all fields by default
+     * Export all data from estimates/invoices.
+     * 
+     * By default, we use the "export_fields" config variable, but
+     * fall back to summary_fields if this is not set.
      *
+     * @return array
      */
     public function getExportFields()
     {
-        if ($this->modelClass == Invoice::class) {
-            $return = [
-                "Number"            => "#",
-                "Status"            => "Status",
-                "Created"           => "Created",
-                "Company"           => "Company Name",
-                "FirstName"         => "First Name(s)",
-                "Surname"           => "Surname",
-                "Email"             => "Email",
-                "PhoneNumber"       => "Phone Number",
-                "ItemSummary"       => "Items Ordered",
-                "SubTotal"          => "SubTotal",
-                "TaxTotal"          => "TaxTotal",
-                "Total"             => "Total",
-                "Address1"          => "Billing Address 1",
-                "Address2"          => "Billing Address 2",
-                "City"              => "Billing City",
-                "PostCode"          => "Billing Post Code",
-                "CountryFull"       => "Billing Country",
-                "DeliveryFirstnames"=> "Delivery First Name(s)",
-                "DeliverySurname"   => "Delivery Surname",
-                "DeliveryAddress1"  => "Delivery Address 1",
-                "DeliveryAddress2"  => "Delivery Address 2",
-                "DeliveryCity"      => "Delivery City",
-                "DeliveryPostCode"  => "Delivery Post Code",
-                "DeliveryCountryFull"=> "Delivery Country",
-                "DiscountAmount"    => "Discount Amount"
-            ];
-        } else {
-            $return = singleton($this->modelClass)->summaryFields();
+        $fields = Config::inst()->get($this->modelClass, "export_fields");
+
+        if ($fields && is_array($fields)) {
+            return $fields;
         }
 
-        $this->extend("updateExportFields", $return);
-
-        return $return;
+        return singleton($this->modelClass)->summaryFields();
     }
 
     public function getEditForm($id = null, $fields = null)
