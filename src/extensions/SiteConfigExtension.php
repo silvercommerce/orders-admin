@@ -8,22 +8,12 @@ use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\ToggleCompositeField;
-use SilverStripe\Forms\TextareaField;
-use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
-use SilverStripe\Forms\GridField\GridFieldButtonRow;
-use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
-use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\Assets\Image;
-use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
-use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Model\Notification as OrderNotification;
-use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
  * Add additional settings to the default siteconfig
@@ -46,8 +36,7 @@ class SiteConfigExtension extends DataExtension
     ];
 
     private static $has_many = [
-        "OrderNotifications"=> OrderNotification::class,
-        'Discounts'         => Discount::class
+        "OrderNotifications"=> OrderNotification::class
     ];
 
     private static $defaults = [
@@ -56,20 +45,6 @@ class SiteConfigExtension extends DataExtension
     
     public function updateCMSFields(FieldList $fields)
     {
-        // Discount options
-        $discount_fields = ToggleCompositeField::create(
-            'DiscountSettings',
-            _t("Orders.DiscountSettings", "Discount Settings"),
-            [
-                LiteralField::create("DiscountPadding", "<br/>"),
-                GridField::create(
-                    'Discounts',
-                    '',
-                    $this->owner->Discounts()
-                )->setConfig(GridFieldConfig_RecordEditor::create())
-            ]
-        );
-
         // Order Notifications
         $notification_fields = ToggleCompositeField::create(
             'OrderNotificationSettings',
@@ -130,7 +105,6 @@ class SiteConfigExtension extends DataExtension
         $fields->addFieldsToTab(
             'Root.Shop',
             [
-                $discount_fields,
                 $notification_fields,
                 $invoice_customisation_fields
             ]

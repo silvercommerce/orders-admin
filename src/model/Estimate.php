@@ -131,10 +131,6 @@ class Estimate extends DataObject implements PermissionProvider
         'DeliveryCounty'    => 'Varchar',
         'DeliveryPostCode'  => 'Varchar',
         'DeliveryCountry'   => 'Varchar',
-        
-        // Discount Provided
-        "DiscountType"      => "Varchar",
-        "DiscountAmount"    => "Currency",
 
         // Access key (for viewing via non logged in users)
         "AccessKey"         => "Varchar(40)"
@@ -147,7 +143,6 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $has_one = [
-        "Discount"  => Discount::class,
         "Customer"  => Contact::class
     ];
 
@@ -180,18 +175,7 @@ class Estimate extends DataObject implements PermissionProvider
         'TotalWeight'       => 'Decimal',
         'ItemSummary'       => 'Text',
         'ItemSummaryHTML'   => 'HTMLText',
-        'TranslatedStatus'  => 'Varchar',
-        'DiscountDetails'   => "Varchar"
-    ];
-
-    /**
-     * Assign default values
-     *
-     * @var array
-     * @config
-     */
-    private static $defaults = [
-        'DiscountAmount'    => 0
+        'TranslatedStatus'  => 'Varchar'
     ];
 
     /**
@@ -406,21 +390,6 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Generate a string outlining the details of selected
-     * discount
-     *
-     * @return string
-     */
-    public function getDiscountDetails()
-    {
-        if ($this->DiscountType) {
-            return $this->DiscountType . " (" . $this->dbObject("DiscountAmount")->Nice() . ")";
-        } else {
-            return "";
-        }
-    }
-
-    /**
      * Find the total quantity of items in the shopping cart
      *
      * @return int
@@ -489,16 +458,7 @@ class Estimate extends DataObject implements PermissionProvider
         
         // Calculate total from items in the list
         foreach ($items as $item) {
-            // If a discount applied, get the tax based on the
-            // discounted amount
-            if ($this->DiscountAmount > 0) {
-                $discount = $this->DiscountAmount / $this->TotalItems;
-                $price = $item->UnitPrice - $discount;
-                $tax = ($price / 100) * $item->TaxRate;
-            } else {
-                $tax = $item->UnitTax;
-            }
-
+            $tax = $item->UnitTax;
             $total += $tax * $item->Quantity;
         }
         
@@ -551,8 +511,8 @@ class Estimate extends DataObject implements PermissionProvider
      */
     public function getTotal()
     {
-        $total = ($this->SubTotal - $this->DiscountAmount) + $this->TaxTotal;
-        
+        $total = $this->SubTotal + $this->TaxTotal;
+
         $this->extend("updateTotal", $total);
         
         return $total;
@@ -674,16 +634,6 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Has this order got a discount applied?
-     *
-     * @return boolean
-     */
-    public function hasDiscount()
-    {
-        return (ceil($this->DiscountAmount)) ? true : false;
-    }
-
-    /**
      * Scaffold CMS form fields
      *
      * @return FieldList
@@ -700,9 +650,6 @@ class Estimate extends DataObject implements PermissionProvider
             $fields->removeByName("Number");
             $fields->removeByName("AccessKey");
             $fields->removeByName("Action");
-            $fields->removeByName("DiscountID");
-            $fields->removeByName("DiscountType");
-            $fields->removeByName("DiscountAmount");
             $fields->removeByName("Items");
             
             $fields->addFieldsToTab(
@@ -730,21 +677,6 @@ class Estimate extends DataObject implements PermissionProvider
                         '<div class="field form-group"></div>'
                     ),
                     
-                    // Discount
-                    HeaderField::create(
-                        "DiscountDetailsHeader",
-                        _t("Orders.DiscountDetails", "Discount")
-                    ),
-                    DropdownField::create(
-                        "DiscountID",
-                        $this->fieldLabel("Discount"),
-                        $siteconfig->Discounts()->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.ApplyADiscount",
-                        "Apply a discount"
-                    )),
-                    ReadonlyField::create("DiscountDetails"),
-                    
                     // Sidebar
                     FieldGroup::create(
                         DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
@@ -757,8 +689,6 @@ class Estimate extends DataObject implements PermissionProvider
                         ReadonlyField::create("Number", "#"),
                         ReadonlyField::create("SubTotalValue", _t("OrdersAdmin.SubTotal", "Sub Total"))
                             ->setValue($this->obj("SubTotal")->Nice()),
-                        ReadonlyField::create("DiscountValue", _t("OrdersAdmin.Discount", "Discount"))
-                            ->setValue($this->dbObject("DiscountAmount")->Nice()),
                         ReadonlyField::create("TaxValue", _t("OrdersAdmin.Tax", "Tax"))
                             ->setValue($this->obj("TaxTotal")->Nice()),
                         ReadonlyField::create("TotalValue", _t("OrdersAdmin.Total", "Total"))
@@ -844,41 +774,6 @@ class Estimate extends DataObject implements PermissionProvider
         });
         
         return parent::getCMSFields();
-    }
-
-    /**
-     * Find the total discount based on discount items added.
-     *
-     * @return float
-     */
-    protected function get_discount_amount()
-    {
-        $discount = $this->Discount();
-        $total = 0;
-        $discount_amount = 0;
-        $items = $this->TotalItems;
-        
-        foreach ($this->Items() as $item) {
-            if ($item->Price) {
-                $total += ($item->Price * $item->Quantity);
-            }
-            
-            if ($item->Price && $discount && $discount->Amount) {
-                if ($discount->Type == "Fixed") {
-                    $discount_amount = $discount_amount + ($discount->Amount / $items) * $item->Quantity;
-                } elseif ($discount->Type == "Percentage") {
-                    $discount_amount = $discount_amount + (($item->Price / 100) * $discount->Amount) * $item->Quantity;
-                }
-            }
-        }
-
-        if ($discount_amount > $total) {
-            $discount_amount = $total;
-        }
-
-        $this->extend("augmentDiscountCalculation", $discount_amount);
-        
-        return $discount_amount;
     }
 
     /**
@@ -1051,12 +946,6 @@ class Estimate extends DataObject implements PermissionProvider
             $this->DeliveryCity = $this->City;
             $this->DeliveryPostCode = $this->PostCode;
             $this->DeliveryCountry = $this->Country;
-        }
-
-        // Assign discount info if needed
-        if ($this->Discount()->exists()) {
-            $this->DiscountAmount = $this->get_discount_amount();
-            $this->DiscountType = $this->Discount()->Title;
         }
 
         // If date not set, make thie equal the created date

@@ -5,18 +5,14 @@ namespace SilverCommerce\OrdersAdmin\Extensions;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\Group;
 use SilverStripe\ORM\DB;
-use SilverCommerce\OrdersAdmin\Model\Discount;
 
 /**
- * Overwrite group object so we can setup default groups
+ * Overwrite group object and setup default groups
  *
  * @package orders-admin
  */
 class GroupExtension extends DataExtension
 {
-    private static $belongs_many_many = [
-        "Discounts" => Discount::class
-    ];
 
     public function requireDefaultRecords()
     {

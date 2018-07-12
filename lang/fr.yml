@@ -87,19 +87,11 @@ fr:
     DeliveryDetails: 'Informations de livraison'
     DeliverySavedAddress: 'Deliver to a saved address'
     Description: Description
-    Discount: Remise
-    DiscountAdded: 'Remise enregistrée'
-    DiscountCode: 'Code promo'
-    DiscountFixedText: '{title} de reduction s'applique à votre commande prochaine'
-    DiscountNotValid: 'Code promo invalide'
-    DiscountNotValidText: 'Ce code promo est invalide'
-    DiscountPercentText: 'Un bon d'achat de EUR {amount} s'applique à votre commande'
     DontHaveAccount: 'Vous n''avez pas de compte?'
     Edit: Edit
     EditAddress: 'Modifier cette adresse'
     Email: E-mail
     EnterDifferentAddress: EnterDifferentAddress:
-    EnterDiscountCode: 'Enter a discount code'
     Error: 'Une erreur est passé'
     EstimateShipping: 'Estimer frais de livraison'
     FirstName: 'Prénom(s)'
@@ -151,7 +143,6 @@ fr:
     YourAddresses: 'Vos Adresses'
     ZipCode: 'Code postal'
   CheckoutAdmin:
-    AddDiscountURL: 'Add discount URL'
     OrderPrefix: 'Add prefix to order numbers'
     OrderPrefixPlaceholder: 'EG ''abc'''
     PaymentFailerContent: 'Payment failer content'
@@ -161,9 +152,6 @@ fr:
   CheckoutUsers:
     Company: 'Nom de société'
     PhoneNumber: 'Numéro de téléphone'
-  Discount:
-    PLURALNAME: Discounts
-    SINGULARNAME: Discount
   Form:
     FIELDISREQUIRED: '%s is required'
   MemberAddress:

@@ -87,19 +87,11 @@ de:
     DeliveryDetails: Lieferanschrift
     DeliverySavedAddress: 'An einer gespeicherten Adresse liefern'
     Description: Beschreibung
-    Discount: Rabatt
-    DiscountAdded: 'Rabatt hinzugefügt wurde'
-    DiscountCode: 'Rabatt-Code'
-    DiscountFixedText: '{title} wird bei Ihrer nächste Bestellung abgezogen'
-    DiscountNotValid: 'ungultigen Rabatt-Code'
-    DiscountNotValidText: 'Diese Rabatt-Code ist ungültig'
-    DiscountPercentText: 'Ein Gutschein zu EUR{amount} wird auf Ihrer nächste Bestellung angerechnet'
     DontHaveAccount: 'Sie haben noch kein Konto?'
     Edit: bearbeiten
     EditAddress: 'Adresse bearbeiten'
     Email: E-Mail
     EnterDifferentAddress: 'Geben Sie eine neue Adresse ein'
-    EnterDiscountCode: 'Enter a discount code'
     Error: 'Ein Fehler passiert ist'
     EstimateShipping: 'Versandkosten abschätzen'
     FirstName: 'Vorname(n)'
@@ -151,7 +143,6 @@ de:
     YourAddresses: 'Ihren Adressen'
     ZipCode: 'Postleitzahl'
   CheckoutAdmin:
-    AddDiscountURL: 'Add discount URL'
     OrderPrefix: 'Add prefix to order numbers'
     OrderPrefixPlaceholder: 'EG ''abc'''
     PaymentFailerContent: 'Payment failer content'
@@ -161,9 +152,6 @@ de:
   CheckoutUsers:
     Company: Firma
     PhoneNumber: 'Telefon'
-  Discount:
-    PLURALNAME: Discounts
-    SINGULARNAME: Discount
   Form:
     FIELDISREQUIRED: '%s is required'
   MemberAddress:

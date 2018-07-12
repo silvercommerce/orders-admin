@@ -39,7 +39,6 @@ en:
     Date: Date
     DeliveryDetails: 'Delivery Details'
     Details: Details
-    Discount: Discount
     Duplicate: Duplicate
     Duplicated: 'Duplicated %s %s'
     Email: Email
@@ -116,20 +115,12 @@ en:
     DeliveryDetails: 'Delivery Details'
     DeliverySavedAddress: 'Deliver to a saved address'
     Description: Description
-    Discount: Discount
-    DiscountAdded: 'Discount Added'
-    DiscountCode: 'Discount Code'
-    DiscountFixedText: '{title} will be deducted from your next order'
-    DiscountNotValid: 'Discount Not Valid'
-    DiscountNotValidText: 'This discount is either not valid or has expired'
-    DiscountPercentText: 'A credit of £{amount} will be applied to your order'
     DontHaveAccount: 'Don''t have an account?'
     Edit: Edit
     EditAddress: 'Edit Address'
     Email: Email
     EmptiedCart: 'Shopping cart emptied'
     EnterDifferentAddress: 'Enter a different address'
-    EnterDiscountCode: 'Enter a discount code'
     Error: 'There was an error'
     EstimateShipping: 'Estimate Shipping'
     FirstName: 'First Name(s)'
@@ -184,7 +175,6 @@ en:
     YourAddresses: 'Your Addresses'
     ZipCode: 'Zip/Postal Code'
   CheckoutAdmin:
-    AddDiscountURL: 'Add discount URL'
     OrderPrefix: 'Add prefix to order numbers'
     OrderPrefixPlaceholder: 'EG ''abc'''
     PaymentFailerContent: 'Payment failer content'
@@ -194,9 +184,6 @@ en:
   CheckoutUsers:
     Company: Company
     PhoneNumber: 'Phone Number'
-  Discount:
-    PLURALNAME: Discounts
-    SINGULARNAME: Discount
   Form:
     FIELDISREQUIRED: '%s is required'
   MemberAddress:
