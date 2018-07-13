@@ -9,7 +9,7 @@ use SilverStripe\SiteConfig\SiteConfig;
 
 class Notification extends DataObject
 {
-    private static $table_name = 'OrderNotification';
+    private static $table_name = 'OrdersAdmin_Notification';
 
     /**
      * @config
@@ -21,14 +21,14 @@ class Notification extends DataObject
         "FromEmail" => "Varchar",
         "VendorEmail" => "Varchar"
     ];
-    
+
     /**
      * @config
      */
     private static $has_one = [
         "Parent" => SiteConfig::class
     ];
-    
+
     /**
      * @config
      */
@@ -39,7 +39,7 @@ class Notification extends DataObject
         "VendorEmail",
         "CustomSubject"
     ];
-    
+
     public function getCMSFields()
     {
         $this->beforeUpdateCMSFields(function ($fields) {
@@ -72,7 +72,7 @@ class Notification extends DataObject
 
         return parent::getCMSFields();
     }
-    
+
     /**
      * Deal with sending a notification. This is assumed to be an email
      * by default, but can be extended through "augmentSend" to allow

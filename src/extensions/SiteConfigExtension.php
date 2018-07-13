@@ -13,7 +13,7 @@ use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RecordEditor;
 use SilverStripe\Assets\Image;
-use SilverCommerce\OrdersAdmin\Model\Notification as OrderNotification;
+use SilverCommerce\OrdersAdmin\Model\Notification as InvoiceNotification;
 
 /**
  * Add additional settings to the default siteconfig
@@ -36,25 +36,25 @@ class SiteConfigExtension extends DataExtension
     ];
 
     private static $has_many = [
-        "OrderNotifications"=> OrderNotification::class
+        "InvoiceNotifications"=> InvoiceNotification::class
     ];
 
     private static $defaults = [
         "OrderNumberLength" => 4
     ];
-    
+
     public function updateCMSFields(FieldList $fields)
     {
         // Order Notifications
         $notification_fields = ToggleCompositeField::create(
-            'OrderNotificationSettings',
-            _t("Orders.OrderNotificationSettings", "Order Notification Settings"),
+            'InvoiceNotificationSettings',
+            _t("Orders.InvoiceNotificationSettings", "Invoice Notification Settings"),
             [
                 LiteralField::create("NotificationPadding", "<br/>"),
                 GridField::create(
-                    "OrderNotifications",
-                    "Order status notifications",
-                    $this->owner->OrderNotifications()
+                    "InvoiceNotifications",
+                    $this->owner->fieldLabel("InvoiceNotifications"),
+                    $this->owner->InvoiceNotifications()
                 )->setConfig(GridFieldConfig_RecordEditor::create())
             ]
         );
