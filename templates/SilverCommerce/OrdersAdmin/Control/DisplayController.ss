@@ -81,10 +81,6 @@
                                             <th><%t OrdersAdmin.Status "Status" %></th>
                                             <td>$TranslatedStatus</td>
                                         </tr>
-                                        <tr>
-                                            <th><%t OrdersAdmin.Action "Action" %></th>
-                                            <td>$Action</td>
-                                        </tr>
                                     <% end_if %>
                                 </tbody>
                             </table>

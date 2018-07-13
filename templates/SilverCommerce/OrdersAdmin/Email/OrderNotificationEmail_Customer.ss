@@ -83,11 +83,8 @@
         
         <hr/>
 
-        <h2><%t Orders.DeliveryDetails 'Delivery Details' %></h2>
-        
-        <% if $Action == "collect" %>
-            <p><%t Orders.AwaitingCollect "The items are awaiting collection" %></p>
-        <% else %>
+        <% if $isDeliverable %>
+            <h2><%t Orders.DeliveryDetails 'Delivery Details' %></h2>
             <p>
                 <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
                 {$DeliveryFirstnames} {$DeliverySurname}<br/>

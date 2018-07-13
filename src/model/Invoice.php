@@ -323,7 +323,7 @@ class Invoice extends Estimate implements PermissionProvider
 
             if ($details) {
                 $details->insertBefore(
-                    "Action",
+                    "StartDate",
                     DropdownField::create(
                         'Status',
                         null,
@@ -476,10 +476,6 @@ class Invoice extends Estimate implements PermissionProvider
         
         if (!$this->Status) {
             $this->Status = $this->config()->get("default_status");
-        }
-
-        if (!$this->Action) {
-            $this->Action = $this->config()->get("default_action");
         }
     }
 

@@ -2,9 +2,9 @@
 
 <% with $Order %>
     <h1><%t Orders.OrderStatusUpdate "Order Status Update" %></h1>
-    
+
     <p><%t Orders.OrderMarkedAs 'Order {ordernumber} has been marked as {status}' ordernumber=$Number status=$Status %></p>
-    
+
     <% if $Items.exists %>
         <hr/>
 
@@ -87,14 +87,12 @@
         <% if $PhoneNumber %><%t Orders.Phone "Phone" %>: {$PhoneNumber}<br/><% end_if %>
         <% if $Email %><%t Orders.Email "Email" %>: <a href="mailto:{$Email}">{$Email}</a><br/><% end_if %>
     </p>
-        
-    <hr/>
 
-    <h2><%t Orders.DeliveryDetails 'Delivery Details' %></h2>
-    
-    <% if $Action == "collect" %>
-        <p><%t Orders.ItemsToBeCollected "The items are to be collected" %></p>
-    <% else %>
+    <% if $isDeliverable %> 
+        <hr/>
+        
+        <h2><%t Orders.DeliveryDetails 'Delivery Details' %></h2>
+
         <p>
             <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
             {$DeliveryFirstnames} {$DeliverySurname}<br/>

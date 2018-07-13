@@ -58,44 +58,6 @@ class Estimate extends DataObject implements PermissionProvider
     private static $default_end = 30;
 
     /**
-     * Actions on an order are to determine what will happen on
-     * completion (the defaults are post or collect).
-     *
-     * @var array
-     * @config
-     */
-    private static $actions = [
-        "post" => "Post",
-        "collect" => "Collect"
-    ];
-
-    /**
-     * Set the default action on our order. If we were using this module
-     * for a more POS type solution, we would probably change this to
-     * collect.
-     *
-     * @var string
-     * @config
-     */
-    private static $default_action = "post";
-    
-    /**
-     * What is the action string for a order to be posted
-     *
-     * @var string
-     * @config
-     */
-    private static $post_action = "post";
-
-    /**
-     * What is the action string for a order to be collected
-     *
-     * @var string
-     * @config
-     */
-    private static $collect_action = "collect";
-
-    /**
      * Standard DB columns
      *
      * @var array
@@ -105,7 +67,6 @@ class Estimate extends DataObject implements PermissionProvider
         'Number'            => 'Varchar',
         'StartDate'         => 'Date',
         'EndDate'           => 'Date',
-        "Action"            => "Varchar",
         
         // Personal Details
         'Company'           => 'Varchar',
@@ -265,12 +226,6 @@ class Estimate extends DataObject implements PermissionProvider
     private static $default_sort = [
         "StartDate" => "DESC"
     ];
-
-    public function populateDefaults()
-    {
-        parent::populateDefaults();
-        $this->Action = $this->config()->get("default_action");
-    }
 
     /**
      * Generate a link to view the associated front end
@@ -593,48 +548,6 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Mark this Estimate for collection?
-     *
-     * @return self
-     */
-    public function MarkForCollection()
-    {
-        $this->Action = $this->config()->collection_action;
-        return $this;
-    }
-
-    /**
-     * Mark this Estimate for collection?
-     *
-     * @return self
-     */
-    public function MarkForPost()
-    {
-        $this->Action = $this->config()->post_action;
-        return $this;
-    }
-
-    /**
-     * Is this Estimate marked for collection?
-     *
-     * @return boolean
-     */
-    public function isCollection()
-    {
-        return ($this->Action == $this->config()->collection_action);
-    }
-
-    /**
-     * Is this Estimate marked for postage?
-     *
-     * @return boolean
-     */
-    public function isPost()
-    {
-        return ($this->Action == $this->config()->post_action);
-    }
-
-    /**
      * Scaffold CMS form fields
      *
      * @return FieldList
@@ -650,7 +563,6 @@ class Estimate extends DataObject implements PermissionProvider
             $fields->removeByName("EndDate");
             $fields->removeByName("Number");
             $fields->removeByName("AccessKey");
-            $fields->removeByName("Action");
             $fields->removeByName("Items");
             
             $fields->addFieldsToTab(
@@ -683,11 +595,6 @@ class Estimate extends DataObject implements PermissionProvider
                         CompositeField::create(
                             DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
                             DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
-                            DropdownField::create(
-                                'Action',
-                                $this->fieldLabel("Action"),
-                                $this->config()->get("actions")
-                            ),
                             ReadonlyField::create("Number", "#")
                         )->setName("OrdersDetailsInfo")
                         ->addExtraClass("col"),
