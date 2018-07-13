@@ -440,7 +440,8 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
             'add',
             'add'
         );
-        $add_action->setAttribute('data-icon', 'add');
+        $add_action->addExtraClass('btn btn-primary font-icon-plus-circled');
+        $add_action->addExtraClass('action_gridfield_relationadd');
 
         // Start thinking about rending this back to the GF
         $fields = ArrayList::create();
@@ -448,7 +449,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         $fields->push($text_field);
         $fields->push($find_action);
         $fields->push($add_action);
-        
+
         $forTemplate = ArrayData::create([]);
         $forTemplate->Fields = $fields;
 
