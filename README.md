@@ -14,6 +14,10 @@ Install via composer:
 
     # composer require silvercommerce/orders-admin
 
+## Further Reading
+
+Checkout the [docs](docs/)
+
 ## Dependancies
 
 * [SilverStripe Framework 4.x](https://github.com/silverstripe/silverstripe-framework)
