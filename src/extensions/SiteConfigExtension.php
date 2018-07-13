@@ -61,8 +61,8 @@ class SiteConfigExtension extends DataExtension
 
         // Invoice Customisation
         $invoice_customisation_fields = ToggleCompositeField::create(
-            'InvoiceQuoteCustomSettings',
-            _t("Orders.InvoiceQuoteCustomisation", "Invoice and Quote Customisation"),
+            'InvoiceEstimateCustomSettings',
+            _t("Orders.InvoiceEstimateCustomisation", "Invoice and Estimate Customisation"),
             [
                 UploadField::create('EstimateInvoiceLogo'),
                 TextField::create(
