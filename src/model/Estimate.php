@@ -39,6 +39,7 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
+use SilverStripe\Forms\CompositeField;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -677,25 +678,35 @@ class Estimate extends DataObject implements PermissionProvider
                         '<div class="field form-group"></div>'
                     ),
                     
-                    // Sidebar
-                    FieldGroup::create(
-                        DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
-                        DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
-                        DropdownField::create(
-                            'Action',
-                            $this->fieldLabel("Action"),
-                            $this->config()->get("actions")
-                        ),
-                        ReadonlyField::create("Number", "#"),
-                        ReadonlyField::create("SubTotalValue", _t("OrdersAdmin.SubTotal", "Sub Total"))
-                            ->setValue($this->obj("SubTotal")->Nice()),
-                        ReadonlyField::create("TaxValue", _t("OrdersAdmin.Tax", "Tax"))
-                            ->setValue($this->obj("TaxTotal")->Nice()),
-                        ReadonlyField::create("TotalValue", _t("OrdersAdmin.Total", "Total"))
-                            ->setValue($this->obj("Total")->Nice())
-                    )->setName("OrdersSidebar")
-                    ->setTitle(_t("Orders.EstimateDetails", "Estimate Details"))
-                    ->addExtraClass("order-admin-sidebar")
+                    // Totals and settings
+                    CompositeField::create(
+                        CompositeField::create(
+                            DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
+                            DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
+                            DropdownField::create(
+                                'Action',
+                                $this->fieldLabel("Action"),
+                                $this->config()->get("actions")
+                            ),
+                            ReadonlyField::create("Number", "#")
+                        )->setName("OrdersDetailsInfo")
+                        ->addExtraClass("col"),
+                        CompositeField::create([])
+                            ->setName("OrdersDetailsMisc")
+                        ->addExtraClass("col"),
+                        CompositeField::create(
+                            ReadonlyField::create("SubTotalValue", _t("OrdersAdmin.SubTotal", "Sub Total"))
+                                ->setValue($this->obj("SubTotal")->Nice()),
+                            ReadonlyField::create("TaxValue", _t("OrdersAdmin.Tax", "Tax"))
+                                ->setValue($this->obj("TaxTotal")->Nice()),
+                            ReadonlyField::create("TotalValue", _t("OrdersAdmin.Total", "Total"))
+                                ->setValue($this->obj("Total")->Nice())
+                        )->setName("OrdersDetailsTotals")
+                        ->addExtraClass("col")
+                    )->setName("OrdersDetails")
+                    ->addExtraClass("orders-details-field")
+                    ->setColumnCount(2)
+                    ->setFieldHolderTemplate("SilverCommerce\\OrdersAdmin\\Forms\\OrderDetailsField_holder")
                 ]
             );
 

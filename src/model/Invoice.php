@@ -304,23 +304,25 @@ class Invoice extends Estimate implements PermissionProvider
             // Go through a convoluted process to find out field group
             // as the default fieldlist doesn't seem to register it!
             $main = $fields->findOrMakeTab("Root.Main");
-            $sidebar = null;
+            $details = null;
 
             $enddate_field = $fields->dataFieldByName("EndDate");
             $enddate_field->setTitle(_t("OrdersAdmin.Due", "Due"));
 
+            // Manually loop through fields to find info composite field, as
+            // fieldByName cannot reliably find this.
             foreach ($main->getChildren() as $field) {
-                if ($field->getName() == "OrdersSidebar") {
-                    $sidebar = $field;
+                if ($field->getName() == "OrdersDetails") {
+                    foreach ($field->getChildren() as $field) {
+                        if ($field->getName() == "OrdersDetailsInfo") {
+                            $details = $field;
+                        }
+                    }
                 }
             }
 
-            if ($sidebar) {
-                $sidebar->setTitle(_t(
-                    "OrdersAdmin.InvoiceDetails",
-                    "Invoice Details"
-                ));
-                $sidebar->insertBefore(
+            if ($details) {
+                $details->insertBefore(
                     "Action",
                     DropdownField::create(
                         'Status',
