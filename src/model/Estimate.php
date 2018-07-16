@@ -548,6 +548,22 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Determine if the current estimate contains only locked items.
+     *
+     * @return boolean
+     */
+    public function isLocked()
+    {
+        foreach ($this->getItems() as $item) {
+            if (!$item->Locked) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
      * Scaffold CMS form fields
      *
      * @return FieldList
