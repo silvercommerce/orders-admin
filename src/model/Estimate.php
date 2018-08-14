@@ -485,11 +485,12 @@ class Estimate extends DataObject implements PermissionProvider
      */
     public function convertToInvoice()
     {
+        $id = $this->ID;
         $this->ClassName = Invoice::class;
         $this->write();
 
         // Get our new Invoice
-        $record = Invoice::get()->byID($this->ID);
+        $record = Invoice::get()->byID($id);
         $record->Number = null;
         $record->StartDate = null;
         $record->EndDate = null;
@@ -882,9 +883,9 @@ class Estimate extends DataObject implements PermissionProvider
             $this->DeliveryCountry = $this->Country;
         }
 
-        // If date not set, make thie equal the created date
+        // If date not set, make this equal the created date
         if (!$this->StartDate) {
-            $this->StartDate = $this->Created;
+            $this->StartDate = $this->LastEdited;
         }
 
         if (!$this->EndDate && $this->StartDate) {
