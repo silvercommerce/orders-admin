@@ -14,4 +14,6 @@
 
 ## 1.1.0
 
-* Switch to config based rounding
+* Switch to config based rounding.
+* Change Estimate/Invoice numbers to be incremental.
+* Remove default Estimate/Invoice prefix if none set.

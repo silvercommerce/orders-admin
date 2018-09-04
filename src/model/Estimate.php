@@ -224,6 +224,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $default_sort = [
+        "Number"    => "DESC",
         "StartDate" => "DESC"
     ];
 
@@ -612,7 +613,7 @@ class Estimate extends DataObject implements PermissionProvider
                         CompositeField::create(
                             DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
                             DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
-                            ReadonlyField::create("Number", "#")
+                            TextField::create("Number", "#")
                         )->setName("OrdersDetailsInfo")
                         ->addExtraClass("col"),
                         CompositeField::create([])
@@ -724,6 +725,80 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Get a base ID for the last Estimate in the DataBase
+     *
+     * @return int
+     */
+    protected function getBaseNumber()
+    {
+        $base = 0;
+        $prefix = $this->get_prefix();
+        $classname = $this->ClassName;
+
+        // Get the last instance of the current class
+        $last = $classname::get()
+            ->filter("ClassName", $classname)
+            ->sort("Number", "DESC")
+            ->first();
+
+        // If we have a last estimate/invoice, get the ID of the last invoice
+        // so we can increment
+        if (isset($last)) {
+            $base = str_replace($prefix, "", $last->Number);
+            $base = (int)str_replace("-", "", $base);
+        }
+
+        // Increment base
+        $base++;
+
+        return $base;
+    }
+
+    /**
+     * Convert an int to a formatted string to use as the order number
+     *
+     * @param int $number Number to use
+     *
+     * @return $number;
+     */
+    protected function convertToFormattedNumber($number)
+    {
+        $config = SiteConfig::current_site_config();
+        $default_length = $config->OrderNumberLength;
+        $prefix = $this->get_prefix();
+
+        $length = strlen($number);
+        $i = $length;
+        $base = 0;
+
+        // Determine what the next multiple of 4 is
+        while ($i % 4 != 0) {
+            $i++;
+        }
+
+        $pad_amount = ($i >= $default_length) ? $i : $default_length;
+
+        $return = str_pad($number, $pad_amount, "0", STR_PAD_LEFT);
+        $return = wordwrap($return, 4, "-", true);
+
+        // Work out if an order prefix string has been set
+        if ($prefix) {
+            $return = $prefix . '-' . $return;
+        }
+
+        return $return;
+    }
+
+    /**
+     * legacy method name - soon to be depreciated
+     *
+     */
+    protected function generate_order_number()
+    {
+        return $this->generateOrderNumber();
+    }
+
+    /**
      * Generate a randomised order number for this order.
      *
      * The order number is generated based on the current order
@@ -738,33 +813,17 @@ class Estimate extends DataObject implements PermissionProvider
      *
      * @return string
      */
-    protected function generate_order_number()
+    protected function generateOrderNumber()
     {
-        $config = SiteConfig::current_site_config();
-        $default_length = $config->OrderNumberLength;
-        $length = strlen($this->ID);
-        $i = $length;
-        $prefix = $this->get_prefix();
+        $base_number = $this->getBaseNumber();
+        $number = $this->convertToFormattedNumber($base_number);
 
-        // Determine what the next multiple of 4 is
-        while ($i % 4 != 0) {
-            $i++;
+        while (!$this->validOrderNumber($number)) {
+            $base_number++;
+            $number = $this->convertToFormattedNumber($base_number);
         }
 
-        $pad_amount = ($i >= $default_length) ? $i : $default_length;
-        $id_base = str_pad($this->ID, $pad_amount, "0", STR_PAD_LEFT);
-        $id_base = wordwrap($id_base, 4, "-", true);
-
-        $current_date = new DateTime();
-
-        // Work out if an order prefix string has been set
-        if ($prefix) {
-            $order_num = $prefix . '-' . $id_base;
-        } else {
-            $order_num = $current_date->format("Y") . "-" . $id_base;
-        }
-
-        return $order_num;
+        return $number;
     }
 
     protected function generate_random_string($length = 20)
@@ -783,12 +842,18 @@ class Estimate extends DataObject implements PermissionProvider
      *
      * @return boolean
      */
-    protected function validOrderNumber()
+    protected function validOrderNumber($number = null)
     {
+        $number = (isset($number)) ? $number : $this->Number;
+
         $existing = Estimate::get()
-            ->filterAny("Number", $this->Number)
-            ->first();
-        
+            ->filter(
+                [
+                    "ClassName" => self::class,
+                    "Number" => $number
+                ]
+            )->first();
+
         return !($existing);
     }
 
@@ -905,11 +970,7 @@ class Estimate extends DataObject implements PermissionProvider
 
         // Check if an order number has been generated, if not, add it and save again
         if (!$this->Number) {
-            $this->Number = $this->generate_order_number();
-            
-            while (!$this->validOrderNumber()) {
-                $this->Number = $this->generate_order_number();
-            }
+            $this->Number = $this->generateOrderNumber();
             $this->write();
         }
     }

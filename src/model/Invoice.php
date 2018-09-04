@@ -444,15 +444,6 @@ class Invoice extends Estimate implements PermissionProvider
         $this->Status = $this->config()->get("collected_status");
         return $this;
     }
-
-    protected function validOrderNumber()
-    {
-        $existing = Invoice::get()
-            ->filterAny("Number", $this->Number)
-            ->first();
-        
-        return !($existing);
-    }
     
     /**
      * Retrieve an order prefix from siteconfig
