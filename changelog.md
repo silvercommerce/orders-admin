@@ -11,3 +11,7 @@
 ## 1.0.2
 
 * Switch to defaulting to the last edited date for StartDate (if null)
+
+## 1.1.0
+
+* Switch to config based rounding

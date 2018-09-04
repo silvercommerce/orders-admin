@@ -420,7 +420,7 @@ class Estimate extends DataObject implements PermissionProvider
         
         $this->extend("updateTaxTotal", $total);
 
-        $total = MathsHelper::round_up($total, 2);
+        $total = MathsHelper::round($total, 2);
 
         return $total;
     }
