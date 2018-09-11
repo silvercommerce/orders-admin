@@ -17,3 +17,7 @@
 * Switch to config based rounding.
 * Change Estimate/Invoice numbers to be incremental.
 * Remove default Estimate/Invoice prefix if none set.
+
+## 1.1.1
+
+* Fix error with trimming estimate/invoice numbers 
