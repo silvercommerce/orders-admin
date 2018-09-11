@@ -764,22 +764,9 @@ class Estimate extends DataObject implements PermissionProvider
     protected function convertToFormattedNumber($number)
     {
         $config = SiteConfig::current_site_config();
-        $default_length = $config->OrderNumberLength;
+        $length = $config->OrderNumberLength;
         $prefix = $this->get_prefix();
-
-        $length = strlen($number);
-        $i = $length;
-        $base = 0;
-
-        // Determine what the next multiple of 4 is
-        while ($i % 4 != 0) {
-            $i++;
-        }
-
-        $pad_amount = ($i >= $default_length) ? $i : $default_length;
-
-        $return = str_pad($number, $pad_amount, "0", STR_PAD_LEFT);
-        $return = wordwrap($return, 4, "-", true);
+        $return = str_pad($number, $length, "0", STR_PAD_LEFT);
 
         // Work out if an order prefix string has been set
         if ($prefix) {
