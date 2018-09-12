@@ -26,3 +26,8 @@
 
 * Split estimate/invoice numbers to use seperate reference and prefix.
 * Add migration tool to estimates/invoices to new ref/prefix config.
+
+## 1.2.1
+
+* Replace references to Number with FullRef
+* Remove legact reports (replaced by reports module)
