@@ -3,7 +3,7 @@
 <% with $Order %>
     <h1><%t Orders.OrderStatusUpdate "Order Status Update" %></h1>
 
-    <p><%t Orders.OrderMarkedAs 'Order {ordernumber} has been marked as {status}' ordernumber=$Number status=$Status %></p>
+    <p><%t Orders.OrderMarkedAs 'Order {ordernumber} has been marked as {status}' ordernumber=$FullRef status=$Status %></p>
 
     <% if $Items.exists %>
         <hr/>

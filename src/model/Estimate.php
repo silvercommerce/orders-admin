@@ -174,7 +174,8 @@ class Estimate extends DataObject implements PermissionProvider
      */
     private static $export_fields = [
         "ID",
-        "Number",
+        "Prefix",
+        "Ref",
         "Created",
         "StartDate",
         "EndDate",
@@ -789,7 +790,7 @@ class Estimate extends DataObject implements PermissionProvider
         // If we have a last estimate/invoice, get the ID of the last invoice
         // so we can increment
         if (isset($last)) {
-            $base = str_replace($prefix, "", $last->Number);
+            $base = str_replace($prefix, "", $last->Ref);
             $base = (int)str_replace("-", "", $base);
         }
 
@@ -844,7 +845,7 @@ class Estimate extends DataObject implements PermissionProvider
      */
     protected function validOrderNumber($number = null)
     {
-        $number = (isset($number)) ? $number : $this->Number;
+        $number = (isset($number)) ? $number : $this->Ref;
 
         $existing = Estimate::get()
             ->filter(
@@ -886,7 +887,8 @@ class Estimate extends DataObject implements PermissionProvider
         
         // Set up items
         if ($doWrite) {
-            $clone->Number = "";
+            $clone->Ref = "";
+            $clone->Prefix = "";
             $clone->write();
 
             foreach ($this->Items() as $item) {

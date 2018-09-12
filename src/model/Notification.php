@@ -86,7 +86,7 @@ class Notification extends DataObject
             if ($this->CustomSubject) {
                 $subject = $this->CustomSubject;
             } else {
-                $subject = _t('Orders.Order', 'Order') . " {$order->Number} {$order->Status}";
+                $subject = _t('Orders.Order', 'Order') . " {$order->FullRef} {$order->Status}";
             }
 
             $email = Email::create()
@@ -113,7 +113,7 @@ class Notification extends DataObject
             if ($this->CustomSubject) {
                 $subject = $this->CustomSubject;
             } else {
-                $subject = _t('Orders.Order', 'Order') . " {$order->Number} {$order->Status}";
+                $subject = _t('Orders.Order', 'Order') . " {$order->FullRef} {$order->Status}";
             }
             
             $email = Email::create()
