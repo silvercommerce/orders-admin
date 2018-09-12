@@ -40,6 +40,9 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\CompositeField;
+use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Control\HTTPRequest;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -64,10 +67,12 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $db = [
+        'Ref'               => 'Int',
+        'Prefix'            => 'Varchar',
         'Number'            => 'Varchar',
         'StartDate'         => 'Date',
         'EndDate'           => 'Date',
-        
+
         // Personal Details
         'Company'           => 'Varchar',
         'FirstName'         => 'Varchar',
@@ -125,6 +130,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $casting = [
+        'FullRef'           => 'Varchar(255)',
         "PersonalDetails"   => "Text",
         'BillingAddress'    => 'Text',
         'CountryFull'       => 'Varchar',
@@ -147,7 +153,8 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
-        'Number'        => '#',
+        'Prefix'        => 'Prefix',
+        'Ref'           => 'Ref',
         'StartDate'     => 'Date',
         'EndDate'       => 'Expires',
         'Company'       => 'Company',
@@ -224,7 +231,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $default_sort = [
-        "Number"    => "DESC",
+        "Ref"       => "DESC",
         "StartDate" => "DESC"
     ];
 
@@ -256,6 +263,28 @@ class Estimate extends DataObject implements PermissionProvider
             $this->ID,
             $this->AccessKey
         );
+    }
+
+    /**
+     * Get the full reference number for this estimate/invoice.
+     * 
+     * This is the stored prefix and ref
+     * 
+     * @return string
+     */
+    public function getFullRef()
+    {
+        $config = SiteConfig::current_site_config();
+        $length = $config->OrderNumberLength;
+        $prefix = ($this->Prefix) ? $this->Prefix : "";
+        $return = str_pad($this->Ref, $length, "0", STR_PAD_LEFT);
+
+        // Work out if an order prefix string has been set
+        if ($prefix) {
+            $return = $prefix . '-' . $return;
+        }
+
+        return $return;
     }
 
     /**
@@ -492,11 +521,12 @@ class Estimate extends DataObject implements PermissionProvider
 
         // Get our new Invoice
         $record = Invoice::get()->byID($id);
-        $record->Number = null;
+        $record->Ref = null;
+        $record->Prefix = null;
         $record->StartDate = null;
         $record->EndDate = null;
         $record->write();
-        
+
         return $record;
     }
 
@@ -580,8 +610,10 @@ class Estimate extends DataObject implements PermissionProvider
             $fields->removeByName("StartDate");
             $fields->removeByName("EndDate");
             $fields->removeByName("Number");
+            $fields->removeByName("Ref");
             $fields->removeByName("AccessKey");
             $fields->removeByName("Items");
+            $fields->removeByName("Prefix");
             
             $fields->addFieldsToTab(
                 "Root.Main",
@@ -613,7 +645,8 @@ class Estimate extends DataObject implements PermissionProvider
                         CompositeField::create(
                             DateField::create("StartDate", _t("OrdersAdmin.Date", "Date")),
                             DateField::create("EndDate", _t("OrdersAdmin.Expires", "Expires")),
-                            TextField::create("Number", "#")
+                            ReadonlyField::create("FullRef", "#"),
+                            TextField::create("Ref", $this->fieldLabel("Ref"))
                         )->setName("OrdersDetailsInfo")
                         ->addExtraClass("col"),
                         CompositeField::create([])
@@ -712,6 +745,18 @@ class Estimate extends DataObject implements PermissionProvider
         return parent::getCMSFields();
     }
 
+    public function requireDefaultRecords()
+    {
+        parent::requireDefaultRecords();
+
+        $run_migration = NumberMigrationTask::config()->run_during_dev_build;
+
+        if ($run_migration) {
+            $request = Injector::inst()->get(HTTPRequest::class);
+            NumberMigrationTask::create()->run($request);
+        }
+    }
+
     /**
      * Retrieve an order prefix from siteconfig
      * for an Estimate
@@ -738,7 +783,7 @@ class Estimate extends DataObject implements PermissionProvider
         // Get the last instance of the current class
         $last = $classname::get()
             ->filter("ClassName", $classname)
-            ->sort("Number", "DESC")
+            ->sort("Ref", "DESC")
             ->first();
 
         // If we have a last estimate/invoice, get the ID of the last invoice
@@ -755,28 +800,6 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Convert an int to a formatted string to use as the order number
-     *
-     * @param int $number Number to use
-     *
-     * @return $number;
-     */
-    protected function convertToFormattedNumber($number)
-    {
-        $config = SiteConfig::current_site_config();
-        $length = $config->OrderNumberLength;
-        $prefix = $this->get_prefix();
-        $return = str_pad($number, $length, "0", STR_PAD_LEFT);
-
-        // Work out if an order prefix string has been set
-        if ($prefix) {
-            $return = $prefix . '-' . $return;
-        }
-
-        return $return;
-    }
-
-    /**
      * legacy method name - soon to be depreciated
      *
      */
@@ -786,31 +809,21 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Generate a randomised order number for this order.
+     * Generate an incremental estimate / invoice number.
      *
-     * The order number is generated based on the current order
-     * ID and is padded to a multiple of 4 and we add "-" every
-     * 4 characters.
-     *
-     * We then add an order prefix (if one is set) or the current
-     * year.
-     *
-     * This keeps a consistent order number structure that allows
-     * for a large number of orders before changing.
+     * We then add an order prefix (if one is set).
      *
      * @return string
      */
     protected function generateOrderNumber()
     {
         $base_number = $this->getBaseNumber();
-        $number = $this->convertToFormattedNumber($base_number);
 
-        while (!$this->validOrderNumber($number)) {
+        while (!$this->validOrderNumber($base_number)) {
             $base_number++;
-            $number = $this->convertToFormattedNumber($base_number);
         }
 
-        return $number;
+        return $base_number;
     }
 
     protected function generate_random_string($length = 20)
@@ -837,7 +850,7 @@ class Estimate extends DataObject implements PermissionProvider
             ->filter(
                 [
                     "ClassName" => self::class,
-                    "Number" => $number
+                    "Ref" => $number
                 ]
             )->first();
 
@@ -903,6 +916,12 @@ class Estimate extends DataObject implements PermissionProvider
             }
         }
 
+
+        // Set a prefix if required
+        if (!$this->Prefix) {
+            $this->Prefix = $this->get_prefix();
+        }
+
         $contact = $this->Customer();
 
         // If a contact is assigned and no customer details set
@@ -956,8 +975,8 @@ class Estimate extends DataObject implements PermissionProvider
         parent::onAfterWrite();
 
         // Check if an order number has been generated, if not, add it and save again
-        if (!$this->Number) {
-            $this->Number = $this->generateOrderNumber();
+        if (!$this->Ref) {
+            $this->Ref = $this->generateOrderNumber();
             $this->write();
         }
     }

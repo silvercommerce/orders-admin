@@ -20,4 +20,9 @@
 
 ## 1.1.1
 
-* Fix error with trimming estimate/invoice numbers 
+* Fix error with trimming estimate/invoice numbers.
+
+## 1.2.0
+
+* Split estimate/invoice numbers to use seperate reference and prefix.
+* Add migration tool to estimates/invoices to new ref/prefix config.
