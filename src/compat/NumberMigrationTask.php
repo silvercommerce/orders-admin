@@ -99,6 +99,6 @@ class NumberMigrationTask extends MigrationTask
      */
     public function down()
     {
-        $this->message('BlogMigrationTask::down() not implemented');
+        $this->message('NumberMigrationTask::down() not implemented');
     }
 }
