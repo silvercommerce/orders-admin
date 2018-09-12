@@ -88,20 +88,20 @@ SilverCommerce\OrdersAdmin\Model\Estimate:
     DeliveryPostCode: "ZX98 9XZ"
     DeliveryCountry: "GB"
   deliverable:
-    Number: 123456
+    Ref: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable,=>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
   notdeliverable:
-    Number: 123456
+    Ref: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
   standardnotax:
-    Number: 123456
+    Ref: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notaxitem
   standardtax:
-    Number: 123456
+    Ref: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
   complextax:
-    Number: 123456
+    Ref: 123456
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem,=>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
 SilverCommerce\OrdersAdmin\Model\Invoice:
   unpaid:
-    Number: 123456
+    Ref: 123456
