@@ -31,3 +31,8 @@
 
 * Replace references to Number with FullRef
 * Remove legact reports (replaced by reports module)
+
+## 1.2.2
+
+* Ensure country selection is using correct case
+* Add extra methods to get uppercase country codes

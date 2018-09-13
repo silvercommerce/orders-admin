@@ -134,8 +134,10 @@ class Estimate extends DataObject implements PermissionProvider
         "PersonalDetails"   => "Text",
         'BillingAddress'    => 'Text',
         'CountryFull'       => 'Varchar',
+        'CountryUC'       => 'Varchar',
         'DeliveryAddress'   => 'Text',
         'DeliveryCountryFull'=> 'Varchar',
+        'DeliveryCountryUC'=> 'Varchar',
         'SubTotal'          => 'Currency',
         'TaxTotal'          => 'Currency',
         'Total'             => 'Currency',
@@ -349,6 +351,16 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Get the uppercase name of this country
+     *
+     * @return string
+     */
+    public function getCountryUC()
+    {
+        return strtoupper($this->Country);
+    }
+
+    /**
      * Get the complete delivery address for this order
      *
      * @return string
@@ -374,6 +386,16 @@ class Estimate extends DataObject implements PermissionProvider
         $list = i18n::getData()->getCountries();
         $country = strtolower($this->DeliveryCountry);
         return (array_key_exists($country, $list)) ? $list[$country] : $country;
+    }
+
+    /**
+     * Get the uppercase name of this country
+     *
+     * @return string
+     */
+    public function getDeliveryCountryUC()
+    {
+        return strtoupper($this->DeliveryCountry);
     }
 
     /**
@@ -691,10 +713,7 @@ class Estimate extends DataObject implements PermissionProvider
                     DropdownField::create(
                         'Country',
                         _t('OrdersAdmin.Country', 'Country'),
-                        array_change_key_case(
-                            i18n::getData()->getCountries(),
-                            CASE_UPPER
-                        )
+                        i18n::getData()->getCountries()
                     )->setEmptyString(""),
                     TextField::create("Email"),
                     TextField::create("PhoneNumber")
@@ -719,10 +738,7 @@ class Estimate extends DataObject implements PermissionProvider
                     DropdownField::create(
                         'DeliveryCountry',
                         _t('OrdersAdmin.Country', 'Country'),
-                        array_change_key_case(
-                            i18n::getData()->getCountries(),
-                            CASE_UPPER
-                        )
+                        i18n::getData()->getCountries()
                     )->setEmptyString("")
                 ]
             );
