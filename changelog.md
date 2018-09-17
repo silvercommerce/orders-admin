@@ -21,3 +21,7 @@
 ## 1.1.1
 
 * Fix error with trimming estimate/invoice numbers 
+
+## 1.1.2
+
+* updated inline with discounts module

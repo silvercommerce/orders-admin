@@ -137,10 +137,10 @@
                                     <td class="text-right">$SubTotal.Nice</td>
                                 </tr>
         
-                                <% if $DiscountAmount.RAW > 0 %>
+                                <% if $DiscountTotal.RAW > 0 %>
                                     <tr>
                                         <th class="text-right"><%t OrdersAdmin.Discount "Discount" %></th>
-                                        <td class="text-right">$DiscountAmount.Nice</td>
+                                        <td class="text-right">$DiscountTotal.Nice</td>
                                     </tr>
                                 <% end_if %>
                                 
