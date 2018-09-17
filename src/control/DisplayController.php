@@ -184,7 +184,7 @@ CSS
         $this->extend("updateInvoicePDF", $pdf);
 
         $pdf->render();
-        $pdf->stream("{$this->object->Number}.pdf");
+        $pdf->stream("{$this->object->FullRef}.pdf");
         exit();
     }
     
@@ -226,7 +226,7 @@ CSS
         $this->extend("updateEstimatePDF", $pdf);
 
         $pdf->render();
-        $pdf->stream("{$this->object->Number}.pdf");
+        $pdf->stream("{$this->object->FullRef}.pdf");
         exit();
     }
 }

@@ -6,7 +6,7 @@
     <% else %>
         <h1><%t Orders.ThankYou 'Thank you for ordering from {title}' title=$Up.SiteConfig.Title %></h1>
 
-        <p><%t Orders.OrderMarkedAs 'Order {ordernumber} has been marked as {status}' ordernumber=$Number status=$Status %></p>
+        <p><%t Orders.OrderMarkedAs 'Order {ordernumber} has been marked as {status}' ordernumber=$FullRef status=$Status %></p>
         
         <% if $Items.exists %>
             <hr/>
