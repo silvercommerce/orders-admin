@@ -31,6 +31,7 @@
         "colymba/gridfield-bulk-editing-tools": "^3.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.0",
         "dompdf/dompdf": "^0.8",
+        "i-lateral/silverstripe-modeladminplus": "~1.0",
         "silvercommerce/settings": "^1.0",
         "silvercommerce/tax-admin": "^1.0",
         "silvercommerce/contact-admin": "^1.0",

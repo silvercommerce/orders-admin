@@ -2,7 +2,6 @@
 
 namespace SilverCommerce\OrdersAdmin\Admin;
 
-use SilverStripe\Admin\ModelAdmin;
 use Colymba\BulkManager\BulkManager;
 use SilverStripe\Core\Config\Config;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
@@ -10,6 +9,7 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
 use Colymba\BulkManager\BulkAction\EditHandler;
 use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
 use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
@@ -24,7 +24,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
   *
   * @package Commerce
   */
-class OrderAdmin extends ModelAdmin
+class OrderAdmin extends ModelAdminPlus
 {
 
     private static $url_segment = 'sales';
@@ -72,9 +72,7 @@ class OrderAdmin extends ModelAdmin
         $config = $gridfield->getConfig();
         
         // Bulk manager
-        $manager = new BulkManager();
-        $manager->removeBulkAction(EditHandler::class);
-        $manager->removeBulkAction(UnlinkHandler::class);
+        $manager = $config->getComponentByType(BulkManager::class);
 
         // Manage orders
         if ($this->modelClass == Invoice::class && $gridfield) {
@@ -91,7 +89,6 @@ class OrderAdmin extends ModelAdmin
         if ($config) {
             $config
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent($manager)
                 ->addComponent(new OrdersDetailForm());
         }
 
