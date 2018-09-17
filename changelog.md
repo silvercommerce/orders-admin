@@ -45,3 +45,7 @@
 
 * updated inline with discounts module
 
+## 1.2.4
+
+* Use ModelAdminPlus for admin area
+* Add more complex date filter
