@@ -43,6 +43,7 @@ use SilverStripe\Forms\CompositeField;
 use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Control\HTTPRequest;
+use SilverShop\HasOneField\HasOneButtonField;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -631,6 +632,7 @@ class Estimate extends DataObject implements PermissionProvider
             $siteconfig = SiteConfig::current_site_config();
 
             $fields->removeByName("StartDate");
+            $fields->removeByName("CustomerID");
             $fields->removeByName("EndDate");
             $fields->removeByName("Number");
             $fields->removeByName("Ref");
@@ -694,14 +696,10 @@ class Estimate extends DataObject implements PermissionProvider
             $fields->addFieldsToTab(
                 "Root.Customer",
                 [
-                    DropdownField::create(
-                        'CustomerID',
-                        _t('OrdersAdmin.ExistingCustomer', 'Existing Customer'),
-                        Contact::get()->map()
-                    )->setEmptyString(_t(
-                        "OrdersAdmin.SelectACustomer",
-                        "Select existing customer"
-                    )),
+                    HasOneButtonField::create(
+                        $this,
+                        'Customer'
+                    ),
                     TextField::create("Company"),
                     TextField::create("FirstName"),
                     TextField::create("Surname"),

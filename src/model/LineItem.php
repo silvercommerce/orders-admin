@@ -549,8 +549,9 @@ class LineItem extends DataObject
     {
         parent::onBeforeWrite();
 
-        // Generate a unique item key based on
-        $this->Key = $this->StockID . ':' . base64_encode(json_encode($this->Customisations()->toArray()));
+        // Generate a unique item key based on the current ID and customisations
+        $key = base64_encode(json_encode($this->Customisations()->map("Title", "Value")->toArray()));
+        $this->Key = $this->StockID . ':' . $key;
     }
 
     /**
