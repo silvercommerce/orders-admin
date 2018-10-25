@@ -50,6 +50,6 @@
 * Use ModelAdminPlus for admin area
 * Add more complex date filter
 
-## 1.2.3
+## 1.2.5
 
 * Fix bug generating line item key for a customisation
