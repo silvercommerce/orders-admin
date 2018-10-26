@@ -35,7 +35,8 @@
         "silvercommerce/settings": "^1.0",
         "silvercommerce/tax-admin": "^1.0",
         "silvercommerce/contact-admin": "^1.0",
-        "silvercommerce/versionhistoryfield": "^1.0"
+        "silvercommerce/versionhistoryfield": "^1.0",
+        "silvershop/silverstripe-hasonefield": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"

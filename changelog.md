@@ -53,3 +53,7 @@
 ## 1.2.5
 
 * Fix bug generating line item key for a customisation
+
+## 1.2.6
+
+* Add requirement for has one button field
