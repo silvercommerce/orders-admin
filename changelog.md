@@ -57,3 +57,11 @@
 ## 1.2.6
 
 * Add requirement for has one button field
+
+## 1.2.7
+
+* Fixed invoice email postage
+
+## 1.2.8
+
+* Fixed error with HasOneButtonField when set to read-only

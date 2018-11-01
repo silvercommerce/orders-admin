@@ -20,6 +20,7 @@ use SilverStripe\ORM\ValidationResult;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverStripe\Versioned\VersionedGridFieldItemRequest;
+use SilverStripe\Forms\ReadonlyField;
 
 class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
 {
@@ -104,7 +105,25 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         // Deal with Order objects
         if ($record->ClassName == Invoice::class) {
             $can_change_status = $this->record->canChangeStatus();
-            
+
+            // replace HasOneButtonField with ReadOnly field
+            ## This is to prevent an error where the Button's object attempts to render
+            if (!$can_edit) {
+                $name = null;
+                if ($record->CustomerID) {
+                    $customer = Member::get()->byID($record->CustomerID);
+                    if ($customer) {
+                        $name = $customer->getTitle();
+                    }
+                }
+                $fields->replaceField(
+                    'Customer',
+                    ReadonlyField::create(
+                        'Customer'
+                    )->setValue($name)
+                );
+            }
+
             // Set our status field as a dropdown (has to be here to
             // ignore canedit)
             // Allow users to change status (as long as they have permission)
