@@ -46,12 +46,12 @@
                         <td style="text-align: right;">$DiscountTotal.Nice</td>
                     </tr><% end_if %>
                     
-                    <% if $PostageCost.RAW > 0 %>
+                    <% if $PostagePrice.RAW > 0 %>
                         <tr>
                             <td colspan="2" style="text-align: right;">
                                 <strong><%t Orders.Postage "Postage" %></strong>
                             </td>
-                            <td style="text-align: right;">$PostageCost.Nice</td>
+                            <td style="text-align: right;">$PostagePrice.Nice</td>
                         </tr>
                     <% end_if %>
                     
