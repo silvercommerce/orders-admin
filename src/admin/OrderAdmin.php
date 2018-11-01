@@ -2,7 +2,9 @@
 
 namespace SilverCommerce\OrdersAdmin\Admin;
 
-use SilverStripe\Admin\ModelAdmin;
+use DateTime;
+use SilverStripe\ORM\DB;
+use SilverStripe\Forms\DateField;
 use Colymba\BulkManager\BulkManager;
 use SilverStripe\Core\Config\Config;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
@@ -10,6 +12,7 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
 use Colymba\BulkManager\BulkAction\EditHandler;
 use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
 use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
@@ -24,7 +27,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
   *
   * @package Commerce
   */
-class OrderAdmin extends ModelAdmin
+class OrderAdmin extends ModelAdminPlus
 {
 
     private static $url_segment = 'sales';
@@ -44,24 +47,9 @@ class OrderAdmin extends ModelAdmin
 
     public $showImportForm = [];
 
-    /**
-     * Export all data from estimates/invoices.
-     * 
-     * By default, we use the "export_fields" config variable, but
-     * fall back to summary_fields if this is not set.
-     *
-     * @return array
-     */
-    public function getExportFields()
-    {
-        $fields = Config::inst()->get($this->modelClass, "export_fields");
-
-        if ($fields && is_array($fields)) {
-            return $fields;
-        }
-
-        return singleton($this->modelClass)->summaryFields();
-    }
+    private static $allowed_actions = [
+        "SearchForm"
+    ];
 
     public function getEditForm($id = null, $fields = null)
     {
@@ -72,9 +60,7 @@ class OrderAdmin extends ModelAdmin
         $config = $gridfield->getConfig();
         
         // Bulk manager
-        $manager = new BulkManager();
-        $manager->removeBulkAction(EditHandler::class);
-        $manager->removeBulkAction(UnlinkHandler::class);
+        $manager = $config->getComponentByType(BulkManager::class);
 
         // Manage orders
         if ($this->modelClass == Invoice::class && $gridfield) {
@@ -91,7 +77,6 @@ class OrderAdmin extends ModelAdmin
         if ($config) {
             $config
                 ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent($manager)
                 ->addComponent(new OrdersDetailForm());
         }
 
@@ -103,15 +88,87 @@ class OrderAdmin extends ModelAdmin
     public function getList()
     {
         $list = parent::getList();
+        $query = $this->getSearchData();
+        $db = DB::get_conn();
+
+        $start = null;
+        $end = null;
+        $date_filter = null;
         
         // Ensure that we only show Order objects in the order tab
         if ($this->modelClass == Estimate::class) {
             $list = $list
                 ->addFilter(["ClassName" => Estimate::class]);
         }
+
+        if ($query && array_key_exists("Start", $query)) {
+            $start = new DateTime($query["Start"]);
+        }
+
+        if ($query && array_key_exists("End", $query)) {
+            $end = new DateTime($query["End"]);
+        }
+
+        $format = "%Y-%m-%d";
+        $start_field = $db->formattedDatetimeClause(
+            '"Estimate"."StartDate"',
+            $format
+        );
+        $end_field = $db->formattedDatetimeClause(
+            '"Estimate"."EndDate"',
+            $format
+        );
+
+        if ($start && $end) {
+            $date_filter = [
+                $start_field . ' <= ?' =>  $end->format("Y-m-d"),
+                $start_field . ' >= ?' =>  $start->format("Y-m-d"),
+                $end_field . ' >= ?' =>  $start->format("Y-m-d"),
+                $end_field . ' <= ?' =>  $end->format("Y-m-d")
+            ];
+        } elseif ($start && !$end) {
+            $date_filter = [
+                $start_field . ' <= ?' =>  $start->format("Y-m-d"),
+                $end_field . ' >= ?' =>  $start->format("Y-m-d")
+            ];
+        }
+
+        if ($date_filter) {
+            $list = $list->where($date_filter);
+        }
                 
         $this->extend("updateList", $list);
 
         return $list;
+    }
+
+    public function SearchForm()
+    {
+        $form = parent::SearchForm();
+        $fields = $form->Fields();
+        $data = $this->getSearchData();
+        $singleton = Estimate::singleton();
+
+        // Replace the start field
+        $fields->replaceField(
+            "StartDate",
+            DateField::create(
+                "Start",
+                $singleton->fieldLabel("StartDate")
+            )
+        );
+
+        // Replace the start field
+        $fields->replaceField(
+            "EndDate",
+            DateField::create(
+                "End",
+                $singleton->fieldLabel("EndDate")
+            )
+        );
+
+        $form->loadDataFrom($data);
+
+        return $form;
     }
 }
