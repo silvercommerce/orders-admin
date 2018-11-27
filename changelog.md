@@ -65,3 +65,7 @@
 ## 1.2.8
 
 * Fixed error with HasOneButtonField when set to read-only
+
+## 1.2.9
+
+* changed Estimate summary fields

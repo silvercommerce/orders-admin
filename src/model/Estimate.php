@@ -156,8 +156,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
-        'Prefix'        => 'Prefix',
-        'Ref'           => 'Ref',
+        'FullRef'       => 'Ref',
         'StartDate'     => 'Date',
         'EndDate'       => 'Expires',
         'Company'       => 'Company',
