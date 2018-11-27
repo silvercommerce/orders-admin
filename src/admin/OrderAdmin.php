@@ -13,6 +13,7 @@ use Colymba\BulkManager\BulkAction\EditHandler;
 use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
+use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
