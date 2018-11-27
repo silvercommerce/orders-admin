@@ -13,6 +13,7 @@ use Colymba\BulkManager\BulkAction\EditHandler;
 use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
+use SilverStripe\Forms\GridField\GridFieldSortableHeader;
 use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
 use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
@@ -59,12 +60,14 @@ class OrderAdmin extends ModelAdminPlus
             ->fieldByName($this->sanitiseClassName($this->modelClass));
         $config = $gridfield->getConfig();
         
-        // Adding sort to FullRef
+        // Adding custom sorting for support of FullRef
         $headers = $config->getComponentByType(GridFieldSortableHeader::class);
-        $sorting = $headers->getFieldSorting();
-        $sorting['FullRef'] = 'Ref';
-        $headers->setFieldSorting($sorting);
-        
+        if ($headers) {
+            $sorting = $headers->getFieldSorting();
+            $sorting['FullRef'] = 'Ref';
+            $headers->setFieldSorting($sorting);
+        }
+
         // Bulk manager
         $manager = $config->getComponentByType(BulkManager::class);
 
