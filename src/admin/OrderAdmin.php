@@ -60,12 +60,14 @@ class OrderAdmin extends ModelAdminPlus
             ->fieldByName($this->sanitiseClassName($this->modelClass));
         $config = $gridfield->getConfig();
         
-        // Adding sort to FullRef
+        // Adding custom sorting for support of FullRef
         $headers = $config->getComponentByType(GridFieldSortableHeader::class);
-        $sorting = $headers->getFieldSorting();
-        $sorting['FullRef'] = 'Ref';
-        $headers->setFieldSorting($sorting);
-        
+        if ($headers) {
+            $sorting = $headers->getFieldSorting();
+            $sorting['FullRef'] = 'Ref';
+            $headers->setFieldSorting($sorting);
+        }
+
         // Bulk manager
         $manager = $config->getComponentByType(BulkManager::class);
 
