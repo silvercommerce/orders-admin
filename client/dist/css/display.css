@@ -1,4 +1,8 @@
-body {
+html, body {
+    height: auto;
+    min-height: 100%;
+}
+.container {
     margin-top: 1.5385rem;
 }
 
@@ -147,5 +151,27 @@ body {
     }
     .col-sm-push-0 {
         left: auto;
+    }
+    .panel {
+        min-height: 15rem;
+    }
+    .panel .panel-heading {
+        padding: 1rem 1rem 0 1rem;
+    }
+    .panel .panel-body {
+        padding: 1rem;
+    }
+    .table {
+        margin-bottom: 1.5rem;
+    }
+    .table td, .table th {
+        padding: 0.75rem;
+    }
+    .table td:last-child, .table th:last-child {
+        padding-right: 1rem;
+    }
+    hr {
+        margin-top: 0.75rem;
+        margin-bottom: 0.75rem;
     }
 }
