@@ -69,3 +69,7 @@
 ## 1.2.9
 
 * changed Estimate summary fields
+
+## 1.2.10
+
+* improved styling on invoice print view
