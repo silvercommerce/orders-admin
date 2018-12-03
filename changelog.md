@@ -72,8 +72,9 @@
 
 ## 1.2.10
 
-<<<<<<< HEAD
-* improved styling on invoice print view
-=======
 * Fix summary issue
->>>>>>> 08bd614a823a066c1a0433e256708d422f2680b9
+
+## 1.2.11
+
+* improved styling on invoice print view
+
