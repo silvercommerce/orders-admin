@@ -78,3 +78,6 @@
 
 * improved styling on invoice print view
 
+## 1.2.12
+
+* improved functionality of NumberMigration Task
