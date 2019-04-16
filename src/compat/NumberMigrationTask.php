@@ -44,7 +44,7 @@ class NumberMigrationTask extends MigrationTask
      */
     public function up()
     {
-        $this->message('Migrating estimate/invoice numbers');
+        $this->message('- Migrating estimate/invoice numbers');
         $total = 0;
 
         if (class_exists(Subsite::class)) {
@@ -52,7 +52,13 @@ class NumberMigrationTask extends MigrationTask
         } else {
             $items = Estimate::get();
         }
-
+        
+        $count = false;
+        if ($items) {
+            $this->message('- '.$items->count().' items to convert.');
+            $count = $items->count();
+        }
+        $i = 0;
         foreach ($items as $item) {
             if ($item->Number !== null) {
                 $config = SiteConfig::current_site_config();
@@ -63,32 +69,32 @@ class NumberMigrationTask extends MigrationTask
                 // Strip off current prefix and convert to a ref
                 if ($item instanceof Invoice) {
                     $ref = str_replace($inv_prefix . "-", "", $number);
+                    $ref = str_replace('-', '', $ref);
                     $item->Ref = (int)$ref;
                     $item->Prefix = $inv_prefix;
                 } else {
                     $ref = str_replace($est_prefix . "-", "", $number);
+                    $ref = str_replace('-', '', $ref);
                     $item->Ref = (int)$ref;
                     $item->Prefix = $est_prefix;
                 }
 
                 $item->Number = null;
                 $item->write();
-                $total++;
             }
+            $i++;
+            $this->message('- '.$i.'/'.$count.' items migrated.', true);
         }
-
-        $this->message("Migrated {$total} items");
     }
 
     /**
      * @param string $text
      */
-    protected function message($text)
+    protected function message($text, $linestart = false)
     {
-        if (Controller::curr() instanceof DatabaseAdmin) {
-            DB::alteration_message($text, 'obsolete');
-        } elseif (Director::is_cli()) {
-            echo $text . "\n";
+        if (Director::is_cli()) {
+            $end = ($linestart) ? "\r" : "\n";
+            echo $text . $end;
         } else {
             echo $text . "<br/>";
         }
