@@ -81,3 +81,7 @@
 ## 1.2.12
 
 * improved functionality of NumberMigration Task
+
+## 1.2.13
+
+* added config for replacing pdf css
