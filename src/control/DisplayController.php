@@ -41,6 +41,14 @@ class DisplayController extends Controller
     ];
 
     /**
+     * directory for pdf css file (in requirements format)
+     *
+     * @var string
+     * @config
+     */
+    private static $pdf_css = 'silvercommerce/orders-admin: client/dist/css/pdf.css';
+
+    /**
      * Ther object associated with this controller
      *
      * @var Estimate
@@ -169,7 +177,7 @@ class DisplayController extends Controller
          * Load custom CSS for PDF explicitly (as pass)
          */
         $loader = ModuleResourceLoader::singleton();
-        $style = file_get_contents($loader->resolvePath('silvercommerce/orders-admin: client/dist/css/pdf.css'));
+        $style = file_get_contents($loader->resolvePath($this->config()->pdf_css));
         Requirements::clear();
         Requirements::customCSS(<<<CSS
         $style
@@ -178,7 +186,6 @@ CSS
         $result = $this->invoice($request);
         $html = $result->getValue();
         $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
-
         $pdf = $this->gernerate_pdf($html);
 
         $this->extend("updateInvoicePDF", $pdf);
