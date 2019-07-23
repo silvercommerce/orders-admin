@@ -5,27 +5,10 @@ namespace SilverCommerce\OrdersAdmin\Model;
 use SilverStripe\Security\PermissionProvider;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
-use SilverStripe\i18n\i18n;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\Tab;
-use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\FieldGroup;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig;
-use SilverStripe\Forms\GridField\GridFieldButtonRow;
-use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use SilverStripe\Forms\GridField\GridFieldEditButton;
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
-use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
-use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 
 /**
