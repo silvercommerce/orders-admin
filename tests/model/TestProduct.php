@@ -4,7 +4,6 @@ namespace SilverCommerce\OrdersAdmin\Tests\Model;
 
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Omnipay\Extensions\Payable;
 
 class TestProduct extends DataObject implements TestOnly
 {
@@ -12,6 +11,7 @@ class TestProduct extends DataObject implements TestOnly
         "Title" => "Varchar",
         "StockID" => "Varchar",
         "Price" => "Currency",
-        "StockLevel" => "Int"
+        "StockLevel" => "Int",
+        "Weight" => "Decimal"
     ];
 }
