@@ -1,25 +1,24 @@
 <?php
 
-namespace SilverCommerce\OrdersAdmin\Compat;
+namespace SilverCommerce\OrdersAdmin\Tasks;
 
 use SilverStripe\ORM\DB;
 use SilverStripe\Control\Director;
 use SilverStripe\Dev\MigrationTask;
 use SilverStripe\ORM\DatabaseAdmin;
 use SilverStripe\Control\Controller;
+use SilverCommerce\GeoZones\Model\Zone;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Subsites\Model\Subsite;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverStripe\Subsites\Model\Subsite;
+use SilverCommerce\OrdersAdmin\Model\LineItem;
 
-class NumberMigrationTask extends MigrationTask
+/**
+ * Task to handle migrating orders/items to newer versions
+ */
+class OrdersMigrationTask extends MigrationTask
 {
-
-    private static $segment = 'OrderNumberMigrationTask';
-
-    protected $title = "Migrate order numbers to seperate ref/prefix";
-    
-    protected $description = "Provide atomic database changes (not implemented yet)";
 
     /**
      * Should this task be invoked automatically via dev/build?
@@ -30,9 +29,20 @@ class NumberMigrationTask extends MigrationTask
      */
     private static $run_during_dev_build = true;
 
+    private static $segment = 'OrdersMigrationTask';
+
+    protected $description = "Upgrade Orders/Items";
+
+    /**
+     * Run this task
+     *
+     * @param HTTPRequest $request The current request
+     *
+     * @return void
+     */
     public function run($request)
     {
-        if ($request->param('Direction') == 'down') {
+        if ($request->getVar('direction') == 'down') {
             $this->down();
         } else {
             $this->up();
@@ -44,7 +54,8 @@ class NumberMigrationTask extends MigrationTask
      */
     public function up()
     {
-        $this->message('- Migrating estimate/invoice numbers');
+        // Migrate estimate/invoice numbers to new ref field
+        $this->log('- Migrating estimate/invoice numbers');
         $total = 0;
 
         if (class_exists(Subsite::class)) {
@@ -55,10 +66,11 @@ class NumberMigrationTask extends MigrationTask
         
         $count = false;
         if ($items) {
-            $this->message('- '.$items->count().' items to convert.');
+            $this->log('- '.$items->count().' items to convert.');
             $count = $items->count();
         }
         $i = 0;
+
         foreach ($items as $item) {
             if ($item->Number !== null) {
                 $config = SiteConfig::current_site_config();
@@ -83,21 +95,39 @@ class NumberMigrationTask extends MigrationTask
                 $item->write();
             }
             $i++;
-            $this->message('- '.$i.'/'.$count.' items migrated.', true);
+            $this->log('- '.$i.'/'.$count.' items migrated.', true);
         }
-    }
 
-    /**
-     * @param string $text
-     */
-    protected function message($text, $linestart = false)
-    {
-        if (Director::is_cli()) {
-            $end = ($linestart) ? "\r" : "\n";
-            echo $text . $end;
-        } else {
-            echo $text . "<br/>";
+        unset($items);
+
+        // Change price/tax on line items to use new fields from extension
+        $items = LineItem::get();
+        $count = $items->count();
+        $this->log("Migrating {$count} Line Items");
+        $i = 0;
+
+        foreach ($items as $item) {
+            $write = false;
+
+            if ((int)$item->Price && (int)$item->BasePrice == 0) {
+                $item->BasePrice = $item->Price;
+                $write = true;
+            }
+
+            if ($item->TaxID != 0 && $item->TaxRateID == 0) {
+                $item->TaxRateID = $item->TaxID;
+                $write = true;
+            }
+
+            if ($write) {
+                $item->write();
+                $i++;
+            }
         }
+
+        unset($items);
+        
+        $this->log("Migrated {$i} Line Items");
     }
 
     /**
@@ -105,6 +135,22 @@ class NumberMigrationTask extends MigrationTask
      */
     public function down()
     {
-        $this->message('NumberMigrationTask::down() not implemented');
+        $zones = Zone::get();
+
+        $this->log('No Downgrade Required');
+    }
+
+    /**
+     * @param string $text
+     */
+    protected function log($text)
+    {
+        if (Controller::curr() instanceof DatabaseAdmin) {
+            DB::alteration_message($text, 'obsolete');
+        } elseif (Director::is_cli()) {
+            echo $text . "\n";
+        } else {
+            echo $text . "<br/>";
+        }
     }
 }
