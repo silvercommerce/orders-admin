@@ -179,12 +179,8 @@ class LineItemFactory
         }
 
         // ensure that object price is something we can work with
-        if (empty($product->dbObject('Price'))
-            || !$product->dbObject('Price') instanceof DBTaxableCurrency
-        ) {
-            throw new ValidationException(
-                "Price needs to be instance of " . DBTaxableCurrency::class
-            );
+        if (empty($product->BasePrice)) {
+            throw new ValidationException("Product needs a 'BasePrice' param");
         }
 
         // Check if deliverable and stocked
@@ -208,8 +204,8 @@ class LineItemFactory
         // Setup initial line item
         return [
             "Title" => $product->Title,
-            "PriceAmount" => $price->Amount,
-            "PriceTaxRateID" => $price->getTaxRate()->ID,
+            "BasePrice" => $product->BasePrice,
+            "TaxRateID" => $product->getTaxRate()->ID,
             "StockID" => $product->StockID,
             "ProductClass" => $product->ClassName,
             "Quantity" => $qty,
