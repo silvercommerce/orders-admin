@@ -11,7 +11,6 @@ use SilverStripe\Forms\DateField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Security\Member;
-use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
@@ -22,7 +21,6 @@ use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\ORM\FieldType\DBCurrency;
-use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Security\PermissionProvider;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
@@ -33,7 +31,6 @@ use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use SilverCommerce\OrdersAdmin\Tools\ShippingCalculator;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
@@ -41,6 +38,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\CompositeField;
 use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
+use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Control\HTTPRequest;
 use SilverShop\HasOneField\HasOneButtonField;
@@ -101,7 +99,7 @@ class Estimate extends DataObject implements PermissionProvider
         'DeliveryCountry'   => 'Varchar',
 
         // Access key (for viewing via non logged in users)
-        "AccessKey"         => "Varchar(40)"
+        'AccessKey'         => "Varchar(40)"
     ];
 
     /**
@@ -111,7 +109,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $has_one = [
-        "Customer"  => Contact::class
+        'Customer'  => Contact::class
     ];
 
     /**
@@ -135,13 +133,13 @@ class Estimate extends DataObject implements PermissionProvider
         "PersonalDetails"   => "Text",
         'BillingAddress'    => 'Text',
         'CountryFull'       => 'Varchar',
-        'CountryUC'       => 'Varchar',
+        'CountryUC'         => 'Varchar',
         'DeliveryAddress'   => 'Text',
         'DeliveryCountryFull'=> 'Varchar',
-        'DeliveryCountryUC'=> 'Varchar',
-        'SubTotal'          => 'Currency',
-        'TaxTotal'          => 'Currency',
-        'Total'             => 'Currency',
+        'DeliveryCountryUC' => 'Varchar',
+        'SubTotal'          => 'Currency(9,4)',
+        'TaxTotal'          => 'Currency(9,4)',
+        'Total'             => 'Currency(9,4)',
         'TotalItems'        => 'Int',
         'TotalWeight'       => 'Decimal',
         'ItemSummary'       => 'Text',
@@ -156,16 +154,27 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $summary_fields = [
+        'FullRef',
+        'StartDate',
+        'EndDate',
+        'Company',
+        'FirstName',
+        'Surname',
+        'Email',
+        'PostCode',
+        'Total',
+        'LastEdited'
+    ];
+
+    /**
+     * Human readable labels for fields
+     * 
+     * @var array
+     */
+    private static $field_labels = [
         'FullRef'       => 'Ref',
         'StartDate'     => 'Date',
-        'EndDate'       => 'Expires',
-        'Company'       => 'Company',
-        'FirstName'     => 'First Name',
-        'Surname'       => 'Surname',
-        'Email'         => 'Email',
-        'PostCode'      => 'Post Code',
-        "Total"         => "Total",
-        "LastEdited"    => "Last Edited"
+        'EndDate'       => 'Expires'
     ];
 
     /**
@@ -424,10 +433,17 @@ class Estimate extends DataObject implements PermissionProvider
     public function getTotalWeight()
     {
         $total = 0;
-        
+
         foreach ($this->Items() as $item) {
-            if ($item->Weight && $item->Quantity) {
-                $total = $total + ($item->Weight * $item->Quantity);
+            $product = $item->findStockItem();
+            $weight = null;
+
+            if (!empty($product) && isset($product->Weight)) {
+                $weight = $product->Weight;
+            }
+
+            if ($weight && $item->Quantity) {
+                $total = $total + ($weight * $item->Quantity);
             }
         }
 
@@ -466,14 +482,13 @@ class Estimate extends DataObject implements PermissionProvider
         $items = $this->Items();
         
         // Calculate total from items in the list
+        // We round here 
         foreach ($items as $item) {
             $tax = $item->UnitTax;
             $total += $tax * $item->Quantity;
         }
-        
-        $this->extend("updateTaxTotal", $total);
 
-        $total = MathsHelper::round($total, 2);
+        $this->extend("updateTaxTotal", $total);
 
         return $total;
     }
@@ -628,8 +643,6 @@ class Estimate extends DataObject implements PermissionProvider
         $self = $this;
    
         $this->beforeUpdateCMSFields(function ($fields) use ($self) {
-            $siteconfig = SiteConfig::current_site_config();
-
             $fields->removeByName("StartDate");
             $fields->removeByName("CustomerID");
             $fields->removeByName("EndDate");
@@ -763,11 +776,11 @@ class Estimate extends DataObject implements PermissionProvider
     {
         parent::requireDefaultRecords();
 
-        $run_migration = NumberMigrationTask::config()->run_during_dev_build;
+        $run_migration = OrdersMigrationTask::config()->run_during_dev_build;
 
         if ($run_migration) {
             $request = Injector::inst()->get(HTTPRequest::class);
-            NumberMigrationTask::create()->run($request);
+            OrdersMigrationTask::create()->run($request);
         }
     }
 
