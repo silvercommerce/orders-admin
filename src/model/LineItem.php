@@ -2,26 +2,25 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
+use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
-use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridFieldConfig;
-use SilverStripe\Forms\GridField\GridFieldConfig_Base;
-use SilverStripe\Forms\GridField\GridFieldButtonRow;
-use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
-use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
-use SilverStripe\Forms\GridField\GridFieldEditButton;
-use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\Forms\GridField\GridFieldAddNewButton;
-use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
-use SilverStripe\Forms\DropdownField;
+use SilverCommerce\TaxAdmin\Traits\Taxable;
+use SilverCommerce\TaxAdmin\PricingExtension;
+use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
+use SilverStripe\Forms\GridField\GridFieldEditButton;
+use SilverStripe\Forms\GridField\GridFieldDataColumns;
+use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
+use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
+use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
+use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * A LineItem is a single line item on an order, extimate or even in
@@ -45,8 +44,10 @@ use SilverStripe\Forms\DropdownField;
  *
  * @author Mo <morven@ilateral.co.uk>
  */
-class LineItem extends DataObject
+class LineItem extends DataObject implements TaxableProvider
 {
+    use Taxable;
+
     private static $table_name = 'LineItem';
 
     /**
@@ -69,16 +70,14 @@ class LineItem extends DataObject
     private static $db = [
         "Key"           => "Varchar(255)",
         "Title"         => "Varchar",
-        "Content"       => "HTMLText",
-        "Quantity"      => "Int",
+        "BasePrice"     => "Decimal(9,3)",
         "Price"         => "Currency",
-        "Weight"        => "Decimal",
+        "Quantity"      => "Int",
         "StockID"       => "Varchar(100)",
         "ProductClass"  => "Varchar",
         "Locked"        => "Boolean",
         "Stocked"       => "Boolean",
-        "Deliverable"   => "Boolean",
-        "Customisation" => "Text",
+        "Deliverable"   => "Boolean"
     ];
 
     /**
@@ -90,6 +89,7 @@ class LineItem extends DataObject
     private static $has_one = [
         "Parent"      => Estimate::class,
         "Tax"         => TaxRate::class,
+        "TaxRate"     => TaxRate::class
     ];
     
     /**
@@ -123,13 +123,13 @@ class LineItem extends DataObject
      * @config
      */
     private static $casting = [
-        "UnitPrice" => "Currency",
-        "UnitTax" => "Currency",
-        "UnitTotal" => "Currency",
-        "SubTotal" => "Currency",
+        "UnitPrice" => "Currency(9,3)",
+        "UnitTax" => "Currency(9,3)",
+        "UnitTotal" => "Currency(9,3)",
+        "SubTotal" => "Currency(9,3)",
         "TaxRate" => "Decimal",
-        "TaxTotal" => "Currency",
-        "Total" => "Currency",
+        "TaxTotal" => "Currency(9,3)",
+        "Total" => "Currency(9,3)",
         "CustomisationList" => "Text",
         "CustomisationAndPriceList" => "Text",
     ];
@@ -141,13 +141,82 @@ class LineItem extends DataObject
      * @config
      */
     private static $summary_fields = [
-        "Quantity"  => "Quantity",
-        "Title"     => "Title",
-        "StockID"   => "Stock ID",
-        "Price"     => "Item Price",
+        "Quantity",
+        "Title",
+        "StockID",
+        "BasePrice",
+        "TaxRateID",
+        "CustomisationAndPriceList"
+    ];
+
+    private static $field_labels = [
+        "BasePrice"=> "Item Price",
+        "Price"    => "Item Price",
         "TaxID"    => "Tax",
+        "TaxRateID"=> "Tax",
         "CustomisationAndPriceList" => "Customisations"
     ];
+
+    /**
+     * Get the basic price for this object
+     *
+     * @return float
+     */
+    public function getBasePrice()
+    {
+        return $this->dbObject('BasePrice')->getValue();
+    }
+
+    /**
+     * Return the tax rate for this Object
+     * 
+     * @return TaxRate
+     */
+    public function getTaxRate()
+    {
+        return $this->TaxRate();
+    }
+
+    /**
+     * Get the locale from the site
+     * 
+     * @return string
+     */
+    public function getLocale()
+    {
+        return i18n::get_locale();
+    }
+
+    /**
+     * Get should this field automatically show the price including TAX?
+     *
+     * @return bool
+     */
+    public function getShowPriceWithTax()
+    {
+        $config = SiteConfig::current_site_config();
+        $show = $config->ShowPriceAndTax;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateShowPriceWithTax", $show)
+        );
+
+        if (!empty($result)) {
+            return (bool)$result;
+        }
+
+        return (bool)$show;
+    }
+
+    /**
+     * We don't want to show a tax string on Line Items
+     *
+     * @return false
+     */
+    public function getShowTaxString()
+    {
+        return false;
+    }
 
     /**
      * Modify default field scaffolding in admin
@@ -156,7 +225,6 @@ class LineItem extends DataObject
      */
     public function getCMSFields()
     {
-        
         $this->beforeUpdateCMSFields(function ($fields) {
             $config = SiteConfig::current_site_config();
 
@@ -210,48 +278,49 @@ class LineItem extends DataObject
 
         return parent::getCMSFields();
     }
-
-    /**
-     * Get the rate of tax for this item
-     *
-     * @return float
-     */
-    public function getTaxRate()
-    {
-        $rate = ($this->Tax()->exists()) ? $this->Tax()->Rate : 0;
-
-        $this->extend("updateTaxRate", $rate);
-
-        return $rate;
-    }
     
     /**
-     * Get the price for a single line item (unit), minus any
-     * tax
+     * Get the price for a single line item (unit), minus any tax
      *
      * @return float
      */
-    public function getUnitPrice()
+    public function getNoTaxPrice()
     {
-        $total = $this->Price;
+        $price = $this->getBasePrice();
 
         foreach ($this->Customisations() as $customisation) {
-            $total += $customisation->Price;
+            $price += $customisation->Price;
         }
 
-        $this->extend("updateUnitPrice", $total);
+        $result = $this->getOwner()->filterTaxableExtensionResults(
+            $this->extend("updateNoTaxPrice", $price)
+        );
 
-        return $total;
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $price;
+    }
+
+    public function getUnitPrice()
+    {
+        return $this->getNoTaxPrice();
     }
 
     /**
      * Get the amount of tax for a single unit of this item
      *
+     * **NOTE** Tax is rounded at the single item price to avoid multiplication
+     * weirdness. For example 49.995 + 20% is 59.994 for one product,
+     * but 239.976 for 4 (it should be 239.96)
+     *
      * @return float
      */
     public function getUnitTax()
     {
-        $total = ($this->UnitPrice / 100) * $this->TaxRate;
+        // Calculate and round tax now to try and minimise penny rounding issues
+        $total = ($this->UnitPrice / 100) * $this->TaxPercentage;
 
         $this->extend("updateUnitTax", $total);
 
@@ -279,7 +348,7 @@ class LineItem extends DataObject
      */
     public function getSubTotal()
     {
-        $total = $this->UnitPrice * $this->Quantity;
+        $total = $this->NoTaxPrice * $this->Quantity;
 
         $this->extend("updateSubTotal", $total);
 
@@ -310,7 +379,7 @@ class LineItem extends DataObject
         $total = $this->SubTotal + $this->TaxTotal;
 
         $this->extend("updateTotal", $total);
-
+    
         return $total;
     }
 
@@ -368,7 +437,7 @@ class LineItem extends DataObject
 
         if ($items && $items->exists()) {
             foreach ($items as $item) {
-                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->dbObject("Price")->Nice() . ')';
+                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->Price . ')';
             }
         }
 
@@ -456,6 +525,22 @@ class LineItem extends DataObject
         $this->extend("updateCheckStockLevel", $return);
         
         return $return;
+    }
+
+    /**
+     * Generate a key based on this item and its customisations
+     *
+     * @return string
+     */
+    public function generateKey()
+    {
+        // Generate a unique item key based on the current ID and customisations
+        $key = base64_encode(
+            json_encode(
+                $this->Customisations()->map("Title", "Value")->toArray()
+            )
+        );
+        return $this->StockID . ':' . $key;
     }
 
     /**
@@ -548,34 +633,7 @@ class LineItem extends DataObject
     public function onBeforeWrite()
     {
         parent::onBeforeWrite();
-
-        // Generate a unique item key based on the current ID and customisations
-        $key = base64_encode(json_encode($this->Customisations()->map("Title", "Value")->toArray()));
-        $this->Key = $this->StockID . ':' . $key;
-    }
-
-    /**
-     * Perform post-DB write functions
-     *
-     * @return void
-     */
-    public function onAfterWrite()
-    {
-        parent::onAfterWrite();
-
-        if ($this->Customisation) {
-            $data = unserialize($this->Customisation);
-
-            if ($data instanceof ArrayList) {
-                foreach ($data as $data_item) {
-                    $data_item->ParentID = $this->ID;
-                    $data_item->write();
-                }
-
-                $this->Customisation = null;
-                $this->write();
-            }
-        }
+        $this->Key = $this->generateKey();
     }
 
     /**
