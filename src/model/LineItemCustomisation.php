@@ -25,7 +25,7 @@ class LineItemCustomisation extends DataObject
     private static $db = [
         "Title" => "Varchar",
         "Value" => "Text",
-        "Price" => "Currency"
+        "Price" => "Decimal(9,3)"
     ];
 
     /**
