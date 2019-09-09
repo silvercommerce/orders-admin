@@ -169,7 +169,7 @@ class LineItem extends DataObject implements TaxableProvider
 
     /**
      * Return the tax rate for this Object
-     * 
+     *
      * @return TaxRate
      */
     public function getTaxRate()
@@ -179,7 +179,7 @@ class LineItem extends DataObject implements TaxableProvider
 
     /**
      * Get the locale from the site
-     * 
+     *
      * @return string
      */
     public function getLocale()

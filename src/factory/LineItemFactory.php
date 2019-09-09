@@ -42,35 +42,35 @@ class LineItemFactory
 
     /**
      * Current line item
-     * 
+     *
      * @var DataObject
      */
     protected $item;
 
     /**
      * DataObject that will act as the product
-     * 
+     *
      * @var \SilverStripe\ORM\DataObject
      */
     protected $product;
 
     /**
      * The number of product to add/update for this line item
-     * 
+     *
      * @var int
      */
     protected $quantity;
 
     /**
      * Should this item be locked (cannot be updated, only removed)?
-     * 
+     *
      * @var bool
      */
     protected $lock;
 
     /**
      * List of customisation data that will need to be setup
-     * 
+     *
      * @var array
      */
     protected $customisations = [];
@@ -100,7 +100,7 @@ class LineItemFactory
     /**
      * Either find an existing line item (based on the submitted data),
      * or return a new one.
-     * 
+     *
      * @return DataObject
      */
     public function makeItem()
@@ -234,7 +234,7 @@ class LineItemFactory
      * Create a customisation object to be added to the current order
      *
      * @param array $data An array of data to add to the customisation
-     * 
+     *
      * @return DataObject
      */
     protected function createCustomisation(array $data)

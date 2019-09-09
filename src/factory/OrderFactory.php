@@ -50,14 +50,14 @@ class OrderFactory
 
     /**
      * The reference number for the invoice (if null, a new invoice is created)
-     * 
+     *
      * @var int
      */
     protected $ref;
 
     /**
      * The estimate/invoice ID (if null, a new estimate/invoice is created)
-     * 
+     *
      * @var int
      */
     protected $id;
@@ -89,7 +89,7 @@ class OrderFactory
     /**
      * Attempt to either find an existing order, or make a new one.
      * (based on submitted ID/Ref)
-     * 
+     *
      * @return self
      */
     public function findOrMake()
@@ -242,7 +242,7 @@ class OrderFactory
 
     /**
      * Write the currently selected order
-     * 
+     *
      * @return self
      */
     public function write()
@@ -282,9 +282,9 @@ class OrderFactory
 
     /**
      * Get the current Invoice/Estimate items list
-     * 
+     *
      * @throws \SilverStripe\ORM\ValidationException
-     * 
+     *
      * @return \SilverStripe\ORM\SS_List
      */
     protected function getItems()
@@ -320,7 +320,7 @@ class OrderFactory
      * Get are we working with an invoice or an estimate?
      *
      * @return boolean
-     */ 
+     */
     public function getIsInvoice()
     {
         return $this->is_invoice;
@@ -332,7 +332,7 @@ class OrderFactory
      * @param bool $invoice Are we working with an invoice or an estimate?
      *
      * @return self
-     */ 
+     */
     public function setIsInvoice(bool $invoice)
     {
         $this->is_invoice = $invoice;
@@ -343,7 +343,7 @@ class OrderFactory
      * Get the reference number for the invoice (if null, a new invoice is created)
      *
      * @return int
-     */ 
+     */
     public function getRef()
     {
         return $this->ref;
@@ -355,7 +355,7 @@ class OrderFactory
      * @param int $ref reference number
      *
      * @return self
-     */ 
+     */
     public function setRef(int $ref)
     {
         $this->ref = $ref;
@@ -366,7 +366,7 @@ class OrderFactory
      * Get the estimate/invoice ID (if null, a new estimate/invoice is created)
      *
      * @return int
-     */ 
+     */
     public function getId()
     {
         return $this->id;
@@ -378,7 +378,7 @@ class OrderFactory
      * @param int $id estimate/invoice ID
      *
      * @return self
-     */ 
+     */
     public function setId(int $id)
     {
         $this->id = $id;

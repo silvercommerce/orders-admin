@@ -16,7 +16,8 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
  * Add additional functions to a contact
  */
 class ContactExtension extends DataExtension
-{   
+{
+
     private static $has_many = [
         "Invoices" => Invoice::class,
         "Estimates"=> Estimate::class

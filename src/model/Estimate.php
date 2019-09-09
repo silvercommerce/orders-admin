@@ -168,7 +168,7 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Human readable labels for fields
-     * 
+     *
      * @var array
      */
     private static $field_labels = [
@@ -279,9 +279,9 @@ class Estimate extends DataObject implements PermissionProvider
 
     /**
      * Get the full reference number for this estimate/invoice.
-     * 
+     *
      * This is the stored prefix and ref
-     * 
+     *
      * @return string
      */
     public function getFullRef()
@@ -482,7 +482,7 @@ class Estimate extends DataObject implements PermissionProvider
         $items = $this->Items();
         
         // Calculate total from items in the list
-        // We round here 
+        // We round here
         foreach ($items as $item) {
             $tax = $item->UnitTax;
             $total += $tax * $item->Quantity;
