@@ -85,3 +85,11 @@
 ## 1.2.13
 
 * added config for replacing pdf css
+
+## 1.3.0
+
+* Added factories for creating Estimates/Invoices
+* Increase decimal sizes of base prices items
+* Switch to "BasePrice" for line item prices
+* Switch to using `Taxable` to calculate Tax Prices
+* Fix travis support
