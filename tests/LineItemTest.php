@@ -49,15 +49,15 @@ class LineItemTest extends SapphireTest
      *
      * @return void
      */
-    public function testGetTaxRate()
+    public function testGetTaxPercentage()
     {
         $item_none = $this->objFromFixture(LineItem::class, 'notaxitem');
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(0, $item_none->TaxRate);
-        $this->assertEquals(5, $item_reduced->TaxRate);
-        $this->assertEquals(20, $item_vat->TaxRate);
+        $this->assertEquals(0, $item_none->TaxPercentage);
+        $this->assertEquals(5, $item_reduced->TaxPercentage);
+        $this->assertEquals(20, $item_vat->TaxPercentage);
     }
 
     /**
