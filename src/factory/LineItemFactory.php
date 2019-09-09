@@ -318,11 +318,11 @@ class LineItemFactory
      * Set current line item
      *
      * @param LineItem $item  Item to add
-     * @param bool     $setup Should we setup this factory based on the item?
+     * @param boolean  $setup Should we setup this factory based on the item?
      *
      * @return self
      */
-    public function setItem(LineItem $item, bool $setup = true)
+    public function setItem(LineItem $item, $setup = true)
     {
         // If item has an assigned product, add it as well
         $this->item = $item;

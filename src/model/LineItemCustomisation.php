@@ -2,6 +2,8 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
+use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
+use SilverCommerce\TaxAdmin\Traits\Taxable;
 use SilverStripe\ORM\DataObject;
 
 /**
@@ -12,8 +14,10 @@ use SilverStripe\ORM\DataObject;
  *  - Value: The data associated with thie customisation (eg. "Red")
  *  - Price: Does this customisation change the LineItem's price?
  */
-class LineItemCustomisation extends DataObject
+class LineItemCustomisation extends DataObject implements TaxableProvider
 {
+    use Taxable;
+
     private static $table_name = 'LineItemCustomisation';
 
     /**
@@ -25,6 +29,7 @@ class LineItemCustomisation extends DataObject
     private static $db = [
         "Title" => "Varchar",
         "Value" => "Text",
+        "BasePrice" => "Decimal(9,3)",
         "Price" => "Decimal(9,3)"
     ];
 
@@ -49,4 +54,42 @@ class LineItemCustomisation extends DataObject
         "Value",
         "Price"
     ];
+
+    private static $field_labels = [
+        'BasePrice' => 'Price'
+    ];
+
+    public function getBasePrice()
+    {
+        return $this->dbObject('BasePrice')->getValue();
+    }
+
+    public function getTaxRate()
+    {
+        return $this->Parent()->getTaxRate();
+    }
+
+    public function getLocale()
+    {
+        return $this->Parent()->getLocale();
+    }
+    /**
+     * Get should this field automatically show the price including TAX?
+     *
+     * @return bool
+     */
+    public function getShowPriceWithTax()
+    {
+        return $this->Parent()->getShowPriceWithTax();
+    }
+
+    /**
+     * We don't want to show a tax string on Line Items
+     *
+     * @return false
+     */
+    public function getShowTaxString()
+    {
+        return false;
+    }
 }

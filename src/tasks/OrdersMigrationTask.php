@@ -13,6 +13,7 @@ use SilverStripe\Subsites\Model\Subsite;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
+use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 
 /**
  * Task to handle migrating orders/items to newer versions
@@ -116,6 +117,30 @@ class OrdersMigrationTask extends MigrationTask
 
             if ($item->TaxID != 0 && $item->TaxRateID == 0) {
                 $item->TaxRateID = $item->TaxID;
+                $write = true;
+            }
+
+            if ($write) {
+                $item->write();
+                $i++;
+            }
+        }
+
+        unset($items);
+        
+        $this->log("Migrated {$i} Line Item Customisations");
+
+        // Change price/tax on line items to use new fields from extension
+        $items = LineItemCustomisation::get();
+        $count = $items->count();
+        $this->log("Migrating {$count} Line Items");
+        $i = 0;
+
+        foreach ($items as $item) {
+            $write = false;
+
+            if ((int)$item->Price && (int)$item->BasePrice == 0) {
+                $item->BasePrice = $item->Price;
                 $write = true;
             }
 

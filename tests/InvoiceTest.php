@@ -4,7 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
-use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
+use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 
 class InvoiceTest extends SapphireTest
 {

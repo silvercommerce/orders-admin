@@ -437,7 +437,7 @@ class LineItem extends DataObject implements TaxableProvider
 
         if ($items && $items->exists()) {
             foreach ($items as $item) {
-                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->Price . ')';
+                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->getFormattedPrice() . ')';
             }
         }
 

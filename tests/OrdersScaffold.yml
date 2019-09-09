@@ -1,19 +1,19 @@
-SilverCommerce\OrdersAdmin\Tests\Model\TestProduct:
+SilverCommerce\TaxAdmin\Tests\Model\TestProduct:
   socks:
     Title: "Socks"
     StockID: "so1"
-    Price: 5.99
+    BasePrice: 5.99
     StockLevel: 10
   notax:
     Title: "No Tax Item"
     StockID: "nt1"
-    Price: 5.99
+    BasePrice: 5.99
     StockLevel: 10
     Weight: 0.5
   tax:
     Title: "Tax Item"
     StockID: "t1"
-    Price: 5.99
+    BasePrice: 5.99
     StockLevel: 10
     Weight: 0.75
 SilverCommerce\TaxAdmin\Model\TaxRate:
@@ -34,11 +34,11 @@ SilverCommerce\OrdersAdmin\Model\LineItemCustomisation:
     Title: "Customisation"
     Value: "Free"
     Number: 123456
-    Price: 0
+    BasePrice: 0
   expensivecustomisation:
     Title: "Customisation"
     Value: "Expensive"
-    Price: 100
+    BasePrice: 100
 SilverCommerce\OrdersAdmin\Model\LineItem:
   deliverable:
     Title: "Deliverable Item"
@@ -49,48 +49,48 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
   notaxitem:
     Title: "A cheap item"
     Quantity: 2
-    PriceAmount: 5.99
-    PriceTaxRateID: 3 # Zero
+    BasePrice: 5.99
     StockID: "nt1"
-    ProductClass: SilverCommerce\OrdersAdmin\Tests\Model\TestProduct
+    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
   reducedtaxitem:
     Title: "An item with reduced tax"
     Quantity: 2
     Weight: 0.5
-    PriceAmount: 5.99 # 0.2995 tax per item
-    PriceTaxRateID: 2 # Reduced
+    BasePrice: 5.99 # 0.2995 tax per item
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.reduced # Reduced
   taxitemone:
     Title: "A tax item"
     Quantity: 2
-    PriceAmount: 5.99 # 1.198 tax per item
-    PriceTaxRateID: 1 # VAT
+    BasePrice: 5.99 # 1.198 tax per item
     StockID: "t1"
-    ProductClass: SilverCommerce\OrdersAdmin\Tests\Model\TestProduct
+    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   taxitemtwo:
     Title: "Another tax item"
     Quantity: 2
-    PriceAmount: 5.99 # 1.198 tax per item
-    PriceTaxRateID: 1 # VAT
+    BasePrice: 5.99 # 1.198 tax per item
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   taxitemthree:
     Title: "Two cheap items"
     Quantity: 2
     Weight: 0.75
-    PriceAmount: 3.99 # 0.798 tax per item
-    PriceTaxRateID: 1 # VAT
+    BasePrice: 3.99 # 0.798 tax per item
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   sockitem:
     Title: "Socks"
     Quantity: 1
     Weight: 0.5
     StockID: "so1"
-    ProductClass: SilverCommerce\OrdersAdmin\Tests\Model\TestProduct
-    PriceAmount: 5.99
-    PriceTaxRateID: 3 # Zero
+    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    BasePrice: 5.99
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
   customitem:
     Title: "Socks"
     Quantity: 1
     Weight: 0.5
-    PriceAmount: 5.99
-    PriceTaxRateID: 3 # Zero
+    BasePrice: 5.99
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
     Customisations: =>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.freecustomisation,=>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.expensivecustomisation
 SilverCommerce\OrdersAdmin\Model\Estimate:
   addressdetails:

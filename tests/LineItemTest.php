@@ -4,7 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
-use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
+use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 
 class LineItemTest extends SapphireTest
 {
@@ -24,7 +24,7 @@ class LineItemTest extends SapphireTest
         TestProduct::class
     ];
 
-    /**notaxitem
+    /**
      * Add some extra functionality on construction
      *
      * @return void
@@ -194,7 +194,7 @@ class LineItemTest extends SapphireTest
 
         $this->assertTrue(is_object($product));
         $this->assertEquals("Socks", $product->Title);
-        $this->assertEquals(5.99, $product->Price);
+        $this->assertEquals(5.99, $product->NoTaxPrice);
     }
 
     /**

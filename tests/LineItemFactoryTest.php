@@ -5,7 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Factory\OrderFactory;
-use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
+use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 
 /**

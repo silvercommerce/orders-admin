@@ -6,7 +6,7 @@ use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Factory\OrderFactory;
-use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
+use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 
 class OrderFactoryTest extends SapphireTest
 {

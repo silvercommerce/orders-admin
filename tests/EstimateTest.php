@@ -3,9 +3,9 @@
 namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 
 class EstimateTest extends SapphireTest
 {
@@ -24,26 +24,6 @@ class EstimateTest extends SapphireTest
     protected static $extra_dataobjects = [
         TestProduct::class
     ];
-
-    /**
-     * Add some extra functionality on construction
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
-     * Clean up after tear down
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
 
     /**
      * Test that an estimate converts to invoice correctly
@@ -139,8 +119,8 @@ class EstimateTest extends SapphireTest
         $tax_order_two = $this->objFromFixture(Estimate::class, 'complextax');
 
         $this->assertEquals(0, $no_tax_order->TaxTotal);
-        $this->assertEquals(2.40, $tax_order_one->TaxTotal);
-        $this->assertEquals(3.0, $tax_order_two->TaxTotal);
+        $this->assertEquals(2.396, $tax_order_one->TaxTotal);
+        $this->assertEquals(2.995, $tax_order_two->TaxTotal);
     }
 
     /**
@@ -158,8 +138,8 @@ class EstimateTest extends SapphireTest
         $this->assertEquals(11.98, $no_tax_order->SubTotal);
         $this->assertEquals(11.98, $no_tax_order->Total);
         $this->assertEquals(11.98, $tax_order_one->SubTotal);
-        $this->assertEquals(14.38, $tax_order_one->Total);
+        $this->assertEquals(14.376, $tax_order_one->Total);
         $this->assertEquals(23.96, $tax_order_two->SubTotal);
-        $this->assertEquals(26.96, $tax_order_two->Total);
+        $this->assertEquals(26.955, $tax_order_two->Total);
     }
 }
