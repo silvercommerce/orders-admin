@@ -52,7 +52,7 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
     private static $summary_fields = [
         "Title",
         "Value",
-        "Price"
+        "BasePrice"
     ];
 
     private static $field_labels = [

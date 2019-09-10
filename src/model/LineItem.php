@@ -228,7 +228,13 @@ class LineItem extends DataObject implements TaxableProvider
         $this->beforeUpdateCMSFields(function ($fields) {
             $config = SiteConfig::current_site_config();
 
-            $fields->removeByName("Customisation");
+            $fields->removeByName(
+                [
+                    'Customisation',
+                    'Price',
+                    'TaxID'
+                ]
+            );
 
             $fields->addFieldToTab(
                 "Root.Main",
@@ -239,19 +245,11 @@ class LineItem extends DataObject implements TaxableProvider
             $fields->addFieldToTab(
                 "Root.Main",
                 DropdownField::create(
-                    "TaxID",
-                    $this->fieldLabel("TaxID"),
+                    "TaxRateID",
+                    $this->fieldLabel("TaxRate"),
                     $config->TaxRates()->map()
                 ),
-                "Weight"
-            );
-
-            $fields->addFieldsToTab(
-                "Root.Description",
-                [
-                    HTMLEditorField::create("Content")
-                        ->addExtraClass("stacked")
-                ]
+                "Quantity"
             );
 
             // Change unlink button to remove on customisation
@@ -289,9 +287,9 @@ class LineItem extends DataObject implements TaxableProvider
         $price = $this->getBasePrice();
 
         foreach ($this->Customisations() as $customisation) {
-            $price += $customisation->Price;
+            $price += $customisation->getBasePrice();
         }
-
+        
         $result = $this->getOwner()->filterTaxableExtensionResults(
             $this->extend("updateNoTaxPrice", $price)
         );
@@ -325,6 +323,16 @@ class LineItem extends DataObject implements TaxableProvider
         $this->extend("updateUnitTax", $total);
 
         return $total;
+    }
+
+    /**
+     * Overwrite TaxAmount with unit tax
+     * 
+     * @return float
+     */
+    public function getTaxAmount()
+    {
+        return $this->UnitTax;
     }
 
     /**

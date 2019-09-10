@@ -7,7 +7,6 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
-use SilverCommerce\TaxableCurrency\DBTaxableCurrency;
 use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 
 /**
@@ -29,7 +28,7 @@ class LineItemFactory
     private static $custom_map = [
         "Title",
         "Value",
-        "Price"
+        "BasePrice"
     ];
 
     /**
@@ -198,8 +197,6 @@ class LineItemFactory
         } else {
             $stocked = false;
         }
-
-        $price = $product->dbObject('Price');
 
         // Setup initial line item
         return [
