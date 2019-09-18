@@ -93,3 +93,11 @@
 * Switch to "BasePrice" for line item prices
 * Switch to using `Taxable` to calculate Tax Prices
 * Fix travis support
+
+## 1.3.1
+
+* Switch to using BasePrice for customisation and correctly calculate tax
+
+## 1.3.2
+
+* Use new price fields for invoice/email templates
