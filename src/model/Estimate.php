@@ -504,7 +504,7 @@ class Estimate extends DataObject implements PermissionProvider
 
         foreach ($this->Items() as $item) {
             $existing = null;
-            $rate = $item->Tax();
+            $rate = $item->TaxRate();
 
             if ($rate->exists()) {
                 $existing = $taxes->find("ID", $rate->ID);
