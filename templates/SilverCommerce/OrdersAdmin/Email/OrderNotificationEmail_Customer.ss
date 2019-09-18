@@ -29,7 +29,7 @@
                             <em>$CustomisationHTML</em>
                         </td>
                         <td style="text-align: right">{$Quantity}</td>
-                        <td style="text-align: right">{$Price.Nice}</td>
+                        <td style="text-align: right">{$UnitPrice.Nice}</td>
                     </tr>
                 <% end_loop %></tbody>
                 

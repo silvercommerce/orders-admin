@@ -114,7 +114,7 @@
                                 <td class="text-center">{$Quantity}</td>
                                 <td class="text-right">{$UnitPrice.Nice}</td>
                                 <td class="text-right">{$UnitTax.Nice}</td>
-                                <td class="text-right">{$Tax.Title}</td>
+                                <td class="text-right">{$TaxRate.Title}</td>
                             </tr>
                         <% end_loop %></tbody>
                     </table>
@@ -144,20 +144,18 @@
                                     </tr>
                                 <% end_if %>
                                 
-                                <% if $PostageCost.RAW > 0 %>
+                                <% if $PostagePrice.RAW > 0 %>
                                     <tr>
                                         <th class="text-right"><%t OrdersAdmin.Postage "Postage" %></th>
-                                        <td class="text-right">$PostageCost.Nice</td>
+                                        <td class="text-right">$PostagePrice.Nice</td>
                                     </tr>
                                 <% end_if %>
-                                
-                                <% loop $TaxList %>
-                                    <tr>
-                                        <th class="text-right">{$Rate.Title}</th>
-                                        <td class="text-right">$Total.Nice</td>
-                                    </tr>
-                                <% end_loop %>
-        
+
+                                <tr>
+                                    <th class="text-right"><%t OrdersAdmin.Tax 'Tax' %></th>
+                                    <td class="text-right">{$TaxTotal.Nice}</td>
+                                </tr>
+
                                 <tr>
                                     <th class="text-right"><%t OrdersAdmin.GrandTotal "Grand Total" %></th>
                                     <td class="text-right">$Total.Nice</td>
