@@ -101,3 +101,7 @@
 ## 1.3.2
 
 * Use new price fields for invoice/email templates
+
+## 1.3.3
+
+* Update AddLineItem to work with changes to GridField.js
