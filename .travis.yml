@@ -12,8 +12,6 @@ env:
 
 matrix:
   include:
-    - php: 5.6
-      env: DB=MYSQL INSTALLER_VERSION=4.2.x-dev PHPUNIT_TEST=1 UNIT_TESTS_RUNNING=1
     - php: 7.1
       env: DB=PGSQL INSTALLER_VERSION=4.2.x-dev PHPUNIT_TEST=1 UNIT_TESTS_RUNNING=1
     - php: 7.1
