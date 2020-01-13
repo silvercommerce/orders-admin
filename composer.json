@@ -24,6 +24,7 @@
         "issues": "https://github.com/silvercommerce/orders-admin/issues"
     },
     "require": {
+        "php": ">=7.1.0",
         "silverstripe/framework": "~4.0",
         "silverstripe/siteconfig": "~4.0",
         "silverstripe/admin": "~1.0",
