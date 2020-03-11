@@ -167,6 +167,23 @@ class Estimate extends DataObject implements PermissionProvider
     ];
 
     /**
+     * Fields to search
+     *
+     * @var array
+     * @config
+     */
+    private static $searchable_fields = [
+        'StartDate',
+        'EndDate',
+        'Company',
+        'FirstName',
+        'Surname',
+        'Email',
+        'PostCode',
+        'LastEdited'
+    ];
+
+    /**
      * Human readable labels for fields
      *
      * @var array
