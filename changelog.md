@@ -101,3 +101,7 @@
 ## 1.3.2
 
 * Use new price fields for invoice/email templates
+
+## 1.3.3
+
+* Fix delivery name variable in email template

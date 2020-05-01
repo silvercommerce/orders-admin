@@ -95,7 +95,7 @@
 
         <p>
             <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
-            {$DeliveryFirstnames} {$DeliverySurname}<br/>
+            {$DeliveryFirstName} {$DeliverySurname}<br/>
             {$DeliveryAddress1},<br/>
             <% if $DeliveryAddress2 %>{$DeliveryAddress2},<br/><% end_if %>
             {$DeliveryCity},<br/>
