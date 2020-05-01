@@ -7,6 +7,7 @@ use SilverStripe\ORM\ValidationException;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 
 class OrderFactory
@@ -238,6 +239,18 @@ class OrderFactory
         }
 
         return $this;
+    }
+
+    /**
+     * Add the provided customer to the Invoice/Estimate
+     *
+     * @param \SilverCommerce\ContactAdmin\Model\Contact $contact
+     *
+     * @return self
+     */
+    public function setCustomer(Contact $contact)
+    {
+        $this->order->CustomerID = $contact->ID;
     }
 
     /**

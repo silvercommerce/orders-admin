@@ -104,4 +104,9 @@
 
 ## 1.3.3
 
+* Add ability to set the customer for an order via the `OrderFactory`
+* Update AddLineItem to work with changes to GridField.js
+
+## 1.3.4
+
 * Fix delivery name variable in email template

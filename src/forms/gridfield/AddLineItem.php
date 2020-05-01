@@ -2,21 +2,22 @@
 
 namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
-use SilverStripe\Control\Controller;
-use SilverStripe\View\ArrayData;
-use SilverStripe\ORM\ArrayList;
+use LogicException;
+use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataList;
 use SilverStripe\View\SSViewer;
-use SilverStripe\Core\Convert;
-use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\Forms\GridField\GridField_ActionProvider;
-use SilverStripe\Forms\GridField\GridField_HTMLProvider;
-use SilverStripe\Forms\GridField\GridField_URLHandler;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Control\Controller;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\HTTPResponse;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
+use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridField_FormAction;
 use Doctrine\Instantiator\Exception\UnexpectedValueException;
-use SilverCommerce\TaxAdmin\Model\TaxRate;
-use LogicException;
+use SilverStripe\Dev\Debug;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
  * A specific gridfield field designed to allow the creation of a new
@@ -28,15 +29,8 @@ use LogicException;
  * @author ilateral <info@ilateral.co.uk>
  * @author Michael Strong <github@michaelstrong.co.uk>
 **/
-class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, GridField_URLHandler
+class AddLineItem extends GridFieldAddExistingAutocompleter
 {
-
-    /**
-     * HTML Fragment to render the field.
-     *
-     * @var string
-     **/
-    protected $targetFragment;
 
     /**
      * Default field to create the dataobject by should be Title.
@@ -46,16 +40,73 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     protected $dataObjectField = "Title";
     
     /**
-     * @var string SSViewer template to render the results presentation
-     */
-    protected $results_format = '$Title';
-    
-    /**
      * Default field to create the dataobject from.
      *
      * @var string
      **/
     protected $source_class = "Product";
+
+    /**
+     * When we check for existing items, should we check based on all
+     * filters or any of the chosen (setting this to true uses
+     * $list->filter() where as false uses $list->filterAny())
+     *
+     * @var boolean
+     */
+    protected $strict_filter = true;
+
+    /**
+     * What filter should the initial search use?
+     *
+     * @var string
+     */
+    protected $search_filter = 'PartialMatch';
+
+    /**
+     * Fields that we try and find our source object based on
+     *
+     * @var array
+     **/
+    protected $filter_fields = [
+        "Title",
+        "StockID"
+    ];
+
+    /**
+     * Fields that we use to filter items for our autocomplete
+     *
+     * @var array
+     **/
+    protected $autocomplete_fields = [
+        "Title",
+        "StockID"
+    ];
+
+    /**
+     * If filter fails, set this field when creating
+     *
+     * @var String
+     **/
+    protected $create_field = "Title";
+
+    /**
+     * Fields that we are mapping from the source object to our item
+     *
+     * @var array
+     **/
+    protected $source_fields = [
+        "Title" => "Title",
+        "StockID" => "StockID",
+        "BasePrice" => "BasePrice"
+    ];
+
+    /**
+     * This is the field that we attempt to match a TAX rate to
+     * when setting up an order item
+     *
+     * @var string
+     **/
+    protected $source_tax_field = "TaxPercentage";
 
     public function getSourceClass()
     {
@@ -68,46 +119,16 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         return $this;
     }
 
-    /**
-     * When we check for existing items, should we check based on all
-     * filters or any of the chosen (setting this to true uses
-     * $list->filter() where as false uses $list->filterAny())
-     *
-     * @var boolean
-     */
-    protected $strict_filter = true;
-
-    /**
-     * Getter for strict_filter param
-     *
-     * @return boolean
-     */
     public function getStrictFilter()
     {
         return $this->strict_filter;
     }
 
-    /**
-     * Setter for strict_filter param
-     *
-     * @param boolean $bool
-     * @return void
-     */
     public function setStrictFilter($bool)
     {
         $this->strict_filter = $bool;
         return $this;
     }
-
-    /**
-     * Fields that we try and find our source object based on
-     *
-     * @var array
-     **/
-    protected $filter_fields = [
-        "Title",
-        "StockID"
-    ];
 
     public function getFilterFields()
     {
@@ -120,16 +141,6 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         return $this;
     }
 
-    /**
-     * Fields that we use to filter items for our autocomplete
-     *
-     * @var array
-     **/
-    protected $autocomplete_fields = [
-        "Title",
-        "StockID"
-    ];
-
     public function getAutocompleteFields()
     {
         return $this->autocomplete_fields;
@@ -140,13 +151,6 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         $this->autocomplete_fields = $fields;
         return $this;
     }
-
-    /**
-     * If filter fails, set this field when creating
-     *
-     * @var String
-     **/
-    protected $create_field = "Title";
 
     public function getCreateField()
     {
@@ -159,111 +163,37 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         return $this;
     }
 
-    /**
-     * Fields that we are mapping from the source object to our item
-     *
-     * @var array
-     **/
-    protected $source_fields = [
-        "Title" => "Title",
-        "StockID" => "StockID",
-        "Price" => "BasePrice"
-    ];
-
-    /**
-     * Get list of source fields
-     *
-     * @return array
-     */
     public function getSourceFields()
     {
         return $this->source_fields;
     }
 
-    /**
-     * Set the list of source fields
-     *
-     * @param  $fields
-     * @return AddLineItem
-     */
     public function setSourceFields($fields)
     {
         $this->source_fields = $fields;
         return $this;
     }
 
-    /**
-     * This is the field that we attempt to match a TAX rate to
-     * when setting up an order item
-     *
-     * @var string
-     **/
-    protected $source_tax_field = "TaxRate";
-
-    /**
-     * @return array
-     */
     public function getSourceTaxField()
     {
         return $this->source_tax_field;
     }
 
-    /**
-     * @param  $field
-     * @return AddLineItem
-     */
     public function setSourceTaxField($field)
     {
         $this->source_tax_field = $field;
         return $this;
     }
 
-    /**
-     * Number of results to appear in autocomplete
-     *
-     * @var int
-     */
-    protected $results_limit = 20;
-    
-    public function getResultsLimit()
+    public function getSearchFilter()
     {
-        return $this->results_limit;
+        return $this->search_filter;
     }
 
-    public function setResultsLimit($fields)
+    public function setSearchFilter(string $search_filter)
     {
-        $this->results_limit = $fields;
+        $this->search_filter = $search_filter;
         return $this;
-    }
-
-    public function __construct($targetFragment = 'before', $dataObjectField = "Title")
-    {
-        $this->targetFragment = $targetFragment;
-        $this->dataObjectField = (string) $dataObjectField;
-    }
-    
-    /**
-     *
-     * @param GridField $gridField
-     * @return array
-     */
-    public function getURLHandlers($gridField)
-    {
-        return [
-            'search' => 'doSearch',
-        ];
-    }
-
-    /**
-     * Provide actions to this component.
-     *
-     * @param $gridField GridField
-     *
-     * @return array
-     **/
-    public function getActions($gridField)
-    {
-        return ["add"];
     }
 
 
@@ -277,48 +207,34 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
      **/
     public function handleAction(GridField $grid, $actionName, $arguments, $data)
     {
-        if ($actionName == "add") {
+        if ($actionName == "addto") {
             // Get our submitted fields and object class
             $dbField = $this->getDataObjectField();
             $objClass = $grid->getModelClass();
             $source_class = $this->getSourceClass();
             $source_item = null;
+            $list = $grid->getList();
             $filter = [];
 
             // Has the user used autocomplete
             if (isset($data['relationID']) && $data['relationID']) {
-                $id = $data['relationID'];
+                $string = $data['relationID'];
             } else {
-                $id = null;
+                $string = null;
             }
-            
-            // If we have an ID try and get an existing object then
-            // check if we have a copy in items
-            if ($id) {
-                $source_item = $source_class::get()->byID($id);
-                
-                foreach ($this->getFilterFields() as $filter_field) {
-                    $filter[$filter_field] = $source_item->$filter_field;
-                }
-            } else {
-                // Generate the filter we need to use
-                $string = $data['gridfieldaddbydbfield'];
-                
-                foreach ($this->getFilterFields() as $filter_field) {
-                    $filter[$filter_field] = $string;
-                }
+
+            foreach ($this->getFilterFields() as $filter_field) {
+                $filter[$filter_field] = $string;
             }
             
             // First check if we already have an object or if we need to
             // create one
             if ($this->getStrictFilter()) {
-                $existing_obj = $grid
-                    ->getList()
+                $existing_obj = $list
                     ->filter($filter)
                     ->first();
             } else {
-                $existing_obj = $grid
-                    ->getList()
+                $existing_obj = $list
                     ->filterAny($filter)
                     ->first();
             }
@@ -343,7 +259,7 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
                     $curr_qty + 1
                 );
                 
-                $id = $grid->getList()->add($obj);
+                $list->add($obj);
             }
             
             if (!$obj->ID && $obj->canCreate()) {
@@ -367,14 +283,14 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
                     $tax_field = $this->getSourceTaxField();
                     $tax = TaxRate::get()->find("Rate", $source_item->$tax_field);
                     if ($tax) {
-                        $obj->TaxID = $tax->ID;
+                        $obj->TaxRateID = $tax->ID;
                     }
                 } else {
                     $obj->setCastedField($this->getCreateField(), $string);
                 }
 
                 $obj->setCastedField("Quantity", 1);
-                $grid->getList()->add($obj, []);
+                $list->add($obj, []);
             }
 
             // Finally, issue a redirect to update totals
@@ -388,8 +304,6 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
         }
     }
 
-
-
     /**
      * Renders the TextField and add button to the GridField.
      *
@@ -397,64 +311,63 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
      *
      * @return string HTML
      **/
-    public function getHTMLFragments($grid)
+    public function getHTMLFragments($gridField)
     {
-        $dataClass = $grid->getList()->dataClass();
-        $obj = singleton($dataClass);
+        $forTemplate = ArrayData::create([
+            'Fields' => FieldList::create()
+        ]);
 
-        if (!$obj->canCreate()) {
-            return "";
-        }
+        $searchField = TextField::create(
+            'gridfield_relationsearch',
+            _t('SilverStripe\\Forms\\GridField\\GridField.RelationSearch', "Relation search")
+        )->setAttribute('data-search-url', Controller::join_links($gridField->Link('search')))
+        ->setAttribute(
+            'placeholder',
+            _t(
+                __CLASS__ . ".TypeToAdd",
+                "Type to add by {Filters} or {Title}",
+                "Inform the user what to add based on",
+                [
+                    "Filters" => implode(", ", $this->getFilterFields()),
+                    "Title" => $this->getCreateField()
+                ]
+            )
+        )->addExtraClass('relation-search no-change-track action_gridfield_relationsearch');
 
-        $text_field = TextField::create("gridfieldaddbydbfield")
-            ->setAttribute(
-                "placeholder",
-                _t(
-                    "GridFieldAddLineItem.TypeToAdd",
-                    "Type to add by {Filters} or {Title}",
-                    "Inform the user what to add based on",
-                    [
-                        "Filters" => implode(", ", $this->getFilterFields()),
-                        "Title" => $this->getCreateField()
-                    ]
-                )
-            )->addExtraClass("relation-search no-change-track")
-            ->setAttribute(
-                'data-search-url',
-                Controller::join_links($grid->Link('search'))
-            );
-
-        $find_action = GridField_FormAction::create(
-            $grid,
+        $findAction = GridField_FormAction::create(
+            $gridField,
             'gridfield_relationfind',
-            _t('GridField.Find', "Find"),
+            _t('SilverStripe\\Forms\\GridField\\GridField.Find', "Find"),
             'find',
             'find'
-        );
-        $find_action->setAttribute('data-icon', 'relationfind');
+        )->setAttribute('data-icon', 'relationfind')
+        ->addExtraClass('action_gridfield_relationfind');
 
-        $add_action = GridField_FormAction::create(
-            $grid,
-            'gridfield_lineitemadd',
-            _t("GridFieldAddLineItem.Add", "Add"),
-            'add',
-            'add'
-        );
-        $add_action->addExtraClass('btn btn-primary font-icon-plus-circled');
-        $add_action->addExtraClass('action_gridfield_relationadd');
+        $addAction = GridField_FormAction::create(
+            $gridField,
+            'gridfield_relationadd',
+            _t(__CLASS__ . 'Add', "Add"),
+            'addto',
+            'addto'
+        )->setAttribute('data-icon', 'plus-circled')
+        ->addExtraClass('btn btn-primary font-icon-plus-circled action_gridfield_relationadd');
 
-        // Start thinking about rending this back to the GF
-        $fields = ArrayList::create();
+        // If an object is not found, disable the action
+        if (!is_int($gridField->State->GridFieldAddRelation(null))) {
+            $addAction->setReadonly(true);
+        }
 
-        $fields->push($text_field);
-        $fields->push($find_action);
-        $fields->push($add_action);
+        $forTemplate->Fields->push($searchField);
+        $forTemplate->Fields->push($findAction);
+        $forTemplate->Fields->push($addAction);
 
-        $forTemplate = ArrayData::create([]);
-        $forTemplate->Fields = $fields;
+        if ($form = $gridField->getForm()) {
+            $forTemplate->Fields->setForm($form);
+        }
 
+        $template = SSViewer::get_templates_by_class($this, '', __CLASS__);
         return [
-            $this->targetFragment => $forTemplate->renderWith(AddLineItem::class)
+            $this->targetFragment => $forTemplate->renderWith($template)
         ];
     }
     
@@ -467,53 +380,62 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
      */
     public function doSearch($gridField, $request)
     {
-        $product_class = $this->getSourceClass();
+        $source_class = $this->getSourceClass();
+        $search_filter = $this->getSearchFilter();
         $params = [];
         
         // Do we have filter fields setup?
         if ($this->getAutocompleteFields()) {
             $search_fields = $this->getAutocompleteFields();
         } else {
-            $search_fields = $this->scaffoldSearchFields($product_class);
+            $search_fields = $this->scaffoldSearchFields($source_class);
         }
         
         if (!$search_fields) {
             throw new LogicException(
                 sprintf(
                     'GridFieldAddExistingAutocompleter: No searchable fields could be found for class "%s"',
-                    $product_class
+                    $source_class
                 )
             );
         }
         
         foreach ($search_fields as $search_field) {
-            $name = (strpos($search_field, ':') !== false) ? $search_field : "$search_field:StartsWith";
-            $params[$name] = $request->getVar('gridfieldaddbydbfield');
+            $name = (strpos($search_field, ':') !== false) ? $search_field : $search_field . ":" . $search_filter;
+            $params[$name] = $request->getVar('gridfield_relationsearch');
         }
 
         $json = [];
+        Config::nest();
 
-        if (class_exists($product_class)) {
-            $results = DataList::create($product_class)
+        if (class_exists($source_class)) {
+            $results = DataList::create($source_class)
                 ->filterAny($params)
                 ->sort(strtok($search_fields[0], ':'), 'ASC')
                 ->limit($this->getResultsLimit());
-            
+
             $originalSourceFileComments = SSViewer::config()->get('source_file_comments');
             
             SSViewer::config()->update('source_file_comments', false);
-            
+            $viewer = SSViewer::fromString($this->resultsFormat);
+
             foreach ($results as $result) {
-                $json[$result->ID] = html_entity_decode(SSViewer::fromString($this->results_format)->process($result));
+                $title = Convert::html2raw($viewer->process($result));
+                $json[] = [
+                    'label' => $title,
+                    'value' => $title,
+                    'id' => $title,
+                ];
             }
 
             SSViewer::config()->update('source_file_comments', $originalSourceFileComments);
         }
-        
-        return Convert::array2json($json);
+
+        Config::unnest();
+        $response = new HTTPResponse(json_encode($json));
+        $response->addHeader('Content-Type', 'application/json');
+        return $response;
     }
-
-
 
     /**
      * Returns the database field for which we'll add the new data object.
@@ -524,8 +446,6 @@ class AddLineItem implements GridField_ActionProvider, GridField_HTMLProvider, G
     {
         return $this->dataObjectField;
     }
-
-
 
     /**
      * Set the database field.

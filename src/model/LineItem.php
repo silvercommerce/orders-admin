@@ -327,7 +327,7 @@ class LineItem extends DataObject implements TaxableProvider
 
     /**
      * Overwrite TaxAmount with unit tax
-     * 
+     *
      * @return float
      */
     public function getTaxAmount()

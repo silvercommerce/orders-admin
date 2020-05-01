@@ -2,6 +2,7 @@
 
 namespace SilverCommerce\OrdersAdmin\Tests;
 
+use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
@@ -32,6 +33,8 @@ class LineItemTest extends SapphireTest
     public function setUp()
     {
         parent::setUp();
+
+        i18n::set_locale('en_GB');
     }
 
     /**
@@ -164,9 +167,12 @@ class LineItemTest extends SapphireTest
     public function testCustomisationList()
     {
         $line_item = $this->objFromFixture(LineItem::class, 'customitem');
-        $expected = "Customisation: Free, Customisation: Expensive";
+        $expected_one = "Customisation: Free";
+        $expected_two = "Customisation: Expensive";
+        $check = $line_item->CustomisationList;
 
-        $this->assertEquals($expected, $line_item->CustomisationList);
+        $this->assertTrue(strpos($check, $expected_one) !== false);
+        $this->assertTrue(strpos($check, $expected_two) !== false);
     }
 
     /**
@@ -177,9 +183,12 @@ class LineItemTest extends SapphireTest
     public function testCustomisationAndPriceList()
     {
         $line_item = $this->objFromFixture(LineItem::class, 'customitem');
-        $expected = "Customisation: Free (£0.00), Customisation: Expensive (£100.00)";
+        $expected_one = "Customisation: Free (£0.00)";
+        $expected_two = "Customisation: Expensive (£100.00)";
+        $check = $line_item->CustomisationAndPriceList;
 
-        $this->assertEquals($expected, $line_item->CustomisationAndPriceList);
+        $this->assertTrue(strpos($check, $expected_one) !== false);
+        $this->assertTrue(strpos($check, $expected_two) !== false);
     }
 
     /**
