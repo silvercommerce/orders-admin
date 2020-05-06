@@ -40,7 +40,7 @@
 
                 <div class="row">
                     <% with $Object %>
-                        <div class="col-sm-4">
+                        <div class="<% if $isDeliverable %>col-sm-3<% else %>col-sm-4<% end_if %>">
                             <div class="panel">
                                 <div class="panel-heading">
                                     <%t OrdersAdmin.IssuedTo "Issued To" %>
@@ -57,7 +57,26 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-8">
+                        <% if $isDeliverable %>
+                            <div class="col-sm-3">
+                                <div class="panel">
+                                    <div class="panel-heading">
+                                        <%t OrdersAdmin.DeliverTo "Deliver To" %>
+                                    </div>
+                                    <div class="panel-body">
+                                        $DeliveryFirstName $DeliverySurname<br/>
+                                        <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
+                                        $DeliveryAddress1<br/>
+                                        <% if $DeliveryAddress2 %>$DeliveryAddress2<br/><% end_if %>
+                                        $DeliveryCity<br/>
+                                        $DeliveryPostCode<br/>
+                                        $DeliveryCountry
+                                    </div>
+                                </div>
+                            </div>
+                        <% end_if %>
+
+                        <div class="<% if $isDeliverable %>col-sm-6<% else %>col-sm-8<% end_if %>">
                             <table style="width: 100%;" class="table">
                                 <tbody>
                                     <tr>
@@ -107,10 +126,7 @@
                         <tbody><% loop $Items %>
                             <tr>
                                 <td class="text-left">{$StockID}</td>
-                                <td class="text-left">
-                                    <strong>{$Title}</strong><br/>
-                                    $Content
-                                </td>
+                                <td class="text-left"><strong>{$Title}</strong></td>
                                 <td class="text-center">{$Quantity}</td>
                                 <td class="text-right">{$UnitPrice.Nice}</td>
                                 <td class="text-right">{$UnitTax.Nice}</td>

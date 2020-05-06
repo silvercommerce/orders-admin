@@ -110,3 +110,7 @@
 ## 1.3.4
 
 * Fix delivery name variable in email template
+
+## 1.3.5
+
+* Add delivery info to invoice template
