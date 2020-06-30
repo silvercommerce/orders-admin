@@ -295,6 +295,34 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
+     * Get the default export fields for this object
+     *
+     * @return array
+     */
+    public function getExportFields()
+    {
+        $rawFields = $this->config()->get('export_fields');
+
+        // Merge associative / numeric keys
+        $fields = [];
+        foreach ($rawFields as $key => $value) {
+            if (is_int($key)) {
+                $key = $value;
+            }
+            $fields[$key] = $value;
+        }
+
+        $this->extend("updateExportFields", $fields);
+
+        // Final fail-over, just list ID field
+        if (!$fields) {
+            $fields['ID'] = 'ID';
+        }
+
+        return $fields;
+    }
+
+    /**
      * Get the full reference number for this estimate/invoice.
      *
      * This is the stored prefix and ref

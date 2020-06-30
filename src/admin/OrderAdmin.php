@@ -52,6 +52,21 @@ class OrderAdmin extends ModelAdminPlus
         "SearchForm"
     ];
 
+    /**
+     * Listen for customised export fields on the currently managed object
+     *
+     * @return array
+     */
+    public function getExportFields()
+    {
+        $model = singleton($this->modelClass);
+        if ($model->hasMethod('getExportFields')) {
+            return $model->getExportFields();
+        }
+
+        return parent::getExportFields();
+    }
+
     public function getEditForm($id = null, $fields = null)
     {
         $form = parent::getEditForm($id, $fields);

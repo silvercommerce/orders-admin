@@ -114,3 +114,7 @@
 ## 1.3.5
 
 * Add delivery info to invoice template
+
+## 1.3.6
+
+* Improve export fields (inline with catalogue admin)
