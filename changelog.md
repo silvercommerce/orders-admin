@@ -118,3 +118,7 @@
 ## 1.3.6
 
 * Improve export fields (inline with catalogue admin)
+
+## 1.3.7
+
+* Ensure LineItems get a stock item from the current subsite (if subsites is installed)

@@ -10,8 +10,8 @@ use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\TaxAdmin\Traits\Taxable;
-use SilverCommerce\TaxAdmin\PricingExtension;
-use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
+use SilverStripe\Core\Manifest\ModuleLoader;
+use SilverStripe\Subsites\State\SubsiteState;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
@@ -491,14 +491,24 @@ class LineItem extends DataObject implements TaxableProvider
     public function Match($relation_name = null, $relation_col = "StockID", $match_col = "StockID")
     {
         // Try to determine relation name
-        if (!$relation_name && !$this->ProductClass) {
-            $relation_name = "Product";
+        if (!$relation_name && !$this->ProductClass && class_exists(CatalogueProduct::class)) {
+            $relation_name = CatalogueProduct::class;
         } elseif (!$relation_name && $this->ProductClass) {
             $relation_name = $this->ProductClass;
         }
-        
+
+        // Setup filter and check for existence of subsites
+        // (as sometimes dubplicate stock ID's are found from another subsite)
+        $filter = [];
+        $filter[$relation_col] = $this->{$match_col};
+
+        $subsites_exists = ModuleLoader::inst()->getManifest()->moduleExists('silverstripe/subsites');
+        if ($subsites_exists) {
+            $filter['SubsiteID'] = SubsiteState::singleton()->getSubsiteId();
+        }
+
         return $relation_name::get()
-            ->filter($relation_col, $this->$match_col)
+            ->filter($filter)
             ->first();
     }
 
