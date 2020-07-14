@@ -126,7 +126,12 @@
                         <tbody><% loop $Items %>
                             <tr>
                                 <td class="text-left">{$StockID}</td>
-                                <td class="text-left"><strong>{$Title}</strong></td>
+                                <td class="text-left"><strong>{$Title}</strong>
+                                    <% if $Customisations.exists %>
+                                        <br />
+                                        <em>$CustomisationHTML</em>
+                                    <% end_if %>
+                                </td>
                                 <td class="text-center">{$Quantity}</td>
                                 <td class="text-right">{$UnitPrice.Nice}</td>
                                 <td class="text-right">{$UnitTax.Nice}</td>

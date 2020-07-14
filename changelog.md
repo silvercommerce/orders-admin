@@ -122,3 +122,7 @@
 ## 1.3.7
 
 * Ensure LineItems get a stock item from the current subsite (if subsites is installed)
+
+## 1.3.8
+
+* Added customisations to Invoice template
