@@ -1,8 +1,8 @@
 Silverstripe Orders Module
 ==========================
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/badges/quality-score.png?b=1.0)](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/?branch=1.0)
-[![Build Status](https://travis-ci.org/silvercommerce/orders-admin.svg?branch=1.0)](https://travis-ci.org/silvercommerce/orders-admin)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/badges/quality-score.png?b=1.3)](https://scrutinizer-ci.com/g/silvercommerce/orders-admin/?branch=1.3)
+[![Build Status](https://travis-ci.org/silvercommerce/orders-admin.svg?branch=1.3)](https://travis-ci.org/silvercommerce/orders-admin)
 
 Provides a simple order/sales management interface that allows the creation
 of estimates and invoices via `ModelAdmin`, and if you have a product catalogue
