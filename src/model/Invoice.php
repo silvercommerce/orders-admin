@@ -463,9 +463,11 @@ class Invoice extends Estimate implements PermissionProvider
 
         // Deal with sending the status emails
         if ($this->isChanged('Status')) {
-            $notifications = Notification::get()
+            $config = SiteConfig::current_site_config();
+            $notifications = $config
+                ->InvoiceNotifications()
                 ->filter("Status", $this->Status);
-                
+
             // Loop through available notifications and send
             foreach ($notifications as $notification) {
                 $notification->sendNotification($this);

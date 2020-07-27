@@ -126,3 +126,7 @@
 ## 1.3.8
 
 * Added customisations to Invoice template
+
+## 1.3.9
+
+* Only get order notifications from currently active SiteConfig (so notifications don't leek from other subsites)
