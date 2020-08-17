@@ -130,3 +130,7 @@
 ## 1.3.9
 
 * Only get order notifications from currently active SiteConfig (so notifications don't leek from other subsites)
+
+## 1.3.10
+
+* Allow adding a LineItemFactory (with assotiated LineItem) directly to an OrderFactory 

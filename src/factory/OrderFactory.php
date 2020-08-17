@@ -155,6 +155,23 @@ class OrderFactory
             ->makeItem()
             ->write();
 
+        $this->addFromLineItemFactory($factory);
+
+        return $this;
+    }
+
+    /**
+     * Add a new item to the current Estimate/Invoice from a pre-created
+     * line item factory
+     *
+     * *NOTE* this method expects a LineItemFactory ro be pre-written
+     *
+     * @param LineItemFactory
+     *
+     * @return self
+     */
+    public function addFromLineItemFactory(LineItemFactory $factory)
+    {
         // First check if this item exists
         $items = $this->getItems();
         $existing = null;
@@ -166,7 +183,7 @@ class OrderFactory
         // If object already in the cart, update quantity and delete new item
         // else add as usual
         if (isset($existing)) {
-            $this->updateItem($existing->Key, $qty);
+            $this->updateItem($existing->Key, $factory->getQuantity());
             $factory->delete();
         } else {
             if (!$factory->checkStockLevel()) {
@@ -183,6 +200,7 @@ class OrderFactory
         }
 
         return $this;
+
     }
 
     /**
