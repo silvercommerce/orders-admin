@@ -200,7 +200,6 @@ class OrderFactory
         }
 
         return $this;
-
     }
 
     /**
