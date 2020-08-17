@@ -100,7 +100,7 @@ class LineItemFactory
      * Either find an existing line item (based on the submitted data),
      * or return a new one.
      *
-     * @return DataObject
+     * @return self
      */
     public function makeItem()
     {
