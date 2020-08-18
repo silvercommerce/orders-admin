@@ -133,4 +133,9 @@
 
 ## 1.3.10
 
-* Allow adding a LineItemFactory (with assotiated LineItem) directly to an OrderFactory 
+* Allow adding a LineItemFactory (with assotiated LineItem) directly to an OrderFactory
+
+## 1.3.11
+
+* Update LineItem extension hook
+* Simplify stock alert messages
