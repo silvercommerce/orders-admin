@@ -540,7 +540,7 @@ class LineItem extends DataObject implements TaxableProvider
         $stock = ($item->$stock_param) ? $item->$stock_param : 0;
         $return = $stock - $qty;
 
-        $this->extend("updateCheckStockLevel", $return);
+        $this->extend("updateCheckStockLevel", $return, $qty);
         
         return $return;
     }
