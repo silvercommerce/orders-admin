@@ -190,7 +190,7 @@ class OrderFactory
                 throw new ValidationException(
                     _t(
                         __CLASS__ . ".NotEnoughStock",
-                        "There are not enough '{title}' in stock",
+                        "Not enough of '{title}' available",
                         ['title' => $factory->getItem()->Title]
                     )
                 );
@@ -228,7 +228,7 @@ class OrderFactory
                 throw new ValidationException(
                     _t(
                         __CLASS__ . ".NotEnoughStock",
-                        "There are not enough '{title}' in stock",
+                        "Not enough of '{title}' available",
                         ['title' => $factory->getItem()->Title]
                     )
                 );
