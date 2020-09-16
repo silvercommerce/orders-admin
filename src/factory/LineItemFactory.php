@@ -187,13 +187,13 @@ class LineItemFactory
         $deliver_param = $this->getProductDeliverableParam();
 
         if (isset($product->{$deliver_param})) {
-            $deliverable = $product->{$deliver_param};
+            $deliverable = (bool) $product->{$deliver_param};
         } else {
             $deliverable = true;
         }
 
         if (isset($product->{$stocked_param})) {
-            $stocked = $product->{$stocked_param};
+            $stocked = (bool) $product->{$stocked_param};
         } else {
             $stocked = false;
         }

@@ -139,3 +139,7 @@
 
 * Update LineItem extension hook
 * Simplify stock alert messages
+
+## 1.3.12
+
+* added fix to LineItemFactory to cast null boolean values to false
