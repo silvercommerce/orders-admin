@@ -268,6 +268,7 @@ class OrderFactory
     public function setCustomer(Contact $contact)
     {
         $this->order->CustomerID = $contact->ID;
+        return $this;
     }
 
     /**

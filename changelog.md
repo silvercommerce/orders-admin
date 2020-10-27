@@ -143,3 +143,7 @@
 ## 1.3.12
 
 * added fix to LineItemFactory to cast null boolean values to false
+
+## 1.3.13
+
+* Add missing output to `OrderFactory::setCustomer()`
