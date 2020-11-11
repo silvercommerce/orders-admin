@@ -15,6 +15,7 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPStreamResponse;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use Dompdf\Dompdf;
+use Dompdf\Options;
 
 /**
  * Controller responsible for displaying either an rendered order or a
@@ -59,7 +60,7 @@ class DisplayController extends Controller
     {
         parent::init();
 
-        $member = Member::currentUser();
+        $member = Security::getCurrentUser();
         $object = Estimate::get()
             ->byID($this->getrequest()->param("ID"));
 
@@ -81,19 +82,23 @@ class DisplayController extends Controller
      */
     protected function gernerate_pdf($html)
     {
-        $dompdf = new Dompdf();
+        $options = new Options([
+            "compressed" => true,
+            'defaultFont' => 'sans-serif',
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true
+        ]);
+        $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
-        $dompdf->set_option("compressed", true);
-        $dompdf->set_option('defaultFont', 'sans-serif');
-        $dompdf->set_option('isHtml5ParserEnabled', true);
+
         return $dompdf;
     }
 
     /**
      * Undocumented function
      *
-     * @return void
+     * @return \SilverStripe\Assets\Image
      */
     public function Logo()
     {
@@ -103,6 +108,25 @@ class DisplayController extends Controller
         $this->extend("updateLogo", $image);
         
         return $image;
+    }
+
+    /**
+     * get the current logo as a base 64 encoded string
+     *
+     * @return string
+     */
+    public function LogoBase64(int $width = 0, int $height = 0)
+    {
+        $logo = $this->Logo();
+
+        if ($width > 0 && $height > 0) {
+            $logo = $logo->Fit($width, $height);
+        }
+        $string = base64_encode($logo->getString());
+
+        $this->extend("updateLogoBase64", $string);
+        
+        return $string;
     }
     
     /**
@@ -185,7 +209,6 @@ CSS
         );
         $result = $this->invoice($request);
         $html = $result->getValue();
-        $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
         $pdf = $this->gernerate_pdf($html);
 
         $this->extend("updateInvoicePDF", $pdf);
@@ -226,7 +249,6 @@ CSS
         );
         $result = $this->estimate($request);
         $html = $result->getValue();
-        $html = str_replace('src="'.BASE_URL, 'src="'.BASE_PATH, $html);
 
         $pdf = $this->gernerate_pdf($html);
 

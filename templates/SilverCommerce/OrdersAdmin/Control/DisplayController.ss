@@ -15,17 +15,16 @@
             <header class="header">
                 <div class="row">
                     <div class="col-sm-8">
-                        <div class="panel">
+                        <div class="panel logopanel">
                             <div class="panel-body">
-                                <br/>
                                 <% if $Logo.exists %>
-                                    <img class="img-fluid" src="{$Logo.Fit(400,240).URL}" />
+                                    <img class="img-fluid logoimg" src="data:image/png;base64,{$LogoBase64(400,240)}" />
                                 <% end_if %>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-4 text-right">
-                        <div class="panel">
+                        <div class="panel contentpanel">
                             <h1 class="panel-heading">
                                 {$Title}
                             </h1>
