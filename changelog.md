@@ -85,3 +85,79 @@
 ## 1.2.13
 
 * added config for replacing pdf css
+
+## 1.2.14
+
+* Update hasonefield
+
+## 1.2.15
+
+* Fix logo image in PDF
+* Improve default PDF styling a little
+
+## 1.3.0
+
+* Added factories for creating Estimates/Invoices
+* Increase decimal sizes of base prices items
+* Switch to "BasePrice" for line item prices
+* Switch to using `Taxable` to calculate Tax Prices
+* Fix travis support
+
+## 1.3.1
+
+* Switch to using BasePrice for customisation and correctly calculate tax
+
+## 1.3.2
+
+* Use new price fields for invoice/email templates
+
+## 1.3.3
+
+* Add ability to set the customer for an order via the `OrderFactory`
+* Update AddLineItem to work with changes to GridField.js
+
+## 1.3.4
+
+* Fix delivery name variable in email template
+
+## 1.3.5
+
+* Add delivery info to invoice template
+
+## 1.3.6
+
+* Improve export fields (inline with catalogue admin)
+
+## 1.3.7
+
+* Ensure LineItems get a stock item from the current subsite (if subsites is installed)
+
+## 1.3.8
+
+* Added customisations to Invoice template
+
+## 1.3.9
+
+* Only get order notifications from currently active SiteConfig (so notifications don't leek from other subsites)
+
+## 1.3.10
+
+* Allow adding a LineItemFactory (with assotiated LineItem) directly to an OrderFactory
+
+## 1.3.11
+
+* Update LineItem extension hook
+* Simplify stock alert messages
+
+## 1.3.12
+
+* added fix to LineItemFactory to cast null boolean values to false
+
+## 1.3.13
+
+* Add missing output to `OrderFactory::setCustomer()`
+
+## 1.3.14
+
+* Fix logo image in PDF
+* Improve default PDF styling a little
