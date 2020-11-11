@@ -1,5 +1,5 @@
 body {
-    font-size: 0.8em;
+    font-size: 0.7em;
 }
 .btn {
     display: none;
@@ -16,6 +16,10 @@ body {
 .text-center {
     text-align: center;
 }
+.panel-body, .panel-heading {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
 .panel-heading {
     font-weight: bold;
 }
@@ -26,10 +30,11 @@ th, td {
     padding: 0.25rem;
 }
 hr {
-    margin-top: 2em;
+    margin-top: 1em;
     margin-bottom: 2em;
     border: 0;
     border-top: 1px solid rgba(0,0,0,.1);
+    clear: both;
 }
 
 .row {
@@ -82,4 +87,10 @@ footer {
 }
 .hide-pdf {
     display: none;
+}
+.logopanel {
+    float: left;
+}
+.contentpanel {
+    float: right;
 }
