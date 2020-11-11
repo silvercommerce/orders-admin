@@ -95,6 +95,11 @@
 * Fix logo image in PDF
 * Improve default PDF styling a little
 
+## 1.2.16
+
+* Fix logo image in PDF
+* Improve default PDF styling a little
+
 ## 1.3.0
 
 * Added factories for creating Estimates/Invoices
