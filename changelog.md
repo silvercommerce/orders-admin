@@ -147,3 +147,8 @@
 ## 1.3.13
 
 * Add missing output to `OrderFactory::setCustomer()`
+
+## 1.3.14
+
+* Fix logo image in PDF
+* Improve default PDF styling a little
