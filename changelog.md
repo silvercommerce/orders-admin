@@ -100,6 +100,10 @@
 * Fix logo image in PDF
 * Improve default PDF styling a little
 
+## 1.2.17
+
+* Make Estimate/Invoice PDf CSS public dir aware
+
 ## 1.3.0
 
 * Added factories for creating Estimates/Invoices
@@ -166,3 +170,7 @@
 
 * Fix logo image in PDF
 * Improve default PDF styling a little
+
+## 1.3.15
+
+* Make Estimate/Invoice PDf CSS public dir aware

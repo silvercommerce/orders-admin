@@ -237,11 +237,17 @@ CSS
 
     public function estimatepdf(HTTPRequest $request)
     {
-        /**
-         * Load custom CSS for PDF explicitly (as pass)
-         */
+        // Load custom CSS for PDF explicitly (as pass)
         $loader = ModuleResourceLoader::singleton();
-        $style = file_get_contents($loader->resolvePath('silvercommerce/orders-admin: client/dist/css/pdf.css'));
+        $path = $loader->resolvePath($this->config()->pdf_css);
+
+        // If using a public dir, then apend it's location
+        if (Director::publicDir()) {
+            // All resources mapped directly to _resources/
+            $path = Path::join(RESOURCES_DIR, $path);
+        }
+
+        $style = file_get_contents($path);
         Requirements::clear();
         Requirements::customCSS(<<<CSS
         $style
