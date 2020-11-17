@@ -104,6 +104,10 @@
 
 * Make Estimate/Invoice PDf CSS public dir aware
 
+## 1.2.18
+
+* Additional invoice PDF CSS tweaks
+
 ## 1.3.0
 
 * Added factories for creating Estimates/Invoices
@@ -174,3 +178,7 @@
 ## 1.3.15
 
 * Make Estimate/Invoice PDf CSS public dir aware
+
+## 1.3.16
+
+* Additional invoice PDF CSS tweaks

@@ -2,20 +2,21 @@
 
 namespace SilverCommerce\OrdersAdmin\Control;
 
-use SilverStripe\Control\Controller;
-use SilverStripe\Control\Director;
-use SilverStripe\Assets\Image;
-use SilverStripe\Security\Member;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Security\Security;
-use SilverCommerce\OrdersAdmin\Model\Invoice;
-use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverStripe\View\Requirements;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\HTTPStreamResponse;
-use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use SilverStripe\Core\Path;
+use SilverStripe\Assets\Image;
+use SilverStripe\Security\Member;
+use SilverStripe\Control\Director;
+use SilverStripe\Security\Security;
+use SilverStripe\View\Requirements;
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Control\HTTPStreamResponse;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
 
 /**
  * Controller responsible for displaying either an rendered order or a
@@ -80,7 +81,7 @@ class DisplayController extends Controller
      * @param string $html
      * @return Dompdf
      */
-    protected function gernerate_pdf($html)
+    protected function generate_pdf($html)
     {
         $options = new Options([
             "compressed" => true,
@@ -167,6 +168,25 @@ class DisplayController extends Controller
         );
     }
 
+    /**
+     * Generate the CSS for the rendered PDF as a string (based on the provided path in config)
+     *
+     * @return string
+     */
+    protected function getPdfCss()
+    {
+        $loader = ModuleResourceLoader::singleton();
+        $path = $loader->resolvePath($this->config()->pdf_css);
+
+        // If using a public dir, then apend it's location
+        if (Director::publicDir() && defined('RESOURCES_DIR')) {
+            // All resources mapped directly to _resources/
+            $path = Path::join(RESOURCES_DIR, $path);
+        }
+
+        return file_get_contents($path);
+    }
+
     public function invoice(HTTPRequest $request)
     {
         $config = SiteConfig::current_site_config();
@@ -197,11 +217,7 @@ class DisplayController extends Controller
      */
     public function invoicepdf(HTTPRequest $request)
     {
-        /**
-         * Load custom CSS for PDF explicitly (as pass)
-         */
-        $loader = ModuleResourceLoader::singleton();
-        $style = file_get_contents($loader->resolvePath($this->config()->pdf_css));
+        $style = $this->getPdfCss();
         Requirements::clear();
         Requirements::customCSS(<<<CSS
         $style
@@ -209,7 +225,7 @@ CSS
         );
         $result = $this->invoice($request);
         $html = $result->getValue();
-        $pdf = $this->gernerate_pdf($html);
+        $pdf = $this->generate_pdf($html);
 
         $this->extend("updateInvoicePDF", $pdf);
 
@@ -237,17 +253,7 @@ CSS
 
     public function estimatepdf(HTTPRequest $request)
     {
-        // Load custom CSS for PDF explicitly (as pass)
-        $loader = ModuleResourceLoader::singleton();
-        $path = $loader->resolvePath($this->config()->pdf_css);
-
-        // If using a public dir, then apend it's location
-        if (Director::publicDir()) {
-            // All resources mapped directly to _resources/
-            $path = Path::join(RESOURCES_DIR, $path);
-        }
-
-        $style = file_get_contents($path);
+        $style = $this->getPdfCss();
         Requirements::clear();
         Requirements::customCSS(<<<CSS
         $style
@@ -256,7 +262,7 @@ CSS
         $result = $this->estimate($request);
         $html = $result->getValue();
 
-        $pdf = $this->gernerate_pdf($html);
+        $pdf = $this->generate_pdf($html);
 
         $this->extend("updateEstimatePDF", $pdf);
 
