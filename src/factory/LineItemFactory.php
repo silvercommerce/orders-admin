@@ -62,10 +62,11 @@ class LineItemFactory
 
     /**
      * Should this item be locked (cannot be updated, only removed)?
+     * (defaults to false)
      *
      * @var bool
      */
-    protected $lock;
+    protected $lock = false;
 
     /**
      * List of customisation data that will need to be setup
@@ -334,7 +335,12 @@ class LineItemFactory
         }
 
         $this->setQuantity($item->Quantity);
-        $this->setLock($item->Locked);
+
+        // Only lock a line item if we have explicitly asked to
+        if (property_exists($item, 'Locked')) {
+            $this->setLock($item->Locked);
+        }
+
         $this->setCustomisations($item->Customisations()->toArray());
 
         return $this;

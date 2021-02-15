@@ -182,3 +182,7 @@
 ## 1.3.16
 
 * Additional invoice PDF CSS tweaks
+
+## 1.3.17
+
+* Only lock line items via the factory, if explicitly asked to
