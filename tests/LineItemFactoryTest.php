@@ -3,57 +3,140 @@
 namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\Dev\SapphireTest;
-use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverCommerce\OrdersAdmin\Factory\OrderFactory;
-use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
-use SilverCommerce\OrdersAdmin\Model\Invoice;
+use SilverStripe\ORM\ValidationException;
+use SilverCommerce\OrdersAdmin\Model\LineItem;
+use SilverCommerce\OrdersAdmin\Factory\LineItemFactory;
+use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 
-/**
- * Simple factory for creating line items that can be added to orders
- * or checked against existing items.
- */
 class LineItemFactoryTest extends SapphireTest
 {
-    /**
-     * Add some scaffold order records
-     *
-     * @var string
-     */
     protected static $fixture_file = 'OrdersScaffold.yml';
 
-    /**
-     * Setup test only objects
-     *
-     * @var array
-     */
-    protected static $extra_dataobjects = [
-        TestProduct::class
-    ];
-
-    public function testFindOrMake()
+    public function testMakeItem()
     {
-        $existing = $this->objFromFixture(Estimate::class, 'addressdetails');
-        $new_estimate = OrderFactory::create();
-        $new_invoice = OrderFactory::create(true);
-        $id = OrderFactory::create(false, $existing->ID);
-        $ref = OrderFactory::create(false, null, '1232');
+        $socks = $this->objFromFixture(CatalogueProduct::class, 'socks');
+        $basic_item = LineItemFactory::create()
+            ->setProduct($socks)
+            ->setQuantity(3)
+            ->makeItem()
+            ->getItem();
 
-        $this->assertNotEmpty($new_estimate->getOrder());
-        $this->assertEquals(Estimate::class, $new_estimate->getOrder()->ClassName);
-        $this->assertFalse($new_estimate->getOrder()->exists());
-        $this->assertEquals(0, $new_estimate->getOrder()->ID);
+        $this->assertNotEmpty($basic_item);
+        $this->assertEquals("Socks", $basic_item->Title);
+        $this->assertEquals(3, $basic_item->Quantity);
+        $this->assertEquals(5.99, $basic_item->BasePrice);
+        $this->assertEquals(17.97, $basic_item->Total);
+        $this->assertEquals(CatalogueProduct::class, $basic_item->ProductClass);
 
-        $this->assertNotEmpty($new_invoice->getOrder());
-        $this->assertEquals(Invoice::class, $new_invoice->getOrder()->ClassName);
-        $this->assertFalse($new_invoice->getOrder()->exists());
-        $this->assertEquals(0, $new_invoice->getOrder()->ID);
+        $notax = $this->objFromFixture(CatalogueProduct::class, 'notax');
+        $notax_item = LineItemFactory::create()
+            ->setProduct($notax)
+            ->setQuantity(5)
+            ->makeItem()
+            ->getItem();
 
-        $this->assertNotEmpty($id->getOrder());
-        $this->assertTrue($id->getOrder()->exists());
-        $this->assertEquals($existing->ID, $id->getOrder()->ID);
+        $this->assertNotEmpty($notax_item);
+        $this->assertEquals("No Tax Item", $notax_item->Title);
+        $this->assertEquals(5, $notax_item->Quantity);
+        $this->assertEquals(6.50, $notax_item->BasePrice);
+        $this->assertEquals(32.50, $notax_item->Total);
+        $this->assertEquals(CatalogueProduct::class, $notax_item->ProductClass);
 
-        $this->assertNotEmpty($ref->getOrder());
-        $this->assertTrue($ref->getOrder()->exists());
-        $this->assertEquals('1232', $ref->getOrder()->Ref);
+        $this->expectException(ValidationException::class);
+        LineItemFactory::create()->makeItem();
+    }
+
+    public function testUpdate()
+    {
+        $socks = $this->objFromFixture(CatalogueProduct::class, 'socks');
+        $notax = $this->objFromFixture(CatalogueProduct::class, 'notax');
+
+        $factory = LineItemFactory::create()
+            ->setProduct($socks)
+            ->setQuantity(1)
+            ->makeItem();
+    
+        $this->assertEquals(1, $factory->getItem()->Quantity);
+        $this->assertEquals(5.99, $factory->getItem()->BasePrice);
+
+        $factory->setQuantity(3);
+        $this->assertEquals(1, $factory->getItem()->Quantity);
+
+        $factory->update();
+        $this->assertEquals(3, $factory->getItem()->Quantity);
+
+        $factory->setProduct($notax)->update();
+        $this->assertEquals(3, $factory->getItem()->Quantity);
+        $this->assertEquals(6.50, $factory->getItem()->BasePrice);
+    }
+
+    public function testFindBestTaxRate()
+    {
+        $item = $this->objFromFixture(LineItem::class, 'taxtestableuk');
+        $estimate = $item->Parent();
+        $factory = LineItemFactory::create()
+            ->setItem($item)
+            ->setParent($estimate);
+
+        $this->assertEquals(0, $item->TaxPercentage);
+        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+
+        $estimate->DeliveryCountry = "NZ";
+        $estimate->DeliveryCounty = "AUK";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(5, $factory->findBestTaxRate()->Rate);
+
+        $estimate->DeliveryCountry = "US";
+        $estimate->DeliveryCounty = "AL";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(0, $factory->findBestTaxRate()->Rate);
+
+        // Erronious result should return 0
+        $estimate->DeliveryCountry = "DE";
+        $estimate->DeliveryCounty = "BE";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(0, $factory->findBestTaxRate()->Rate);
+    }
+
+    public function testCheckStockLevel()
+    {
+        $item = $this->objFromFixture(LineItem::class, 'sockitem');
+        $factory = LineItemFactory::create()
+            ->setItem($item);
+
+        $this->assertTrue($factory->checkStockLevel());
+
+        $factory
+            ->setQuantity(5)
+            ->update();
+
+        $this->assertTrue($factory->checkStockLevel());
+
+        $factory
+            ->setQuantity(9)
+            ->update();
+
+        $this->assertTrue($factory->checkStockLevel());
+
+        $factory
+            ->setQuantity(10)
+            ->update();
+
+        $this->assertTrue($factory->checkStockLevel());
+
+        $factory
+            ->setQuantity(15)
+            ->update();
+
+        $this->assertFalse($factory->checkStockLevel());
+
+        $factory
+            ->setQuantity(20)
+            ->update();
+
+        $this->assertFalse($factory->checkStockLevel());
     }
 }
