@@ -179,6 +179,7 @@ class LineItemFactory
         $item = $this->getItem();
         $product = $this->getProduct();
         $default = TaxRate::create();
+        $default->Rate = 0;
         $default->ID = -1;
 
         // If no product available, return an empty rate
@@ -194,13 +195,20 @@ class LineItemFactory
 
         // If order available, try to gt delivery location
         if (!empty($parent)) {
+            $rate = null;
             $country = $parent->DeliveryCountry;
             $region = $parent->DeliveryCounty;
             /** @var \SilverCommerce\TaxAdmin\Model\TaxCategory */
             $category = $product->TaxCategory();
 
             if ($category->exists() && strlen($country) >= 2 && strlen($region) >= 2) {
-                return $category->ValidTax($country, $region);
+                $rate = $category->ValidTax($country, $region);
+            }
+
+            if (empty($rate)) {
+                return $default;
+            } else {
+                return $rate;
             }
         }
 
