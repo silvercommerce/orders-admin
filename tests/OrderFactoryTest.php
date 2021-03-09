@@ -28,7 +28,7 @@ class OrderFactoryTest extends SapphireTest
 
     public function testFindOrMake()
     {
-        $existing = $this->objFromFixture(Estimate::class, 'addressdetails');
+        $existing = $this->objFromFixture(Estimate::class, 'addressdetails_uk');
         $new_estimate = OrderFactory::create();
         $new_invoice = OrderFactory::create(true);
         $id = OrderFactory::create(false, $existing->ID);

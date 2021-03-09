@@ -1,4 +1,56 @@
-SilverCommerce\TaxAdmin\Tests\Model\TestProduct:
+SilverCommerce\GeoZones\Model\Region:
+  bir:
+    Name: Birmingham
+    Code: BIR
+    CountryCode: GB
+  auk:
+    Name: Aukland
+    Code: AUK
+    CountryCode: NZ
+  al:
+    Name: Alabama
+    Code: AL
+    CountryCode: US
+SilverCommerce\GeoZones\Model\Zone:
+  uk:
+    Country: '["GB"]'
+    AllRegions: 1
+    Enabled: 1
+  nz:
+    Country: '["NZ"]'
+    AllRegions: 1
+    Enabled: 1
+  us:
+    Country: '["US"]'
+    AllRegions: 1
+    Enabled: 1
+
+SilverCommerce\TaxAdmin\Model\TaxRate:
+  vat:
+    ID: 1
+    Title: "VAT"
+    Rate: 20
+    Zones: =>SilverCommerce\GeoZones\Model\Zone.uk
+  reduced:
+    ID: 2
+    Title: "Reduced Rate"
+    Rate: 5
+    Zones: =>SilverCommerce\GeoZones\Model\Zone.nz
+  zero:
+    ID: 3
+    Title: "Zero Rate"
+    Rate: 0
+    Zones: =>SilverCommerce\GeoZones\Model\Zone.us
+
+SilverCommerce\TaxAdmin\Model\TaxCategory:
+  standard_goods:
+    Title: "Standard Goods"
+    Rates:
+      - =>SilverCommerce\TaxAdmin\Model\TaxRate.vat
+      - =>SilverCommerce\TaxAdmin\Model\TaxRate.reduced
+      - =>SilverCommerce\TaxAdmin\Model\TaxRate.zero
+
+SilverCommerce\CatalogueAdmin\Model\CatalogueProduct:
   socks:
     Title: "Socks"
     StockID: "so1"
@@ -7,7 +59,7 @@ SilverCommerce\TaxAdmin\Tests\Model\TestProduct:
   notax:
     Title: "No Tax Item"
     StockID: "nt1"
-    BasePrice: 5.99
+    BasePrice: 6.50
     StockLevel: 10
     Weight: 0.5
   tax:
@@ -16,19 +68,12 @@ SilverCommerce\TaxAdmin\Tests\Model\TestProduct:
     BasePrice: 5.99
     StockLevel: 10
     Weight: 0.75
-SilverCommerce\TaxAdmin\Model\TaxRate:
-  vat:
-    ID: 1
-    Title: "VAT"
-    Rate: 20
-  reduced:
-    ID: 2
-    Title: "Reduced Rate"
-    Rate: 5
-  zero:
-    ID: 3
-    Title: "Zero Rate"
-    Rate: 0
+  categorised:
+    Title: "Categorised Item"
+    StockID: "ci1"
+    BasePrice: 4.65
+    TaxCategory: =>SilverCommerce\TaxAdmin\Model\TaxCategory.standard_goods
+
 SilverCommerce\OrdersAdmin\Model\LineItemCustomisation:
   freecustomisation:
     Title: "Customisation"
@@ -39,6 +84,7 @@ SilverCommerce\OrdersAdmin\Model\LineItemCustomisation:
     Title: "Customisation"
     Value: "Expensive"
     BasePrice: 100
+
 SilverCommerce\OrdersAdmin\Model\LineItem:
   deliverable:
     Title: "Deliverable Item"
@@ -49,9 +95,9 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
   notaxitem:
     Title: "A cheap item"
     Quantity: 2
-    BasePrice: 5.99
+    BasePrice: 6.50
     StockID: "nt1"
-    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
   reducedtaxitem:
     Title: "An item with reduced tax"
@@ -64,7 +110,7 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     Quantity: 2
     BasePrice: 5.99 # 1.198 tax per item
     StockID: "t1"
-    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   taxitemtwo:
     Title: "Another tax item"
@@ -82,7 +128,7 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     Quantity: 1
     Weight: 0.5
     StockID: "so1"
-    ProductClass: SilverCommerce\TaxAdmin\Tests\Model\TestProduct
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     BasePrice: 5.99
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
   customitem:
@@ -92,21 +138,33 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     BasePrice: 5.99
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
     Customisations: =>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.freecustomisation,=>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.expensivecustomisation
+  taxtestableuk:
+    Title: "UK Tax Test item"
+    StockID: "ci1"
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
+    Quantity: 1
+    BasePrice: 5.50
+
 SilverCommerce\OrdersAdmin\Model\Estimate:
-  addressdetails:
+  addressdetails_uk:
     Ref: 1231
     Address1: "123 Street Name"
     Address2: "A Place"
     City: "A City"
     PostCode: "AB12 3AB"
+    County: "BIR"
     Country: "GB"
     DeliveryAddress1: "321 Street Name"
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "ZX98 9XZ"
+    DeliveryCounty: "BIR"
     DeliveryCountry: "GB"
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxtestableuk
   deliverable:
     Ref: 1232
-    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable,=>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
+    Items:
+      - =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
+      - =>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
   notdeliverable:
     Ref: 1233
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
@@ -118,7 +176,10 @@ SilverCommerce\OrdersAdmin\Model\Estimate:
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
   complextax:
     Ref: 1236
-    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem,=>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
+    Items:
+      - =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem
+      - =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
+
 SilverCommerce\OrdersAdmin\Model\Invoice:
   unpaid:
     Ref: 1231

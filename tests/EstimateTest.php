@@ -5,7 +5,6 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
-use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 
 class EstimateTest extends SapphireTest
 {
@@ -17,20 +16,11 @@ class EstimateTest extends SapphireTest
     protected static $fixture_file = 'OrdersScaffold.yml';
 
     /**
-     * Setup test only objects
-     *
-     * @var array
-     */
-    protected static $extra_dataobjects = [
-        TestProduct::class
-    ];
-
-    /**
      * Test that an estimate converts to invoice correctly
      */
     public function testConvertToInvoice()
     {
-        $estimate = $this->objFromFixture(Estimate::class, 'addressdetails');
+        $estimate = $this->objFromFixture(Estimate::class, 'addressdetails_uk');
         $invoice = $estimate->convertToInvoice();
 
         $this->assertTrue($invoice instanceof Invoice);
@@ -59,7 +49,7 @@ class EstimateTest extends SapphireTest
      */
     public function testLocationDetails()
     {
-        $estimate = $this->objFromFixture(Estimate::class, 'addressdetails');
+        $estimate = $this->objFromFixture(Estimate::class, 'addressdetails_uk');
 
         $bil_country = "United Kingdom";
         $del_country = "United Kingdom";
@@ -135,8 +125,8 @@ class EstimateTest extends SapphireTest
         $tax_order_one = $this->objFromFixture(Estimate::class, 'standardtax');
         $tax_order_two = $this->objFromFixture(Estimate::class, 'complextax');
 
-        $this->assertEquals(11.98, $no_tax_order->SubTotal);
-        $this->assertEquals(11.98, $no_tax_order->Total);
+        $this->assertEquals(13.00, $no_tax_order->SubTotal);
+        $this->assertEquals(13.00, $no_tax_order->Total);
         $this->assertEquals(11.98, $tax_order_one->SubTotal);
         $this->assertEquals(14.376, $tax_order_one->Total);
         $this->assertEquals(23.96, $tax_order_two->SubTotal);
