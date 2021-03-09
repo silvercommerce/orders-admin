@@ -4,8 +4,10 @@ namespace SilverCommerce\OrdersAdmin\Factory;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 
@@ -45,6 +47,13 @@ class LineItemFactory
      * @var DataObject
      */
     protected $item;
+
+    /**
+     * Parent estimate/invoice
+     *
+     * @var Estimate
+     */
+    protected $parent;
 
     /**
      * DataObject that will act as the product
@@ -159,6 +168,47 @@ class LineItemFactory
     }
 
     /**
+     * Find the best possible tax rate for a line item. If the item is
+     * linked to an invoice/estimate, then see if there is a Country
+     * and Region set, else use product default
+     *
+     * @return TaxRate
+     */
+    public function findBestTaxRate()
+    {
+        $item = $this->getItem();
+        $product = $this->getProduct();
+        $default = TaxRate::create();
+        $default->ID = -1;
+
+        // If no product available, return an empty rate
+        if (empty($product)) {
+            return $default;
+        }
+
+        if (empty($item)) {
+            return $product->getTaxRate();
+        }
+
+        $parent = $this->getParent();
+
+        // If order available, try to gt delivery location
+        if (!empty($parent)) {
+            $country = $parent->DeliveryCountry;
+            $region = $parent->DeliveryCounty;
+            /** @var \SilverCommerce\TaxAdmin\Model\TaxCategory */
+            $category = $product->TaxCategory();
+
+            if ($category->exists() && strlen($country) >= 2 && strlen($region) >= 2) {
+                return $category->ValidTax($country, $region);
+            }
+        }
+
+        // Finally, return product's default tax
+        return $product->getTaxRate();
+    }
+
+    /**
      * Get an array of data for the line item
      *
      * @return array
@@ -199,11 +249,13 @@ class LineItemFactory
             $stocked = false;
         }
 
+        $tax_rate = $this->findBestTaxRate();
+
         // Setup initial line item
         return [
             "Title" => $product->Title,
             "BasePrice" => $product->BasePrice,
-            "TaxRateID" => $product->getTaxRate()->ID,
+            "TaxRateID" => $tax_rate->ID,
             "StockID" => $product->StockID,
             "ProductClass" => $product->ClassName,
             "Quantity" => $qty,
@@ -342,6 +394,8 @@ class LineItemFactory
         }
 
         $this->setCustomisations($item->Customisations()->toArray());
+
+        $this->setParent($item->Parent());
 
         return $this;
     }
@@ -509,6 +563,29 @@ class LineItemFactory
     public function setProductDeliverableParam(string $param)
     {
         $this->product_deliverable_param = $param;
+        return $this;
+    }
+
+    /**
+     * Get current parent estimate
+     *
+     * @return Estimate
+     */ 
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Set current parent estimate
+     *
+     * @param Estimate $parent
+     *
+     * @return self
+     */ 
+    public function setParent(Estimate $parent)
+    {
+        $this->parent = $parent;
         return $this;
     }
 }
