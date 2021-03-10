@@ -68,8 +68,11 @@ checks:
 build:
   nodes:
     analysis:
+      project_setup:
+        override: ['true']
       tests:
-        override: [php-scrutinizer-run]
+        override:
+          - php ./vendor/bin/phpunit --configuration ./phpunit.xml.dist --testsuite scrutinizer
 
 filter:
   paths: [src/*, tests/*]
