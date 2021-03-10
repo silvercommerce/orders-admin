@@ -41,7 +41,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  *           shopping cart
  * - Deliverable: Is this a product that can be delivered? This can effect
  *                delivery options
- * 
+ *
  * @method Estimate Parent
  * @method TaxRate Tax
  * @method TaxRate TaxRate

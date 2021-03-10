@@ -578,7 +578,7 @@ class LineItemFactory
      * Get current parent estimate
      *
      * @return Estimate
-     */ 
+     */
     public function getParent()
     {
         return $this->parent;
@@ -590,7 +590,7 @@ class LineItemFactory
      * @param Estimate $parent
      *
      * @return self
-     */ 
+     */
     public function setParent(Estimate $parent)
     {
         $this->parent = $parent;
