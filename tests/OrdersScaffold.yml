@@ -89,9 +89,11 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
   deliverable:
     Title: "Deliverable Item"
     Deliverable: true
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
   notdeliverable:
     Title: "Non Deliverable Item"
     Deliverable: false
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
   notaxitem:
     Title: "A cheap item"
     Quantity: 2
@@ -103,6 +105,7 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     Title: "An item with reduced tax"
     Quantity: 2
     Weight: 0.5
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     BasePrice: 5.99 # 0.2995 tax per item
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.reduced # Reduced
   taxitemone:
@@ -115,12 +118,14 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
   taxitemtwo:
     Title: "Another tax item"
     Quantity: 2
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     BasePrice: 5.99 # 1.198 tax per item
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   taxitemthree:
     Title: "Two cheap items"
     Quantity: 2
     Weight: 0.75
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     BasePrice: 3.99 # 0.798 tax per item
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat # VAT
   sockitem:
@@ -135,6 +140,7 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     Title: "Socks"
     Quantity: 1
     Weight: 0.5
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     BasePrice: 5.99
     TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.zero # Zero
     Customisations: =>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.freecustomisation,=>SilverCommerce\OrdersAdmin\Model\LineItemCustomisation.expensivecustomisation
