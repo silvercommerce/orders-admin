@@ -186,3 +186,8 @@
 ## 1.3.17
 
 * Only lock line items via the factory, if explicitly asked to
+
+## 1.3.18
+
+* Add ability to find best tax rate for a line item
+* Add more unit tests
