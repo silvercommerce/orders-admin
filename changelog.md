@@ -191,3 +191,7 @@
 
 * Add ability to find best tax rate for a line item
 * Add more unit tests
+
+## 1.3.19
+
+* Fix error when checking out using a fixed tax rate on a product

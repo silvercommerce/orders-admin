@@ -68,6 +68,7 @@ SilverCommerce\CatalogueAdmin\Model\CatalogueProduct:
     BasePrice: 5.99
     StockLevel: 10
     Weight: 0.75
+    TaxRate: =>SilverCommerce\TaxAdmin\Model\TaxRate.vat
   categorised:
     Title: "Categorised Item"
     StockID: "ci1"
@@ -150,6 +151,12 @@ SilverCommerce\OrdersAdmin\Model\LineItem:
     ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
     Quantity: 1
     BasePrice: 5.50
+  fixedtaxtestableuk:
+    Title: "UK Fixed Tax Test item"
+    StockID: "t1"
+    ProductClass: SilverCommerce\CatalogueAdmin\Model\CatalogueProduct
+    Quantity: 1
+    BasePrice: 5.99
 
 SilverCommerce\OrdersAdmin\Model\Estimate:
   addressdetails_uk:
@@ -166,6 +173,20 @@ SilverCommerce\OrdersAdmin\Model\Estimate:
     DeliveryCounty: "BIR"
     DeliveryCountry: "GB"
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxtestableuk
+  addressdetails_uk_two:
+    Ref: 1231
+    Address1: "123 Street Name"
+    Address2: "A Place"
+    City: "A City"
+    PostCode: "AB12 3AB"
+    County: "BIR"
+    Country: "GB"
+    DeliveryAddress1: "321 Street Name"
+    DeliveryCity: "Delivery City"
+    DeliveryPostCode: "ZX98 9XZ"
+    DeliveryCounty: "BIR"
+    DeliveryCountry: "GB"
+    Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.fixedtaxtestableuk
   deliverable:
     Ref: 1232
     Items:

@@ -72,6 +72,35 @@ class LineItemFactoryTest extends SapphireTest
 
     public function testFindBestTaxRate()
     {
+        // First test a static rate
+        $item = $this->objFromFixture(LineItem::class, 'taxitemone');
+        $estimate = $item->Parent();
+        $factory = LineItemFactory::create()
+            ->setItem($item)
+            ->setParent($estimate);
+
+        $this->assertEquals(20, $item->TaxPercentage);
+        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+
+        $estimate->DeliveryCountry = "NZ";
+        $estimate->DeliveryCounty = "AUK";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+
+        $estimate->DeliveryCountry = "US";
+        $estimate->DeliveryCounty = "AL";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+
+        $estimate->DeliveryCountry = "DE";
+        $estimate->DeliveryCounty = "BE";
+        $factory->setParent($estimate);
+
+        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+
+        // Now test a more flexible category
         $item = $this->objFromFixture(LineItem::class, 'taxtestableuk');
         $estimate = $item->Parent();
         $factory = LineItemFactory::create()

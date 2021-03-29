@@ -176,6 +176,7 @@ class LineItemFactory
      */
     public function findBestTaxRate()
     {
+        $rate = null;
         $item = $this->getItem();
         $product = $this->getProduct();
         $default = TaxRate::create();
@@ -191,29 +192,31 @@ class LineItemFactory
             return $product->getTaxRate();
         }
 
+        /** @var \SilverCommerce\TaxAdmin\Model\TaxCategory */
+        $category = $product->TaxCategory();
+
+        // If no tax category, return product default
+        if (!$category->exists()) {
+            return $product->getTaxRate();
+        }
+
         $parent = $this->getParent();
 
         // If order available, try to gt delivery location
         if (!empty($parent)) {
-            $rate = null;
             $country = $parent->DeliveryCountry;
             $region = $parent->DeliveryCounty;
-            /** @var \SilverCommerce\TaxAdmin\Model\TaxCategory */
-            $category = $product->TaxCategory();
 
-            if ($category->exists() && strlen($country) >= 2 && strlen($region) >= 2) {
+            if (strlen($country) >= 2 && strlen($region) >= 2) {
                 $rate = $category->ValidTax($country, $region);
-            }
-
-            if (empty($rate)) {
-                return $default;
-            } else {
-                return $rate;
             }
         }
 
-        // Finally, return product's default tax
-        return $product->getTaxRate();
+        if (!empty($rate)) {
+            return $rate;
+        }
+
+        return $default;
     }
 
     /**
