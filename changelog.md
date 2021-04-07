@@ -195,3 +195,7 @@
 ## 1.3.19
 
 * Fix error when checking out using a fixed tax rate on a product
+
+## 1.3.20
+
+* Allow line items with a base price of zero to be added
