@@ -240,7 +240,7 @@ class LineItemFactory
         }
 
         // ensure that object price is something we can work with
-        if (empty($product->BasePrice)) {
+        if (!isset($product->BasePrice)) {
             throw new ValidationException("Product needs a 'BasePrice' param");
         }
 
