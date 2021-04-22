@@ -199,3 +199,7 @@
 ## 1.3.20
 
 * Allow line items with a base price of zero to be added
+
+## 1.3.21
+
+* Add customer info and discounts to email templates

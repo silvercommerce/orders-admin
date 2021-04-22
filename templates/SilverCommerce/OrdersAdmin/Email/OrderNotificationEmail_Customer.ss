@@ -36,15 +36,16 @@
                 <tfoot>
                     <tr><td colspan="3">&nbsp;</td></tr>
                     
-                    <% if $DiscountTotal.RAW > 0 || $Discount %><tr>
-                        <td colspan="2" style="text-align: right;">
-                            <strong>
-                                <%t Orders.Discount "Discount" %>
-                                <% if $Discount %>($Discount)<% end_if %>
-                            </strong>
-                        </td>
-                        <td style="text-align: right;">$DiscountTotal.Nice</td>
-                    </tr><% end_if %>
+                    <% loop $Discounts %>
+                        <tr class="discounts">
+                            <td colspan="2" style="text-align: right;">
+                                <strong>$Title ($Code)</strong>
+                            </td>
+                            <td style="text-align: right;">
+                                {$Value.Nice}
+                            </td>
+                        </tr>
+                    <% end_loop %>
                     
                     <% if $PostagePrice.RAW > 0 %>
                         <tr>
@@ -83,18 +84,37 @@
         
         <hr/>
 
-        <% if $isDeliverable %>
-            <h2><%t Orders.DeliveryDetails 'Delivery Details' %></h2>
-            <p>
-                <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
-                {$DeliveryFirstName} {$DeliverySurname}<br/>
-                {$DeliveryAddress1},<br/>
-                <% if $DeliveryAddress2 %>{$DeliveryAddress2},<br/><% end_if %>
-                {$DeliveryCity},<br/>
-                {$DeliveryPostCode},<br/>
-                {$DeliveryCountryFull}
-            </p>
-        <% end_if %>
+        <table style="width: 100%;">
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top;">
+                        <strong><%t Orders.CustomerDetails "Customer Details" %></strong><br/>
+                        <%t Orders.Name "Name" %>: {$FirstName} {$Surname}<br/>
+                        <% if $PhoneNumber %><%t Orders.Phone "Phone" %>: {$PhoneNumber}<br/><% end_if %>
+                        <% if $Email %><%t Orders.Email "Email" %>: <a href="mailto:{$Email}">{$Email}</a><br/><% end_if %>
+                        <br/>
+                        <% if $Company %>$Company<br/><% end_if %>
+                        {$Address1},<br/>
+                        <% if $Address2 %>{$Address2},<br/><% end_if %>
+                        {$City},<br/>
+                        {$PostCode},<br/>
+                        {$CountryFull}
+                    </td>
+                    <td style="vertical-align: top;">
+                        <% if $isDeliverable %>
+                            <strong><%t Orders.DeliveryDetails 'Delivery Details' %></strong><br/>
+                            <% if $DeliveryCompany %>$DeliveryCompany<br/><% end_if %>
+                            {$DeliveryFirstName} {$DeliverySurname}<br/>
+                            {$DeliveryAddress1},<br/>
+                            <% if $DeliveryAddress2 %>{$DeliveryAddress2},<br/><% end_if %>
+                            {$DeliveryCity},<br/>
+                            {$DeliveryPostCode},<br/>
+                            {$DeliveryCountryFull}
+                        <% end_if %>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         
         <hr/>
 
