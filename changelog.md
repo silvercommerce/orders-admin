@@ -203,3 +203,8 @@
 ## 1.3.21
 
 * Add customer info and discounts to email templates
+
+## 1.4.0
+
+* Improve Estimate/Invoice Add line item to be independent of GridFieldRelationAdd
+* Switch to new notifications system for order notifications

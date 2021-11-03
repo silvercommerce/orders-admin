@@ -1,6 +1,13 @@
-/** Order admin Items Gridfield */
-.cms .ss-gridfield .add-existing-autocompleter button#action_gridfield_relationfind {
+.grid-field .add-line-item-autocompleter {
+    width: 33%;
+}
+
+.grid-field .add-line-item-autocompleter button.action_gridfield_lineitemfind {
     display: none;
+}
+
+.grid-field .add-line-item-autocompleter button.action_gridfield_lineitemadd span {
+    float: none;
 }
 
 .cms #Form_ItemEditForm_OrdersDetails_Holder #Form_ItemEditForm_OrdersDetails {

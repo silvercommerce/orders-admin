@@ -1,10 +1,14 @@
 ---
 Name: orderadminconfig
 ---
-## Extensions
+
 SilverStripe\Admin\LeftAndMain:
-  extensions:
-    - SilverCommerce\OrdersAdmin\Extensions\AdminExtension
+  extra_requirements_javascript:
+    - "silvercommerce/orders-admin: client/dist/js/admin.js"
+  extra_requirements_css:
+    - "silvercommerce/orders-admin: client/dist/css/admin.css"
+
+## Extensions
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - SilverCommerce\OrdersAdmin\Extensions\SiteConfigExtension

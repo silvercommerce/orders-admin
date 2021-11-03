@@ -53,6 +53,8 @@ class LineItem extends DataObject implements TaxableProvider
 {
     use Taxable;
 
+    const STOCKID = "StockID";
+
     private static $table_name = 'LineItem';
 
     /**
@@ -493,8 +495,11 @@ class LineItem extends DataObject implements TaxableProvider
      * @param $match_col = The column we use to match the two objects
      * @return DataObject
      */
-    public function Match($relation_name = null, $relation_col = "StockID", $match_col = "StockID")
-    {
+    public function Match(
+        $relation_name = null,
+        $relation_col = self::STOCKID,
+        $match_col = self::STOCKID
+    ) {
         // Try to determine relation name
         if (!$relation_name && !$this->ProductClass && class_exists(CatalogueProduct::class)) {
             $relation_name = CatalogueProduct::class;
