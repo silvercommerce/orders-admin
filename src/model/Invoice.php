@@ -282,6 +282,7 @@ class Invoice extends Estimate implements PermissionProvider
                     'Status',
                     $this->fieldLabel('Status')
                 )->setSource($statuses)
+                ->setEmptyString('')
             );
         }
 

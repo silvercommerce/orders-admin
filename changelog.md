@@ -212,3 +212,7 @@
 ## 1.4.1
 
 * Re-add status and reference filter fields to admin
+
+## 1.4.2
+
+* Ensure status can be left blank when filtering
