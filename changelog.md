@@ -208,3 +208,7 @@
 
 * Improve Estimate/Invoice Add line item to be independent of GridFieldRelationAdd
 * Switch to new notifications system for order notifications
+
+## 1.4.1
+
+* Re-add status and reference filter fields to admin

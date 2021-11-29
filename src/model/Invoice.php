@@ -10,6 +10,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use SilverStripe\Forms\TextField;
 
 /**
  * Order objects track all the details of an order and if they were completed or
@@ -221,6 +222,16 @@ class Invoice extends Estimate implements PermissionProvider
     ];
 
     /**
+     * Fields to search
+     *
+     * @var array
+     * @config
+     */
+    private static $searchable_fields = [
+        'Status'
+    ];
+
+    /**
      * Fields to use when exporting from `OrdersAdmin`
      *
      * @var array
@@ -245,6 +256,38 @@ class Invoice extends Estimate implements PermissionProvider
     {
         return _t(self::class . "." . $this->Status, $this->Status);
     }
+
+    /**
+     * Overwrite default search fields to add a dropdown
+     * for status
+     *
+     * Used by {@link SearchContext}.
+     *
+     * @param array $_params
+     *
+     * @return \SilverStripe\Forms\FieldList
+     */
+    public function scaffoldSearchFields($_params = null)
+    {
+        $fields = parent::scaffoldSearchFields($_params);
+
+        // Update the classname field if set
+        $status_field = $fields->dataFieldByName('Status');
+
+        if (!empty($status_field) && is_a($status_field, TextField::class)) {
+            $statuses = self::config()->get('statuses');
+            $fields->replaceField(
+                'Status',
+                DropdownField::create(
+                    'Status',
+                    $this->fieldLabel('Status')
+                )->setSource($statuses)
+            );
+        }
+
+        return $fields;
+    }
+
 
     /**
      * Generate a link to view the associated front end

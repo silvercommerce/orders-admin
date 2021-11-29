@@ -173,6 +173,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $searchable_fields = [
+        'Ref',
         'StartDate',
         'EndDate',
         'Company',
