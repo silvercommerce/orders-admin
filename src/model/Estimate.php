@@ -15,16 +15,21 @@ use SilverStripe\Forms\HeaderField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\Forms\CompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\FieldType\DBCurrency;
+use SilverShop\HasOneField\HasOneButtonField;
 use SilverStripe\Security\PermissionProvider;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
 use SilverStripe\Forms\GridField\GridFieldConfig;
+use SilverCommerce\OrdersAdmin\Interfaces\Orderable;
 use SilverStripe\Forms\GridField\GridFieldButtonRow;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
@@ -32,22 +37,64 @@ use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
+use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
-use SilverStripe\Forms\CompositeField;
-use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
-use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Control\HTTPRequest;
-use SilverShop\HasOneField\HasOneButtonField;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
  *
+ * @property int Ref
+ * @property string Prefix
+ * @property string Number
+ * @property string StartDate
+ * @property string EndDate
+ * @property string Company
+ * @property string FirstName
+ * @property string Surname
+ * @property string Email
+ * @property string PhoneNumber
+ * @property string Address1
+ * @property string Address2
+ * @property string City
+ * @property string County
+ * @property string PostCode
+ * @property string Country
+ * @property string DeliveryCompany
+ * @property string DeliveryFirstName
+ * @property string DeliverySurname
+ * @property string DeliveryAddress1
+ * @property string DeliveryAddress2
+ * @property string DeliveryCity
+ * @property string DeliveryCounty
+ * @property string DeliveryPostCode
+ * @property string DeliveryCountry
+ * @property string AccessKey
+ * @property bool DisableNegative
+ * @property string FullRef
+ * @property string PersonalDetails
+ * @property string BillingAddress
+ * @property string CountryFull
+ * @property string CountryUC
+ * @property string DeliveryAddress
+ * @property string DeliveryCountryFull
+ * @property string DeliveryCountryUC
+ * @property string SubTotal
+ * @property string TaxTotal
+ * @property string Total
+ * @property string TotalItems
+ * @property string TotalWeight
+ * @property string ItemSummary
+ * @property string ItemSummaryHTML
+ * @property string TranslatedStatus
+ *
+ * @method Contact Customer
+ * @method HasManyList Items
  */
-class Estimate extends DataObject implements PermissionProvider
+class Estimate extends DataObject implements Orderable, PermissionProvider
 {
     private static $table_name = 'Estimate';
 
@@ -63,7 +110,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Standard DB columns
      *
      * @var array
-     * @config
      */
     private static $db = [
         'Ref'               => 'Int',
@@ -99,14 +145,16 @@ class Estimate extends DataObject implements PermissionProvider
         'DeliveryCountry'   => 'Varchar',
 
         // Access key (for viewing via non logged in users)
-        'AccessKey'         => "Varchar(40)"
+        'AccessKey'         => "Varchar(40)",
+
+        // Allow/Disallow this estimate/invoice to return a negative value
+        'DisableNegative'  => 'Boolean'
     ];
 
     /**
      * Foreign key associations
      *
      * @var array
-     * @config
      */
     private static $has_one = [
         'Customer'  => Contact::class
@@ -116,7 +164,6 @@ class Estimate extends DataObject implements PermissionProvider
      * One to many assotiations
      *
      * @var array
-     * @config
      */
     private static $has_many = [
         'Items'     => LineItem::class
@@ -126,7 +173,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Cast methods for templates
      *
      * @var array
-     * @config
      */
     private static $casting = [
         'FullRef'           => 'Varchar(255)',
@@ -151,7 +197,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Fields to show in summary views
      *
      * @var array
-     * @config
      */
     private static $summary_fields = [
         'FullRef',
@@ -170,7 +215,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Fields to search
      *
      * @var array
-     * @config
      */
     private static $searchable_fields = [
         'Ref',
@@ -199,7 +243,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Fields to show in summary views
      *
      * @var array
-     * @config
      */
     private static $export_fields = [
         "ID",
@@ -238,7 +281,6 @@ class Estimate extends DataObject implements PermissionProvider
      * Add extension classes
      *
      * @var array
-     * @config
      */
     private static $extensions = [
         Versioned::class . '.versioned',
@@ -248,17 +290,19 @@ class Estimate extends DataObject implements PermissionProvider
      * Declare version history
      *
      * @var array
-     * @config
      */
     private static $versioning = [
         "History"
+    ];
+
+    private static $defaults = [
+        "DisableNegative" => false
     ];
 
     /**
      * Default sort order for ORM
      *
      * @var array
-     * @config
      */
     private static $default_sort = [
         "Ref"       => "DESC",
@@ -453,12 +497,22 @@ class Estimate extends DataObject implements PermissionProvider
         return strtoupper($this->DeliveryCountry);
     }
 
-    /**
-     * Find the total quantity of items in the shopping cart
-     *
-     * @return int
-     */
-    public function getTotalItems()
+    public function setAllowNegativeValue(bool $allow_negative): Orderable
+    {
+        // To retain better backwards compatibility
+        // This performs an inverse assignment
+        // As by default negatives are allowed
+        $this->DisableNegative = !$allow_negative;
+
+        return $this;
+    }
+
+    public function canHaveNegativeValue(): bool
+    {
+        return !($this->DisableNegative);
+    }
+
+    public function getTotalItems(): int
     {
         $total = 0;
 
@@ -468,15 +522,10 @@ class Estimate extends DataObject implements PermissionProvider
 
         $this->extend("updateTotalItems", $total);
 
-        return $total;
+        return (int)$total;
     }
 
-    /**
-    * Find the total weight of all items in the shopping cart
-    *
-    * @return float
-    */
-    public function getTotalWeight()
+    public function getTotalWeight(): float
     {
         $total = 0;
 
@@ -495,15 +544,10 @@ class Estimate extends DataObject implements PermissionProvider
 
         $this->extend("updateTotalWeight", $total);
         
-        return $total;
+        return (float)$total;
     }
 
-    /**
-     * Total values of items in this order (without any tax)
-     *
-     * @return float
-     */
-    public function getSubTotal()
+    public function getSubTotal(): float
     {
         $total = 0;
 
@@ -514,15 +558,10 @@ class Estimate extends DataObject implements PermissionProvider
         
         $this->extend("updateSubTotal", $total);
 
-        return $total;
+        return (float)$total;
     }
 
-    /**
-     * Total values of items in this order
-     *
-     * @return float
-     */
-    public function getTaxTotal()
+    public function getTaxTotal(): float
     {
         $total = 0;
         $items = $this->Items();
@@ -536,7 +575,11 @@ class Estimate extends DataObject implements PermissionProvider
 
         $this->extend("updateTaxTotal", $total);
 
-        return $total;
+        if ($total < 0 && !$this->canHaveNegativeValue()) {
+            return (float)0;
+        }
+
+        return (float)$total;
     }
 
     /**
@@ -574,18 +617,17 @@ class Estimate extends DataObject implements PermissionProvider
         return $taxes;
     }
 
-    /**
-     * Total value of order
-     *
-     * @return float
-     */
-    public function getTotal()
+    public function getTotal(): float
     {
         $total = $this->SubTotal + $this->TaxTotal;
 
         $this->extend("updateTotal", $total);
-        
-        return $total;
+
+        if ($total < 0 && !$this->canHaveNegativeValue()) {
+            return (float)0;
+        }
+
+        return (float)$total;
     }
 
     /**
@@ -646,13 +688,7 @@ class Estimate extends DataObject implements PermissionProvider
         return $html;
     }
 
-    /**
-     * Determine if the current estimate contains delivereable
-     * items.
-     *
-     * @return boolean
-     */
-    public function isDeliverable()
+    public function isDeliverable(): bool
     {
         foreach ($this->Items() as $item) {
             if ($item->Deliverable) {
@@ -663,12 +699,7 @@ class Estimate extends DataObject implements PermissionProvider
         return false;
     }
 
-    /**
-     * Determine if the current estimate contains only locked items.
-     *
-     * @return boolean
-     */
-    public function isLocked()
+    public function isLocked(): bool
     {
         foreach ($this->getItems() as $item) {
             if (!$item->Locked) {
