@@ -216,3 +216,9 @@
 ## 1.4.2
 
 * Ensure status can be left blank when filtering
+
+## 1.5.0
+
+* Add ability to specify if estimate can have a negative value
+* Migrate some logic from Estimates/Invoices to a factory
+* Tidy up code folder, PSR4 folder naming
