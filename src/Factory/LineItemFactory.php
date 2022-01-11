@@ -78,6 +78,14 @@ class LineItemFactory
     protected $lock = false;
 
     /**
+     * Is this item deliverable (a physical item that is shipped)?
+     * (defaults to true)
+     *
+     * @var bool
+     */
+    protected $deliverable = false;
+
+    /**
      * List of customisation data that will need to be setup
      *
      * @var array
@@ -229,6 +237,7 @@ class LineItemFactory
         $product = $this->getProduct();
         $qty = $this->getQuantity();
         $lock = $this->getLock();
+        $deliverable = $this->getDeliverable();
 
         if (empty($product)) {
             throw new ValidationException(
@@ -246,13 +255,6 @@ class LineItemFactory
 
         // Check if deliverable and stocked
         $stocked_param = $this->getProductStockedParam();
-        $deliver_param = $this->getProductDeliverableParam();
-
-        if (isset($product->{$deliver_param})) {
-            $deliverable = (bool) $product->{$deliver_param};
-        } else {
-            $deliverable = true;
-        }
 
         if (isset($product->{$stocked_param})) {
             $stocked = (bool) $product->{$stocked_param};
@@ -555,29 +557,6 @@ class LineItemFactory
     }
 
     /**
-     * Get the name of the param used on product to determin if item is deliverable
-     *
-     * @return string
-     */
-    public function getProductDeliverableParam()
-    {
-        return $this->product_deliverable_param;
-    }
-
-    /**
-     * Set the name of the param used on product to determin if item is deliverable
-     *
-     * @param string $param The param name
-     *
-     * @return self
-     */
-    public function setProductDeliverableParam(string $param)
-    {
-        $this->product_deliverable_param = $param;
-        return $this;
-    }
-
-    /**
      * Get current parent estimate
      *
      * @return Estimate
@@ -597,6 +576,29 @@ class LineItemFactory
     public function setParent(Estimate $parent)
     {
         $this->parent = $parent;
+        return $this;
+    }
+
+    /**
+     * Get if this item is deliverable
+     *
+     * @return  bool
+     */ 
+    public function getDeliverable()
+    {
+        return $this->deliverable;
+    }
+
+    /**
+     * Set if this item is deliverable
+     *
+     * @param bool $deliverable
+     *
+     * @return self
+     */ 
+    public function setDeliverable(bool $deliverable)
+    {
+        $this->deliverable = $deliverable;
         return $this;
     }
 }
