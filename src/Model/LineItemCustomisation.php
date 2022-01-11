@@ -13,6 +13,13 @@ use SilverStripe\ORM\DataObject;
  *  - Title: The name of the customisation (eg. "Colour")
  *  - Value: The data associated with thie customisation (eg. "Red")
  *  - Price: Does this customisation change the LineItem's price?
+ *
+ * @property string Title
+ * @property string Value
+ * @property float BasePrice
+ * @property float Price
+ *
+ * @method LineItem Parent
  */
 class LineItemCustomisation extends DataObject implements TaxableProvider
 {
@@ -24,7 +31,6 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
      * Standard database columns
      *
      * @var array
-     * @config
      */
     private static $db = [
         "Title" => "Varchar",
@@ -37,7 +43,6 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
      * DB foreign key associations
      *
      * @var array
-     * @config
      */
     private static $has_one = [
         "Parent" => LineItem::class
@@ -47,7 +52,6 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
      * Fields to display in gridfields
      *
      * @var array
-     * @config
      */
     private static $summary_fields = [
         "Title",

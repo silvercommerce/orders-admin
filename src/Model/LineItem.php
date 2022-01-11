@@ -5,6 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -42,10 +43,30 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * - Deliverable: Is this a product that can be delivered? This can effect
  *                delivery options
  *
+ * @property string Key
+ * @property string Title
+ * @property float BasePrice
+ * @property float Price
+ * @property int Quantity
+ * @property string StockID
+ * @property string ProductClass
+ * @property bool Locked
+ * @property bool Stocked
+ * @property bool Deliverable
+ * @property float UnitPrice
+ * @property float UnitTax
+ * @property float UnitTotal
+ * @property float SubTotal
+ * @property float TaxRate
+ * @property float TaxTotal
+ * @property float Total
+ * @property string CustomisationList
+ * @property string CustomisationAndPriceList
+ *
  * @method Estimate Parent
  * @method TaxRate Tax
  * @method TaxRate TaxRate
- * @method \SilverStripe\ORM\HasManyList Customisations
+ * @method HasManyList Customisations
  *
  * @author Mo <morven@ilateral.co.uk>
  */
