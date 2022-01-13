@@ -11,6 +11,7 @@ use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverCommerce\OrdersAdmin\BulkManager\PaidHandler;
 use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
+use SilverCommerce\OrdersAdmin\BulkManager\BulkDownloadHandler;
 use SilverCommerce\OrdersAdmin\BulkManager\CancelHandler;
 use SilverCommerce\OrdersAdmin\BulkManager\RefundHandler;
 use SilverStripe\Forms\GridField\GridFieldSortableHeader;
@@ -96,7 +97,8 @@ class OrderAdmin extends ModelAdminPlus
         }
 
         $manager->addBulkAction(BulkViewHandler::class);
-        
+        $manager->addBulkAction(BulkDownloadHandler::class);
+
         // Set our default detailform and bulk manager
         if ($config) {
             $config
