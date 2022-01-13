@@ -1,4 +1,4 @@
-<div class="estimate pb-5">
+<div class="estimate-container">
     <header class="header">
         <div class="row">
             <div class="col-sm-8">
@@ -70,26 +70,29 @@
 
     <hr/>
 
-    <footer class="row">
-        <div class="col-sm-8 d-none d-md-block">
-            {$SiteConfig.EstimateFooterContent}
+    <footer>
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="panel contentpanel">
+                    <div class="panel-body">
+                        {$SiteConfig.EstimateFooterContent}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <% include SilverCommerce\OrdersAdmin\Includes\SummaryTable %>
+            </div>
         </div>
 
-        <div class="col-sm-4">
-            <% include SilverCommerce\OrdersAdmin\Includes\SummaryTable %>
-        </div>
-
-        <div class="col-sm-8 hide-pdf d-block d-sm-none">
-            {$SiteConfig.EstimateFooterContent}
-        </div>
-
-        <div class="col-sm-12 text-center">
-            <a
-                class="btn btn-lg btn-primary font-icon-down-circled"
-                href="{$PDFLink}"
-            >
-                Download
-            </a>
+        <div class="row py-4">
+            <div class="col-sm-12 text-center">
+                <a
+                    class="btn btn-lg btn-primary font-icon-down-circled"
+                    href="{$PDFLink}"
+                >
+                    Download
+                </a>
+            </div>
         </div>
     </footer>
 </div>
