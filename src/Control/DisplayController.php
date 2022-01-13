@@ -95,40 +95,6 @@ class DisplayController extends Controller
 
         return $dompdf;
     }
-
-    /**
-     * Undocumented function
-     *
-     * @return \SilverStripe\Assets\Image
-     */
-    public function Logo()
-    {
-        $config = SiteConfig::current_site_config();
-        $image = $config->EstimateInvoiceLogo();
-
-        $this->extend("updateLogo", $image);
-        
-        return $image;
-    }
-
-    /**
-     * get the current logo as a base 64 encoded string
-     *
-     * @return string
-     */
-    public function LogoBase64(int $width = 0, int $height = 0)
-    {
-        $logo = $this->Logo();
-
-        if ($width > 0 && $height > 0) {
-            $logo = $logo->Fit($width, $height);
-        }
-        $string = base64_encode($logo->getString());
-
-        $this->extend("updateLogoBase64", $string);
-        
-        return $string;
-    }
     
     /**
      * Get a relative link to anorder or invoice
@@ -239,8 +205,6 @@ CSS
         $config = SiteConfig::current_site_config();
         $this->customise([
             "Type" => "Estimate",
-            "HeaderContent" => $config->dbObject("EstimateHeaderContent"),
-            "FooterContent" => $config->dbObject("EstimateFooterContent"),
             "Title" => _t("Orders.EstimateTitle", "Estimate"),
             "MetaTitle" => _t("Orders.EstimateTitle", "Estimate"),
             "Object" => $this->object

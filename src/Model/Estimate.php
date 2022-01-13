@@ -340,6 +340,23 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     }
 
     /**
+     * Render this estimate into a template
+     *
+     * @return string
+     */
+    public function forTemplate(): string
+    {
+        $config = SiteConfig::current_site_config();
+
+        return $this->renderWith(
+            $this->getViewerTemplates(),
+            [
+                'SiteConfig' => $config
+            ]
+        );
+    }
+
+    /**
      * Get the default export fields for this object
      *
      * @return array
