@@ -318,7 +318,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     public function DisplayLink()
     {
         return Controller::join_links(
-            DisplayController::create()->AbsoluteLink("estimate"),
+            DisplayController::create()->AbsoluteLink(),
             $this->ID,
             $this->AccessKey
         );
@@ -333,7 +333,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     public function PDFLink()
     {
         return Controller::join_links(
-            DisplayController::create()->AbsoluteLink("estimatepdf"),
+            DisplayController::create()->AbsoluteLink('pdf'),
             $this->ID,
             $this->AccessKey
         );

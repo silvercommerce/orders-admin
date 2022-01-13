@@ -13,6 +13,7 @@ use SilverStripe\View\Requirements;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Control\HTTPStreamResponse;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
@@ -33,13 +34,10 @@ class DisplayController extends Controller
      * @config
      */
     private static $url_segment = "ordersadmin/display";
-    
-    
+
     private static $allowed_actions = [
-        "invoice",
-        "invoicepdf",
-        "estimate",
-        "estimatepdf"
+        "index",
+        "pdf"
     ];
 
     /**
@@ -69,7 +67,7 @@ class DisplayController extends Controller
             ($member && $object->canView($member)) ||
             ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
         )) {
-            $this->object = $object;
+            $this->setObject($object);
         } else {
             return Security::permissionFailure();
         }
@@ -107,7 +105,7 @@ class DisplayController extends Controller
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function Link($action = "invoice")
+    public function Link($action = "index")
     {
         return Controller::join_links(
             $this->config()->url_segment,
@@ -126,7 +124,7 @@ class DisplayController extends Controller
      * @param $key Access key of the order (for security).
      * @return string
      */
-    public function AbsoluteLink($action = "invoice")
+    public function AbsoluteLink($action = "index")
     {
         return Controller::join_links(
             Director::absoluteBaseURL(),
@@ -153,21 +151,8 @@ class DisplayController extends Controller
         return file_get_contents($path);
     }
 
-    public function invoice(HTTPRequest $request)
-    {
-        $config = SiteConfig::current_site_config();
-        
-        $this->customise([
-            "Type" => "Invoice",
-            "HeaderContent" => $config->dbObject("InvoiceHeaderContent"),
-            "FooterContent" => $config->dbObject("InvoiceFooterContent"),
-            "Title" => _t("Orders.InvoiceTitle", "Invoice"),
-            "MetaTitle" => _t("Orders.InvoiceTitle", "Invoice"),
-            "Object" => $this->object
-        ]);
-
-        $this->extend("updateInvoice");
-        
+    public function index(HTTPRequest $request)
+    {   
         return $this->render();
     }
 
@@ -181,7 +166,7 @@ class DisplayController extends Controller
      * @param HTTPRequest $request
      * @return void
      */
-    public function invoicepdf(HTTPRequest $request)
+    public function pdf(HTTPRequest $request)
     {
         $style = $this->getPdfCss();
         Requirements::clear();
@@ -189,7 +174,9 @@ class DisplayController extends Controller
         $style
 CSS
         );
-        $result = $this->invoice($request);
+
+        /** @var DBHTMLText */
+        $result = $this->index($request);
         $html = $result->getValue();
         $pdf = $this->generate_pdf($html);
 
@@ -199,39 +186,27 @@ CSS
         $pdf->stream("{$this->object->FullRef}.pdf");
         exit();
     }
-    
-    public function estimate(HTTPRequest $request)
-    {
-        $config = SiteConfig::current_site_config();
-        $this->customise([
-            "Type" => "Estimate",
-            "Title" => _t("Orders.EstimateTitle", "Estimate"),
-            "MetaTitle" => _t("Orders.EstimateTitle", "Estimate"),
-            "Object" => $this->object
-        ]);
 
-        $this->extend("updateEstimate");
-        
-        return $this->render();
+    /**
+     * Get the object associated with this controller
+     *
+     * @return Estimate
+     */ 
+    public function getObject(): Estimate
+    {
+        return $this->object;
     }
 
-    public function estimatepdf(HTTPRequest $request)
+    /**
+     * Set the object associated with this controller
+     *
+     * @param Estimate $object
+     *
+     * @return self
+     */ 
+    public function setObject(Estimate $object)
     {
-        $style = $this->getPdfCss();
-        Requirements::clear();
-        Requirements::customCSS(<<<CSS
-        $style
-CSS
-        );
-        $result = $this->estimate($request);
-        $html = $result->getValue();
-
-        $pdf = $this->generate_pdf($html);
-
-        $this->extend("updateEstimatePDF", $pdf);
-
-        $pdf->render();
-        $pdf->stream("{$this->object->FullRef}.pdf");
-        exit();
+        $this->object = $object;
+        return $this;
     }
 }
