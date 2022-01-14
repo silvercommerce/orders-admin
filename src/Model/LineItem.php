@@ -3,6 +3,7 @@
 namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\i18n\i18n;
+use SilverStripe\Assets\Image;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\HasManyList;
@@ -62,6 +63,10 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @property float Total
  * @property string CustomisationList
  * @property string CustomisationAndPriceList
+ * @property string Currency
+ * @property string CurrencySymbol
+ * @property float NoTaxPrice
+ * @property float TaxPercentage
  *
  * @method Estimate Parent
  * @method TaxRate Tax
@@ -93,7 +98,6 @@ class LineItem extends DataObject implements TaxableProvider
      * Standard database columns
      *
      * @var array
-     * @config
      */
     private static $db = [
         "Key"           => "Varchar(255)",
@@ -112,7 +116,6 @@ class LineItem extends DataObject implements TaxableProvider
      * Foreign key associations in DB
      *
      * @var array
-     * @config
      */
     private static $has_one = [
         "Parent"      => Estimate::class,
@@ -124,7 +127,6 @@ class LineItem extends DataObject implements TaxableProvider
      * One to many associations
      *
      * @var array
-     * @config
      */
     private static $has_many = [
         "Customisations" => LineItemCustomisation::class
@@ -134,7 +136,6 @@ class LineItem extends DataObject implements TaxableProvider
      * Specify default values of a field
      *
      * @var array
-     * @config
      */
     private static $defaults = [
         "Quantity"      => 1,
@@ -148,7 +149,6 @@ class LineItem extends DataObject implements TaxableProvider
      * Function to DB Object conversions
      *
      * @var array
-     * @config
      */
     private static $casting = [
         "UnitPrice" => "Currency(9,3)",
@@ -166,7 +166,6 @@ class LineItem extends DataObject implements TaxableProvider
      * Fields to display in list tables
      *
      * @var array
-     * @config
      */
     private static $summary_fields = [
         "Quantity",
@@ -318,7 +317,7 @@ class LineItem extends DataObject implements TaxableProvider
             $price += $customisation->getBasePrice();
         }
         
-        $result = $this->getOwner()->filterTaxableExtensionResults(
+        $result = $this->filterTaxableExtensionResults(
             $this->extend("updateNoTaxPrice", $price)
         );
 
@@ -423,7 +422,7 @@ class LineItem extends DataObject implements TaxableProvider
      * Get an image object associated with this line item.
      * By default this is retrieved from the base product.
      *
-     * @return Image | null
+     * @return Image|null
      */
     public function Image()
     {
@@ -511,9 +510,10 @@ class LineItem extends DataObject implements TaxableProvider
      * Match this item to another object in the Database, by the
      * provided details.
      *
-     * @param $relation_name = The class name of the related dataobject
-     * @param $relation_col = The column name of the related object
-     * @param $match_col = The column we use to match the two objects
+     * @param string $relation_name The class name of the related dataobject
+     * @param string $relation_col The column name of the related object
+     * @param string $match_col The column we use to match the two objects
+     *
      * @return DataObject
      */
     public function Match(
@@ -561,8 +561,9 @@ class LineItem extends DataObject implements TaxableProvider
      * Check stock levels for this item, will return the actual number
      * of remaining stock after removing the current quantity
      *
-     * @param $qty The quantity we want to check against
-     * @return Int
+     * @param int $qty The quantity we want to check against
+     *
+     * @return int
      */
     public function checkStockLevel($qty)
     {
