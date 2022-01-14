@@ -67,7 +67,7 @@ checks:
 
 build:
   environment:
-      php: 7.2
+      php: 7.4
       mysql: true
       node: false
       postgresql: false
