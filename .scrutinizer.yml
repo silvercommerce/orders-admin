@@ -66,6 +66,9 @@ checks:
     argument_type_checks: true
 
 build:
+  dependencies:
+    override:
+      - composer update --prefer-dist --no-progress
   nodes:
     analysis:
       tests:
