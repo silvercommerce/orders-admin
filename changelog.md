@@ -216,3 +216,7 @@
 ## 1.4.2
 
 * Ensure status can be left blank when filtering
+
+## 1.4.3
+
+* Fix error manually adding line items to an estimate/invoice
