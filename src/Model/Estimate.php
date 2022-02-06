@@ -356,6 +356,15 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         );
     }
 
+    public function getTitle(): string
+    {
+        $title = $this->getFullRef();
+
+        $this->extend('updateTitle', $title);
+
+        return $title;
+    }
+
     /**
      * Get the default export fields for this object
      *
