@@ -295,6 +295,10 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         "History"
     ];
 
+    private static $owns = [
+        'LineItems'
+    ];
+
     private static $defaults = [
         "DisableNegative" => false
     ];

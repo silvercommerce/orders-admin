@@ -9,6 +9,7 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Versioned\Versioned;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\TaxAdmin\Traits\Taxable;
@@ -22,6 +23,7 @@ use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
+use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
@@ -94,11 +96,6 @@ class LineItem extends DataObject implements TaxableProvider
      */
     private static $stock_param = "StockLevel";
 
-    /**
-     * Standard database columns
-     *
-     * @var array
-     */
     private static $db = [
         "Key"           => "Varchar(255)",
         "Title"         => "Varchar",
@@ -112,31 +109,28 @@ class LineItem extends DataObject implements TaxableProvider
         "Deliverable"   => "Boolean"
     ];
 
-    /**
-     * Foreign key associations in DB
-     *
-     * @var array
-     */
     private static $has_one = [
         "Parent"      => Estimate::class,
         "Tax"         => TaxRate::class,
         "TaxRate"     => TaxRate::class
     ];
-    
-    /**
-     * One to many associations
-     *
-     * @var array
-     */
+
     private static $has_many = [
         "Customisations" => LineItemCustomisation::class
     ];
 
-    /**
-     * Specify default values of a field
-     *
-     * @var array
-     */
+    private static $extensions = [
+        Versioned::class . '.versioned',
+    ];
+
+    private static $versioning = [
+        "History"
+    ];
+
+    private static $owned_by = [
+        'Parent'
+    ];
+
     private static $defaults = [
         "Quantity"      => 1,
         "ProductClass"  => "Product",
@@ -145,11 +139,6 @@ class LineItem extends DataObject implements TaxableProvider
         "Deliverable"   => true
     ];
 
-    /**
-     * Function to DB Object conversions
-     *
-     * @var array
-     */
     private static $casting = [
         "UnitPrice" => "Currency(9,3)",
         "UnitTax" => "Currency(9,3)",
@@ -162,11 +151,6 @@ class LineItem extends DataObject implements TaxableProvider
         "CustomisationAndPriceList" => "Text",
     ];
 
-    /**
-     * Fields to display in list tables
-     *
-     * @var array
-     */
     private static $summary_fields = [
         "Quantity",
         "Title",
@@ -299,6 +283,15 @@ class LineItem extends DataObject implements TaxableProvider
                 
                     $custom_field->setConfig($config);
             }
+
+            $fields->addFieldToTab(
+                "Root.History",
+                VersionHistoryField::create(
+                    "History",
+                    _t("SilverCommerce\VersionHistoryField.History", "History"),
+                    $this
+                )->addExtraClass("stacked")
+            );
         });
 
         return parent::getCMSFields();
