@@ -5,10 +5,10 @@
                 <div class="panel logopanel">
                     <div class="panel-body">
                         <div class="w-75">
-                            <% if $SiteConfig.Logo.exists %>
+                            <% if $SiteConfig.EstimateInvoiceLogo.exists %>
                                 <img
                                     class="img-fluid logoimg"
-                                    src="{$SiteConfig.Logo.Base64DataURL}"
+                                    src="{$SiteConfig.EstimateInvoiceLogo.Base64DataURL}"
                                 />
                             <% end_if %>
                         </div>
