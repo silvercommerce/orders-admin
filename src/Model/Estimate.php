@@ -750,14 +750,17 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         $self = $this;
    
         $this->beforeUpdateCMSFields(function ($fields) use ($self) {
-            $fields->removeByName("StartDate");
-            $fields->removeByName("CustomerID");
-            $fields->removeByName("EndDate");
-            $fields->removeByName("Number");
-            $fields->removeByName("Ref");
-            $fields->removeByName("AccessKey");
-            $fields->removeByName("Items");
-            $fields->removeByName("Prefix");
+            $fields->removeByName([
+                "StartDate",
+                "CustomerID",
+                "EndDate",
+                "Number",
+                "Ref",
+                "AccessKey",
+                "Items",
+                "Prefix",
+                "DisableNegative"
+            ]);
             
             $fields->addFieldsToTab(
                 "Root.Main",
