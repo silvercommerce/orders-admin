@@ -217,6 +217,10 @@
 
 * Ensure status can be left blank when filtering
 
+## 1.4.3
+
+* Fix error manually adding line items to an estimate/invoice
+
 ## 1.5.0
 
 * Add ability to specify if estimate can have a negative value

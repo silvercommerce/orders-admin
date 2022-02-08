@@ -452,7 +452,7 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
         
         foreach ($search_fields as $search_field) {
             $name = (strpos($search_field, ':') !== false) ? $search_field : $search_field . ":" . $search_filter;
-            $params[$name] = $request->getVar('gridfield_relationsearch');
+            $params[$name] = $request->getVar('gridfield_productsearch');
         }
 
         $json = [];
