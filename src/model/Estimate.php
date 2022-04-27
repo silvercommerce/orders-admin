@@ -594,19 +594,28 @@ class Estimate extends DataObject implements PermissionProvider
      *
      * This method writes and reloads the object so
      * we are now working with the new object type
+     * 
+     * If the current object is already a type of
+     * invoice, we just return the current object
+     * with no further action
      *
      * @return Invoice
      */
     public function convertToInvoice()
     {
+        if ($this instanceof Invoice) {
+            return $this;
+        }
+
         $id = $this->ID;
         $this->ClassName = Invoice::class;
         $this->write();
 
         // Get our new Invoice
+        // and re-generate numbers
         $record = Invoice::get()->byID($id);
-        $record->Ref = null;
-        $record->Prefix = null;
+        $record->Ref = $this->generateOrderNumber();
+        $record->Prefix = $this->getPrefix();
         $record->StartDate = null;
         $record->EndDate = null;
         $record->write();
@@ -831,15 +840,25 @@ class Estimate extends DataObject implements PermissionProvider
     }
 
     /**
-     * Retrieve an order prefix from siteconfig
-     * for an Estimate
+     * @depreciated Use getPrefix instead
      *
      * @return string
      */
     protected function get_prefix()
     {
+        return $this->getPrefix();
+    }
+
+    /**
+     * Retrieve an order prefix from siteconfig
+     * for an Estimate
+     *
+     * @return string
+     */
+    protected function getPrefix(): string
+    {
         $config = SiteConfig::current_site_config();
-        return $config->EstimateNumberPrefix;
+        return (string)$config->EstimateNumberPrefix;
     }
 
     /**
@@ -850,7 +869,7 @@ class Estimate extends DataObject implements PermissionProvider
     protected function getBaseNumber()
     {
         $base = 0;
-        $prefix = $this->get_prefix();
+        $prefix = $this->getPrefix();
         $classname = $this->ClassName;
 
         // Get the last instance of the current class
@@ -899,13 +918,30 @@ class Estimate extends DataObject implements PermissionProvider
         return $base_number;
     }
 
+
+    /**
+     * legacy method name - soon to be depreciated
+     *
+     */
     protected function generate_random_string($length = 20)
+    {
+        return $this->generateRandomString($length);
+    }
+
+    /**
+     * Generate a random string for use in estimate numbering
+     *
+     * @return string
+     */
+    protected function generateRandomString($length = 20): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randomString = '';
+
         for ($i = 0; $i < $length; $i++) {
             $randomString .= $characters[rand(0, strlen($characters) - 1)];
         }
+
         return $randomString;
     }
 
@@ -920,12 +956,10 @@ class Estimate extends DataObject implements PermissionProvider
         $number = (isset($number)) ? $number : $this->Ref;
 
         $existing = Estimate::get()
-            ->filter(
-                [
-                    "ClassName" => self::class,
-                    "Ref" => $number
-                ]
-            )->first();
+            ->filter([
+                "ClassName" => self::class,
+                "Ref" => $number
+            ])->first();
 
         return !($existing);
     }
@@ -983,17 +1017,16 @@ class Estimate extends DataObject implements PermissionProvider
 
         // Ensure that this object has a non-conflicting Access Key
         if (!$this->AccessKey) {
-            $this->AccessKey = $this->generate_random_string(40);
+            $this->AccessKey = $this->generateRandomString(40);
             
             while (!$this->validAccessKey()) {
-                $this->AccessKey = $this->generate_random_string(40);
+                $this->AccessKey = $this->generateRandomString(40);
             }
         }
 
-
         // Set a prefix if required
         if (!$this->Prefix) {
-            $this->Prefix = $this->get_prefix();
+            $this->Prefix = $this->getPrefix();
         }
 
         $contact = $this->Customer();

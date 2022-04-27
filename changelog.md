@@ -204,6 +204,11 @@
 
 * Add customer info and discounts to email templates
 
+## 1.3.22
+
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
 ## 1.4.0
 
 * Improve Estimate/Invoice Add line item to be independent of GridFieldRelationAdd
@@ -220,3 +225,8 @@
 ## 1.4.3
 
 * Fix error manually adding line items to an estimate/invoice
+
+## 1.4.4
+
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
