@@ -204,6 +204,11 @@
 
 * Add customer info and discounts to email templates
 
+## 1.3.22
+
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
 ## 1.4.0
 
 * Improve Estimate/Invoice Add line item to be independent of GridFieldRelationAdd
@@ -221,6 +226,11 @@
 
 * Fix error manually adding line items to an estimate/invoice
 
+## 1.4.4
+
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
 ## 1.5.0
 
 * Add ability to specify if estimate can have a negative value
@@ -228,3 +238,5 @@
 * Tidy up code folder, PSR4 folder naming
 * Add basic versioning to line items as well as Estimates/Invoices
 * Set Estimate/Invoice title to use full ref
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
