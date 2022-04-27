@@ -429,15 +429,25 @@ class Invoice extends Estimate implements PermissionProvider
     }
     
     /**
-     * Retrieve an order prefix from siteconfig
-     * for an Estimate
+     * @depreciated This method is depreciated
      *
      * @return string
      */
     protected function get_prefix()
     {
+        return $this->getPrefix();
+    }
+    
+    /**
+     * Retrieve an order prefix from siteconfig
+     * for an Invoice
+     *
+     * @return string
+     */
+    protected function getPrefix(): string
+    {
         $config = SiteConfig::current_site_config();
-        return $config->InvoiceNumberPrefix;
+        return (string)$config->InvoiceNumberPrefix;
     }
 
     /**

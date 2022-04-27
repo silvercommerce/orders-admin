@@ -203,3 +203,8 @@
 ## 1.3.21
 
 * Add customer info and discounts to email templates
+
+## 1.3.22
+
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
