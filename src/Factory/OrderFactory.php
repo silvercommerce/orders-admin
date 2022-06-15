@@ -138,6 +138,7 @@ class OrderFactory
      * @param int        $qty     Quanty of items to add
      * @param bool       $lock    Should this item be locked (cannot change quantity)
      * @param array      $custom  List of customisations to add
+     * @param bool       $deliver Is this item deliverable?
      *
      * @return self
      */
@@ -145,12 +146,14 @@ class OrderFactory
         DataObject $product,
         int $qty = 1,
         bool $lock = false,
-        array $custom = []
+        array $custom = [],
+        bool $deliver = true
     ) {
         $factory = LineItemFactory::create()
             ->setProduct($product)
             ->setQuantity($qty)
             ->setLock($lock)
+            ->setDeliverable($deliver)
             ->setCustomisations($custom)
             ->makeItem()
             ->write();

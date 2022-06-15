@@ -83,7 +83,7 @@ class LineItemFactory
      *
      * @var bool
      */
-    protected $deliverable = false;
+    protected $deliverable = true;
 
     /**
      * List of customisation data that will need to be setup
@@ -106,13 +106,6 @@ class LineItemFactory
      * @var string
      */
     protected $product_stock_param = "StockLevel";
-
-    /**
-     * The name of the param used on product to determin if item is deliverable
-     *
-     * @var string
-     */
-    protected $product_deliverable_param = "Deliverable";
 
     /**
      * Either find an existing line item (based on the submitted data),
