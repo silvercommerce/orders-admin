@@ -6,6 +6,7 @@ use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
+use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 
 class LineItemTest extends SapphireTest
 {
@@ -164,12 +165,12 @@ class LineItemTest extends SapphireTest
      *
      * @return void
      */
-    public function testCustomisationList()
+    public function testCustomisationsString()
     {
         $line_item = $this->objFromFixture(LineItem::class, 'customitem');
         $expected_one = "Customisation: Free";
         $expected_two = "Customisation: Expensive";
-        $check = $line_item->CustomisationList;
+        $check = $line_item->CustomisationsString;
 
         $this->assertTrue(strpos($check, $expected_one) !== false);
         $this->assertTrue(strpos($check, $expected_two) !== false);
@@ -180,12 +181,12 @@ class LineItemTest extends SapphireTest
      *
      * @return void
      */
-    public function testCustomisationAndPriceList()
+    public function testGetPriceModificationString()
     {
         $line_item = $this->objFromFixture(LineItem::class, 'customitem');
-        $expected_one = "Customisation: Free (£0.00)";
-        $expected_two = "Customisation: Expensive (£100.00)";
-        $check = $line_item->CustomisationAndPriceList;
+        $expected_one = "Negative (-£1.50)";
+        $expected_two = "Positive (£0.75)";
+        $check = $line_item->PriceModificationString;
 
         $this->assertTrue(strpos($check, $expected_one) !== false);
         $this->assertTrue(strpos($check, $expected_two) !== false);
@@ -196,14 +197,39 @@ class LineItemTest extends SapphireTest
      *
      * @return void
      */
-    public function testMatch()
+    public function testFindStockItem()
     {
+        // Get an object from fixtures and add traditional details
         $line_item = $this->objFromFixture(LineItem::class, 'sockitem');
-        $product = $line_item->Match();
+        $product = $line_item->findStockItem();
 
         $this->assertTrue(is_object($product));
         $this->assertEquals("Socks", $product->Title);
         $this->assertEquals(5.99, $product->NoTaxPrice);
+
+        // Finally, ensure we get the correct product (at the correct version)
+        $product = CatalogueProduct::create();
+        $product->Title = "Test versioned product";
+        $product->StockID = "TVP-123";
+        $product->BasePrice = 4.99;
+        $product->write();
+
+        $line_item = LineItem::create();
+        $line_item->ProductClass = $product->ClassName;
+        $line_item->ProductID = $product->ID;
+        $line_item->ProductVersion = $product->Version;
+        $line_item->write();
+
+        $product->BasePrice = 6.99;
+        $product->write();
+
+        $versioned_product = $line_item->findStockItem();
+
+        $this->assertTrue(is_object($versioned_product));
+        $this->assertEquals("Test versioned product", $versioned_product->Title);
+        $this->assertEquals(1, $versioned_product->Version);
+        $this->assertEquals(4.99, $versioned_product->NoTaxPrice);
+        $this->assertEquals(4.99, $line_item->NoTaxPrice);
     }
 
     /**

@@ -197,7 +197,7 @@ class LineItemFactory
         /** @var PriceModifier */
         $modifier =  $class::create();
         $modifier->Name = $name;
-        $modifier->ModifyPice = $amount;
+        $modifier->ModifyPrice = $amount;
         $modifier->LineItemID = $item->ID;
 
         if ($customisation_id > 0) {
@@ -329,9 +329,7 @@ class LineItemFactory
         // Setup initial line item
         return [
             'Title' => $product->Title,
-            'BasePrice' => $product->BasePrice,
             'TaxRateID' => $tax_rate->ID,
-            'StockID' => $product->StockID,
             'Quantity' => $qty,
             'Stocked' => $stocked,
             'Deliverable' => $deliverable,

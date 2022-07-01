@@ -5,8 +5,10 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationException;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
+use SilverCommerce\OrdersAdmin\Model\PriceModifier;
 use SilverCommerce\OrdersAdmin\Factory\LineItemFactory;
 use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
+use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 
 class LineItemFactoryTest extends SapphireTest
 {
@@ -42,6 +44,72 @@ class LineItemFactoryTest extends SapphireTest
         $this->assertEquals(32.50, $notax_item->Total);
         $this->assertEquals(CatalogueProduct::class, $notax_item->ProductClass);
 
+        /** Test item creation using new versioned products */
+        $versioned_product_one = CatalogueProduct::create();
+        $versioned_product_one->Title = "Simple Versioned Product";
+        $versioned_product_one->StockID = "SVP-1";
+        $versioned_product_one->BasePrice = 6.75;
+        $versioned_product_one->write();
+
+        $versioned_item = LineItemFactory::create()
+            ->setProduct($versioned_product_one)
+            ->setQuantity(1)
+            ->makeItem()
+            ->getItem();
+
+        $item_id = $versioned_item->write();
+        $versioned_product_one->BasePrice = 7.50;
+        $versioned_product_one->write();
+
+        $versioned_item = LineItem::get()->byID($item_id);
+        $this->assertNotEmpty($versioned_item);
+
+        $versioned_product_one = $versioned_item->findStockItem();
+        $this->assertNotEmpty($versioned_product_one);
+        $this->assertEquals(1, $versioned_item->ProductVersion);
+        $this->assertEquals(1, $versioned_product_one->Version);
+
+        $this->assertEquals("Simple Versioned Product", $versioned_item->Title);
+        $this->assertEquals(1, $versioned_item->Quantity);
+        $this->assertEquals(6.75, $versioned_item->BasePrice);
+        $this->assertEquals(6.75, $versioned_item->Total);
+        $this->assertEquals(CatalogueProduct::class, $versioned_item->ProductClass);
+
+        /** Test item creation using new versioned product between price changes */
+        $versioned_product_two = CatalogueProduct::create();
+        $versioned_product_two->Title = "Another Versioned Product";
+        $versioned_product_two->StockID = "AVP-1";
+        $versioned_product_two->BasePrice = 5.25;
+        $versioned_product_two->write();
+
+        $versioned_product_two->BasePrice = 7.50;
+        $versioned_product_two->write();
+
+        $versioned_item = LineItemFactory::create()
+            ->setProduct($versioned_product_two)
+            ->setQuantity(3)
+            ->makeItem()
+            ->getItem();
+        $item_id = $versioned_item->write();
+
+        $versioned_product_two->BasePrice = 6.99;
+        $versioned_product_two->write();
+
+        $versioned_item = LineItem::get()->byID($item_id);
+        $this->assertNotEmpty($versioned_item);
+
+        $this->assertEquals(3, $versioned_product_two->Version);
+        $versioned_product_two = $versioned_item->findStockItem();
+        $this->assertNotEmpty($versioned_product_two);
+        $this->assertEquals(2, $versioned_item->ProductVersion);
+        $this->assertEquals(2, $versioned_product_two->Version);
+
+        $this->assertEquals("Another Versioned Product", $versioned_item->Title);
+        $this->assertEquals(3, $versioned_item->Quantity);
+        $this->assertEquals(7.50, $versioned_item->BasePrice);
+        $this->assertEquals(22.5, $versioned_item->Total);
+        $this->assertEquals(CatalogueProduct::class, $versioned_item->ProductClass);
+
         $this->expectException(ValidationException::class);
         LineItemFactory::create()->makeItem();
     }
@@ -68,6 +136,59 @@ class LineItemFactoryTest extends SapphireTest
         $factory->setProduct($notax)->update();
         $this->assertEquals(3, $factory->getItem()->Quantity);
         $this->assertEquals(6.50, $factory->getItem()->BasePrice);
+    }
+
+    public function testCustomise()
+    {
+        $item = /** Test item creation using new versioned products */
+        $product = CatalogueProduct::create();
+        $product->Title = "A-Nother Product";
+        $product->StockID = "ANP-222";
+        $product->BasePrice = 2.50;
+        $product->write();
+
+        $factory = LineItemFactory::create()
+            ->setProduct($product)
+            ->setQuantity(1)
+            ->makeItem()
+            ->write();
+
+        $customisation = $factory->customise('Colour', "Blue");
+
+        $this->assertNotEmpty($customisation);
+        $this->assertInstanceOf(LineItemCustomisation::class, $customisation);
+        $this->assertEquals("Colour", $customisation->Name);
+        $this->assertEquals("Blue", $customisation->Value);
+
+        $this->assertCount(1, $factory->getItem()->Customisations());
+    }
+
+    public function testModifyPrice()
+    {
+        $item = /** Test item creation using new versioned products */
+        $product = CatalogueProduct::create();
+        $product->Title = "A-Nother Product";
+        $product->StockID = "ANP-333";
+        $product->BasePrice = 2.50;
+        $product->write();
+
+        $factory = LineItemFactory::create()
+            ->setProduct($product)
+            ->setQuantity(1)
+            ->makeItem()
+            ->write();
+
+        $modification = $factory->modifyPrice('Large', 1.50);
+        $item = $factory->getItem();
+
+        $this->assertNotEmpty($modification);
+        $this->assertInstanceOf(PriceModifier::class, $modification);
+        $this->assertEquals("Large", $modification->Name);
+        $this->assertEquals(1.5, $modification->ModifyPrice);
+        $this->assertEquals(2.5, $item->BasePrice);
+        $this->assertEquals(4, $item->NoTaxPrice);
+
+        $this->assertCount(1, $item->PriceModifications());
     }
 
     public function testFindBestTaxRate()
