@@ -2,13 +2,17 @@
 
 namespace SilverCommerce\OrdersAdmin\Factory;
 
+use LogicException;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ValidationException;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
+use SilverCommerce\OrdersAdmin\Model\PriceModifier;
 use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 
 /**
@@ -22,15 +26,18 @@ class LineItemFactory
 
     const CUSTOM_CLASS = LineItemCustomisation::class;
 
+    const PRICE_CLASS = PriceModifier::class;
+
     /**
-     * Data that will be added to a customisation
+     * Data that will be added to a customisation. If you
+     * want additional data to be added to the
+     * customisation, ensure it is mapped here
      *
      * @var array
      */
     private static $custom_map = [
         "Title",
-        "Value",
-        "BasePrice"
+        "Value"
     ];
 
     /**
@@ -78,13 +85,6 @@ class LineItemFactory
     protected $lock = false;
 
     /**
-     * List of customisation data that will need to be setup
-     *
-     * @var array
-     */
-    protected $customisations = [];
-
-    /**
      * The name of the param used on product to determin if stock level should
      * be checked.
      *
@@ -106,50 +106,114 @@ class LineItemFactory
      */
     protected $product_deliverable_param = "Deliverable";
 
+
+    /**
+     * List of customisation data that will need to be setup
+     *
+     * Depreciated as of v2
+     * 
+     * @var array
+     */
+    protected $customisations = [];
+
     /**
      * Either find an existing line item (based on the submitted data),
      * or return a new one.
      *
      * @return self
      */
-    public function makeItem()
+    public function makeItem(): self
     {
-        $custom = $this->getCustomisations();
         $class = self::ITEM_CLASS;
 
         // Setup initial line item
         $item = $class::create($this->getItemArray());
-
-        // Find any item customisation associations
-        $custom_association = null;
-        $associations = array_merge(
-            $item->hasMany(),
-            $item->manyMany()
-        );
-
-        // Define association of item to customisations
-        foreach ($associations as $key => $value) {
-            $class = $value::create();
-            if (is_a($class, self::CUSTOM_CLASS)) {
-                $custom_association = $key;
-                break;
-            }
-        }
-
-        // Map any customisations to the current item
-        if (isset($custom_association)) {
-            foreach ($custom as $custom_data) {
-                $customisation = $this->createCustomisation($custom_data);
-                $customisation->write();
-                $item->{$custom_association}()->add($customisation);
-            }
-        }
 
         // Setup Key
         $item->Key = $item->generateKey();
         $this->setItem($item);
         
         return $this;
+    }
+
+    /**
+     * Customise the current line item and then return the
+     * generated customisation
+     *
+     * @param string $name The name of this customisation (eg: size)
+     * @param string $value The value of this customisation (eg: small)
+     * @param array  $additional_data Any additional data to save (ensure you also)
+     *
+     * @return LineItemCustomisation
+     */
+    public function customise(
+        string $name,
+        string $value,
+        array $additional_data = []
+    ): LineItemCustomisation {
+        $item = $this->getItem();
+        $mapped_data = [];
+        $class = self::CUSTOM_CLASS;
+
+        /** @var LineItemCustomisation */
+        $customisation =  $class::create();
+        $customisation->Name = $name;
+        $customisation->Value = $value;
+        $customisation->ParentID = $item->ID;
+
+        if (count($additional_data) > 0) {
+            $customisation->write();
+            return $this;
+        }
+
+        foreach ($additional_data as $key => $value) {
+            if (in_array($key, $this->config()->get('custom_map'))) {
+                $mapped_data[$key] = $value;
+            }
+        }
+
+        $customisation->write();
+        return $customisation;
+    }
+
+    /**
+     * Generate a customisation and/or price
+     * modification for the current item
+     *
+     * @param string $name The name of this modification (eg: size)
+     * @param float  $amount The amount to modify the price by (either positive or negative)
+     * @param int $customisation_id Optionally link this to a customisation
+     *
+     * @return PriceModifier
+     */
+    public function modifyPrice(
+        string $name,
+        float $amount,
+        int $customisation_id = 0
+    ): PriceModifier  {
+        $item = $this->getItem();
+        $class = self::PRICE_CLASS;
+
+        /** @var PriceModifier */
+        $modifier =  $class::create();
+        $modifier->Name = $name;
+        $modifier->ModifyPice = $amount;
+        $modifier->LineItemID = $item->ID;
+
+        if ($customisation_id > 0) {
+            $customisation = $item
+                ->Customisations()
+                ->byID($customisation_id);
+            
+            if (empty($customisation)) {
+                throw new LogicException("Invalid customisation passed to modifier");
+            }
+
+            $modifier->CustomisatioID = $customisation_id;
+        }
+
+        $modifier->write();
+        return $modifier;
     }
 
     /**
@@ -264,15 +328,17 @@ class LineItemFactory
 
         // Setup initial line item
         return [
-            "Title" => $product->Title,
-            "BasePrice" => $product->BasePrice,
-            "TaxRateID" => $tax_rate->ID,
-            "StockID" => $product->StockID,
-            "ProductClass" => $product->ClassName,
-            "Quantity" => $qty,
-            "Stocked" => $stocked,
-            "Deliverable" => $deliverable,
-            'Locked' => $lock
+            'Title' => $product->Title,
+            'BasePrice' => $product->BasePrice,
+            'TaxRateID' => $tax_rate->ID,
+            'StockID' => $product->StockID,
+            'Quantity' => $qty,
+            'Stocked' => $stocked,
+            'Deliverable' => $deliverable,
+            'Locked' => $lock,
+            'ProductClass' => $product->ClassName,
+            'ProductID' => $product->ID,
+            'ProductVersion' => $product->Version
         ];
     }
 
@@ -289,27 +355,6 @@ class LineItemFactory
         }
 
         return "";
-    }
-
-    /**
-     * Create a customisation object to be added to the current order
-     *
-     * @param array $data An array of data to add to the customisation
-     *
-     * @return DataObject
-     */
-    protected function createCustomisation(array $data)
-    {
-        $mapped_data = [];
-        $class = self::CUSTOM_CLASS;
-
-        foreach ($data as $key => $value) {
-            if (in_array($key, $this->config()->get('custom_map'))) {
-                $mapped_data[$key] = $value;
-            }
-        }
-
-        return $class::create($mapped_data);
     }
 
     /**
@@ -404,8 +449,6 @@ class LineItemFactory
             $this->setLock($item->Locked);
         }
 
-        $this->setCustomisations($item->Customisations()->toArray());
-
         $this->setParent($item->Parent());
 
         return $this;
@@ -435,26 +478,13 @@ class LineItemFactory
     }
 
     /**
-     * Get list of customisation data that will need to be setup
+     * Get list of customisations from the current item
      *
-     * @return array
+     * @return SS_List
      */
     public function getCustomisations()
     {
-        return $this->customisations;
-    }
-
-    /**
-     * Set list of customisation data that will need to be setup
-     *
-     * @param array $customisations customisation data
-     *
-     * @return self
-     */
-    public function setCustomisations(array $customisations)
-    {
-        $this->customisations = $customisations;
-        return $this;
+        return $this->getItem()->Customisations();
     }
 
     /**
@@ -598,5 +628,46 @@ class LineItemFactory
     {
         $this->parent = $parent;
         return $this;
+    }
+
+
+    /********** LEGACY METHODS *********/
+
+    /**
+     * Set list of customisation data that will need to be setup
+     *
+     * @param array $customisations customisation data
+     *
+     * @return self
+     */
+    public function setCustomisations(array $customisations)
+    {
+        Deprecation::notice('2.0', "Customisations need to be set via `customise` or `modifyPrice` methods");
+
+        $this->customisations = $customisations;
+        return $this;
+    }
+
+    /**
+     * Create a customisation object to be added to the current order
+     *
+     * @param array $data An array of data to add to the customisation
+     *
+     * @return DataObject
+     */
+    protected function createCustomisation(array $data)
+    {
+        Deprecation::notice('2.0', "Customisations need to be set via `customise` or `modifyPrice` methods");
+
+        $mapped_data = [];
+        $class = self::CUSTOM_CLASS;
+
+        foreach ($data as $key => $value) {
+            if (in_array($key, $this->config()->get('custom_map'))) {
+                $mapped_data[$key] = $value;
+            }
+        }
+
+        return $class::create($mapped_data);
     }
 }

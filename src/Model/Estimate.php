@@ -481,21 +481,12 @@ class Estimate extends DataObject implements PermissionProvider
         $total = 0;
 
         foreach ($this->Items() as $item) {
-            $product = $item->findStockItem();
-            $weight = null;
-
-            if (!empty($product) && isset($product->Weight)) {
-                $weight = $product->Weight;
-            }
-
-            if ($weight && $item->Quantity) {
-                $total = $total + ($weight * $item->Quantity);
-            }
+            $total = $total + $item->TotalWeight;
         }
 
         $this->extend("updateTotalWeight", $total);
         
-        return $total;
+        return (float) $total;
     }
 
     /**
@@ -528,7 +519,6 @@ class Estimate extends DataObject implements PermissionProvider
         $items = $this->Items();
         
         // Calculate total from items in the list
-        // We round here
         foreach ($items as $item) {
             $tax = $item->UnitTax;
             $total += $tax * $item->Quantity;
@@ -536,7 +526,7 @@ class Estimate extends DataObject implements PermissionProvider
 
         $this->extend("updateTaxTotal", $total);
 
-        return $total;
+        return (float) $total;
     }
 
     /**

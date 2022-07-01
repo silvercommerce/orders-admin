@@ -2,16 +2,22 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
+use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 use SilverStripe\i18n\i18n;
+use SilverStripe\Assets\Image;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
+use SilverStripe\Versioned\Versioned;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\TaxAdmin\Traits\Taxable;
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Subsites\State\SubsiteState;
+use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
@@ -42,12 +48,20 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * - Deliverable: Is this a product that can be delivered? This can effect
  *                delivery options
  *
- * @method Estimate Parent
- * @method TaxRate Tax
- * @method TaxRate TaxRate
- * @method \SilverStripe\ORM\HasManyList Customisations
+ * @property string Key encoded string of item data to identify this item
+ * @property string Title Name of this item
+ * @property int    Quantity Number of items to purchase
+ * @property float  UnmodifiedPrice The price of a single item
+ * @property string StockID Product stock identifier
+ * @property bool   Locked Can this quantity be changed
+ * @property bool   Stocked Is this item stocked
+ * @property bool   Deliverable Can this item be delivered
  *
- * @author Mo <morven@ilateral.co.uk>
+ * @method Estimate Parent
+ * @method TaxRate TaxRate
+ * @method HasManyList PriceModifications
+ * @method HasManyList Customisations
+ *
  */
 class LineItem extends DataObject implements TaxableProvider
 {
@@ -64,89 +78,62 @@ class LineItem extends DataObject implements TaxableProvider
      * Defaults to StockLevel
      *
      * @var string
-     * @config
      */
     private static $stock_param = "StockLevel";
 
-    /**
-     * Standard database columns
-     *
-     * @var array
-     * @config
-     */
     private static $db = [
-        "Key"           => "Varchar(255)",
-        "Title"         => "Varchar",
-        "BasePrice"     => "Decimal(9,3)",
+        'Key'               => 'Varchar(255)',
+        'Title'             => 'Varchar(255)',
+        'Quantity'          => 'Int',
+        'StockID'           => 'Varchar(100)',
+        'UnmodifiedPrice'   => 'Decimal(9,3)', // Basic, unmodified price for a single unit
+        'Locked'            => 'Boolean',
+        'Stocked'           => 'Boolean',
+        'Deliverable'       => 'Boolean',
+
+        // Polymorphic-ish fields to handle storing product data from versioned table
+        'ProductID' => 'Int',
+        'ProductClass' => 'Varchar(255)',
+        'ProductVersion' => 'Int',
+
+        // Legacy fields
+        "BasePrice"     => "Decimal(9,3)", 
         "Price"         => "Currency",
-        "Quantity"      => "Int",
-        "StockID"       => "Varchar(100)",
-        "ProductClass"  => "Varchar",
-        "Locked"        => "Boolean",
-        "Stocked"       => "Boolean",
-        "Deliverable"   => "Boolean"
     ];
 
-    /**
-     * Foreign key associations in DB
-     *
-     * @var array
-     * @config
-     */
     private static $has_one = [
         "Parent"      => Estimate::class,
         "Tax"         => TaxRate::class,
         "TaxRate"     => TaxRate::class
     ];
-    
-    /**
-     * One to many associations
-     *
-     * @var array
-     * @config
-     */
+
     private static $has_many = [
-        "Customisations" => LineItemCustomisation::class
+        'PriceModifications' => PriceModifier::class,
+        'Customisations'     => LineItemCustomisation::class
     ];
 
-    /**
-     * Specify default values of a field
-     *
-     * @var array
-     * @config
-     */
     private static $defaults = [
         "Quantity"      => 1,
-        "ProductClass"  => "Product",
         "Locked"        => false,
         "Stocked"       => false,
         "Deliverable"   => true
     ];
 
-    /**
-     * Function to DB Object conversions
-     *
-     * @var array
-     * @config
-     */
     private static $casting = [
-        "UnitPrice" => "Currency(9,3)",
-        "UnitTax" => "Currency(9,3)",
-        "UnitTotal" => "Currency(9,3)",
-        "SubTotal" => "Currency(9,3)",
-        "TaxRate" => "Decimal",
-        "TaxTotal" => "Currency(9,3)",
-        "Total" => "Currency(9,3)",
-        "CustomisationList" => "Text",
-        "CustomisationAndPriceList" => "Text",
+        'UnitPrice' => 'Currency(9,3)',
+        'UnitTax' => 'Currency(9,3)',
+        'UnitTotal' => 'Currency(9,3)',
+        'SubTotal' => 'Currency(9,3)',
+        'TaxRate' => 'Decimal',
+        'TaxTotal' => 'Currency(9,3)',
+        'Total' => 'Currency(9,3)',
+        'UnitWeight' => 'Decimal',
+        'TotalWeight' => 'Decimal',
+        'CustomisationList' => 'Text',
+        'PriceModificationString' => 'Text',
+        'CustomisationAndPriceList' => 'Text'
     ];
 
-    /**
-     * Fields to display in list tables
-     *
-     * @var array
-     * @config
-     */
     private static $summary_fields = [
         "Quantity",
         "Title",
@@ -157,21 +144,63 @@ class LineItem extends DataObject implements TaxableProvider
     ];
 
     private static $field_labels = [
-        "BasePrice"=> "Item Price",
-        "Price"    => "Item Price",
-        "TaxID"    => "Tax",
-        "TaxRateID"=> "Tax",
+        "UnitPrice"         => "Single Item Price",
+        "TaxRateID"         => "Tax",
         "CustomisationAndPriceList" => "Customisations"
     ];
 
     /**
-     * Get the basic price for this object
+     * Get the basic price for this line without
+     * modification
      *
      * @return float
      */
-    public function getBasePrice()
+    public function getBasePrice(): float
     {
-        return $this->dbObject('BasePrice')->getValue();
+        // First check if the single unit price is set
+        $price = $this
+            ->dbObject('UnmodifiedPrice')
+            ->getValue();
+
+        // If no cached price, attempt to get the price from the
+        // stock item
+        if ($price == 0) {
+            $product = $this->findStockItem();
+            $price = $product->getBasePrice();
+        }
+
+        $this->extend('updateBasePrice', $price);
+
+        return (float) $price;
+    }
+
+    /**
+     * Get the price for a single line item (unit), minus any tax
+     *
+     * @return float
+     */
+    public function getNoTaxPrice(): float
+    {
+        $price = $this->getBasePrice();
+
+        /** @var PriceModifier modifier */
+        foreach ($this->PriceModifications() as $modifier) {
+            $price += $modifier->ModifyPrice;
+        }
+
+        $this->extend('updateNoTaxPrice', $price);
+
+        return $price;
+    }
+
+    /**
+     * Stub method that is more logically named
+     *
+     * @return float
+     */
+    public function getUnitPrice(): float
+    {
+        return $this->getNoTaxPrice();
     }
 
     /**
@@ -179,9 +208,166 @@ class LineItem extends DataObject implements TaxableProvider
      *
      * @return TaxRate
      */
-    public function getTaxRate()
+    public function getTaxRate(): TaxRate
     {
-        return $this->TaxRate();
+        $rate = $this->TaxRate();
+
+        $this->extend('updateTaxRate', $rate);
+
+        return $rate;
+    }
+
+    /**
+     * Get the amount of tax for a single unit of this item
+     *
+     * **NOTE** Tax is rounded at the single item price to avoid multiplication
+     * weirdness. For example 49.995 + 20% is 59.994 for one product,
+     * but 239.976 for 4 (it should be 239.96)
+     *
+     * @return float
+     */
+    public function getUnitTax()
+    {
+        // Calculate and round tax now to try and minimise penny rounding issues
+        $total = ($this->UnitPrice / 100) * $this->TaxPercentage;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateUnitTax", $total)
+        );
+
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Overwrite TaxAmount with unit tax
+     *
+     * @return float
+     */
+    public function getTaxAmount()
+    {
+        $tax = $this->UnitTax;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateTaxAmount", $tax)
+        );
+
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $tax;
+    }
+
+    /**
+     * Get the total price and tax for a single unit
+     *
+     * @return float
+     */
+    public function getUnitTotal()
+    {
+        $total = $this->UnitPrice + $this->UnitTax;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateUnitTotal", $total)
+        );
+
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Get the value of this item, minus any tax
+     *
+     * @return float
+     */
+    public function getSubTotal()
+    {
+        $total = $this->NoTaxPrice * $this->Quantity;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateSubTotal", $total)
+        );
+
+        if (!empty($result)) {
+            return $result;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Get the total amount of tax for a single unit of this item
+     *
+     * @return float
+     */
+    public function getTaxTotal()
+    {
+        $total = $this->UnitTax * $this->Quantity;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateTaxTotal", $total)
+        );
+
+        if (!empty($result)) {
+            return (float) $result;
+        }
+
+        return (float) $total;
+    }
+
+    /**
+     * Get the value of this item, minus any tax
+     *
+     * @return float
+     */
+    public function getTotal()
+    {
+        $total = $this->SubTotal + $this->TaxTotal;
+
+        $result = $this->filterTaxableExtensionResults(
+            $this->extend("updateTotal", $total)
+        );
+
+        if (!empty($result)) {
+            return $result;
+        }
+    
+        return $total;
+    }
+
+    /**
+     * Get the weight of the related product
+     * (if available)
+     *
+     * @return float
+     */
+    public function getUnitWeight(): float
+    {
+        $product = $this->findStockItem();
+        $weight = 0;
+
+        if (!empty($product)) {
+            $weight = $product->Weight;
+        }
+
+        return (float) $weight;
+    }
+
+    /**
+     * Get the total weight for this line
+     *
+     * @return float
+     */
+    public function getTotalWeight(): float
+    {
+        return $this->UnitWeight * $this->Quantity;
     }
 
     /**
@@ -189,9 +375,23 @@ class LineItem extends DataObject implements TaxableProvider
      *
      * @return string
      */
-    public function getLocale()
+    public function getLocale(): string
     {
         return i18n::get_locale();
+    }
+
+    /**
+     * We don't want to show a tax string on Line Items
+     *
+     * @return bool
+     */
+    public function getShowTaxString(): bool
+    {
+        $show = false;
+
+        $this->extend('updateShowTaxString', $show);
+        
+        return $show;
     }
 
     /**
@@ -199,7 +399,7 @@ class LineItem extends DataObject implements TaxableProvider
      *
      * @return bool
      */
-    public function getShowPriceWithTax()
+    public function getShowPriceWithTax(): bool
     {
         $config = SiteConfig::current_site_config();
         $show = $config->ShowPriceAndTax;
@@ -216,13 +416,49 @@ class LineItem extends DataObject implements TaxableProvider
     }
 
     /**
-     * We don't want to show a tax string on Line Items
+     * Find the stock item linked from this line item
+     * 
+     * **NOTE** This method will return a product from the
+     * version table, so modifying or writing it will result in a
+     * duplicate item being created.
      *
-     * @return false
+     * @return DataObject
      */
-    public function getShowTaxString()
+    public function findStockItem(): DataObject
     {
-        return false;
+        $stock_id = $this->StockID;
+        $class = $this->ProductClass;
+        $id = $this->ProductID;
+        $version = $this->ProductVersion;
+        $product = null;
+        $filter = [];
+
+        $subsites_exists = ModuleLoader::inst()
+            ->getManifest()
+            ->moduleExists('silverstripe/subsites');
+
+        if ($subsites_exists) {
+            $filter['SubsiteID'] = SubsiteState::singleton()->getSubsiteId();
+        }
+
+        // Backwards compatability for older line items
+        if (empty($id) && !empty($stock_id)) {
+            $filter['StockID'] = $stock_id;
+            $product = $class::get()
+                ->filter($filter)
+                ->first();
+        }
+
+        // Finally, try and get product from versions table
+        if (empty($product) && !empty($class) && $version > 0) {
+            $product = Versioned::get_version($class, $id, $version);
+        }
+
+        if (empty($product)) {
+            $product = CatalogueProduct::create(['ID', -1]);
+        }
+
+        return $product;
     }
 
     /**
@@ -285,145 +521,12 @@ class LineItem extends DataObject implements TaxableProvider
     }
     
     /**
-     * Get the price for a single line item (unit), minus any tax
-     *
-     * @return float
-     */
-    public function getNoTaxPrice()
-    {
-        $price = $this->getBasePrice();
-
-        foreach ($this->Customisations() as $customisation) {
-            $price += $customisation->getBasePrice();
-        }
-        
-        $result = $this->getOwner()->filterTaxableExtensionResults(
-            $this->extend("updateNoTaxPrice", $price)
-        );
-
-        if (!empty($result)) {
-            return $result;
-        }
-
-        return $price;
-    }
-
-    public function getUnitPrice()
-    {
-        return $this->getNoTaxPrice();
-    }
-
-    /**
-     * Get the amount of tax for a single unit of this item
-     *
-     * **NOTE** Tax is rounded at the single item price to avoid multiplication
-     * weirdness. For example 49.995 + 20% is 59.994 for one product,
-     * but 239.976 for 4 (it should be 239.96)
-     *
-     * @return float
-     */
-    public function getUnitTax()
-    {
-        // Calculate and round tax now to try and minimise penny rounding issues
-        $total = ($this->UnitPrice / 100) * $this->TaxPercentage;
-
-        $this->extend("updateUnitTax", $total);
-
-        return $total;
-    }
-
-    /**
-     * Overwrite TaxAmount with unit tax
-     *
-     * @return float
-     */
-    public function getTaxAmount()
-    {
-        return $this->UnitTax;
-    }
-
-    /**
-     * Get the total price and tax for a single unit
-     *
-     * @return float
-     */
-    public function getUnitTotal()
-    {
-        $total = $this->UnitPrice + $this->UnitTax;
-
-        $this->extend("updateUnitTotal", $total);
-
-        return $total;
-    }
-
-    /**
-     * Get the value of this item, minus any tax
-     *
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        $total = $this->NoTaxPrice * $this->Quantity;
-
-        $this->extend("updateSubTotal", $total);
-
-        return $total;
-    }
-
-    /**
-     * Get the total amount of tax for a single unit of this item
-     *
-     * @return float
-     */
-    public function getTaxTotal()
-    {
-        $total = $this->UnitTax * $this->Quantity;
-
-        $this->extend("updateTaxTotal", $total);
-
-        return $total;
-    }
-
-    /**
-     * Get the value of this item, minus any tax
-     *
-     * @return float
-     */
-    public function getTotal()
-    {
-        $total = $this->SubTotal + $this->TaxTotal;
-
-        $this->extend("updateTotal", $total);
-    
-        return $total;
-    }
-
-    /**
-     * Get an image object associated with this line item.
-     * By default this is retrieved from the base product.
-     *
-     * @return Image | null
-     */
-    public function Image()
-    {
-        $product = $this->FindStockItem();
-
-        if ($product && method_exists($product, "SortedImages")) {
-            return  $product->SortedImages()->first();
-        } elseif ($product && method_exists($product, "Images")) {
-            return $product->Images()->first();
-        } elseif ($product && method_exists($product, "Image") && $product->Image()->exists()) {
-            return $product->Image();
-        }
-    }
-    
-    /**
      * Provide a string of customisations seperated by a comma but not
      * including a price
      *
      * @return string
      */
-    public function getCustomisationList()
+    public function getCustomisationsString()
     {
         $return = [];
         $items = $this->Customisations();
@@ -440,20 +543,17 @@ class LineItem extends DataObject implements TaxableProvider
     }
 
     /**
-     * Provide a string of customisations seperated by a comma and
-     * including a price
+     * Generate a string of price modifications
      *
      * @return string
      */
-    public function getCustomisationAndPriceList()
+    public function getPriceModificationString()
     {
         $return = [];
-        $items = $this->Customisations();
+        $modifications = $this->PriceModifications();
 
-        if ($items && $items->exists()) {
-            foreach ($items as $item) {
-                $return[] = $item->Title . ': ' . $item->Value . ' (' . $item->getFormattedPrice() . ')';
-            }
+        foreach ($modifications as $modification) {
+            $return[] = $modification->Name . ' (' . $modification->getFormattedPrice() . ')';
         }
 
         $this->extend("updateCustomisationAndPriceList", $return);
@@ -485,56 +585,6 @@ class LineItem extends DataObject implements TaxableProvider
 
         return $return;
     }
-        
-    /**
-     * Match this item to another object in the Database, by the
-     * provided details.
-     *
-     * @param $relation_name = The class name of the related dataobject
-     * @param $relation_col = The column name of the related object
-     * @param $match_col = The column we use to match the two objects
-     * @return DataObject
-     */
-    public function Match(
-        $relation_name = null,
-        $relation_col = self::STOCKID,
-        $match_col = self::STOCKID
-    ) {
-        // Try to determine relation name
-        if (!$relation_name && !$this->ProductClass && class_exists(CatalogueProduct::class)) {
-            $relation_name = CatalogueProduct::class;
-        } elseif (!$relation_name && $this->ProductClass) {
-            $relation_name = $this->ProductClass;
-        }
-
-        // Setup filter and check for existence of subsites
-        // (as sometimes dubplicate stock ID's are found from another subsite)
-        $filter = [];
-        $filter[$relation_col] = $this->{$match_col};
-
-        $subsites_exists = ModuleLoader::inst()->getManifest()->moduleExists('silverstripe/subsites');
-        if ($subsites_exists) {
-            $filter['SubsiteID'] = SubsiteState::singleton()->getSubsiteId();
-        }
-
-        return $relation_name::get()
-            ->filter($filter)
-            ->first();
-    }
-
-    /**
-     * Find our original stock item (useful for adding links back to the
-     * original product).
-     *
-     * This function is a synonym for @Link Match (as a result of) merging
-     * LineItem
-     *
-     * @return DataObject
-     */
-    public function FindStockItem()
-    {
-        return $this->Match();
-    }
 
     /**
      * Check stock levels for this item, will return the actual number
@@ -546,7 +596,7 @@ class LineItem extends DataObject implements TaxableProvider
     public function checkStockLevel($qty)
     {
         $stock_param = $this->config()->get("stock_param");
-        $item = $this->Match();
+        $item = $this->findStockItem();
         $stock = ($item->$stock_param) ? $item->$stock_param : 0;
         $return = $stock - $qty;
 
@@ -676,5 +726,41 @@ class LineItem extends DataObject implements TaxableProvider
         foreach ($this->Customisations() as $customisation) {
             $customisation->delete();
         }
+    }
+
+
+    /********* DEPRECIATED METHODS ***********/
+    public function getCustomisationAndPriceList()
+    {
+        Deprecation::notice('2.0', 'Customisation prices migrated to pricing modifiers');
+
+        return $this->getPriceModificationString();
+    }
+
+    /**
+     * Provide a string of customisations seperated by a comma but not
+     * including a price
+     *
+     * @return string
+     */
+    public function getCustomisationList()
+    {
+        Deprecation::notice('2.0', 'Customisation list renamed');
+
+        return $this->getCustomisationsString();
+    }
+
+    public function Match()
+    {
+        Deprecation::notice('2.0', 'Match will be removed in favour of "findStockItem"');
+
+        return $this->findStockItem();
+    }
+
+    public function Image()
+    {
+        Deprecation::notice('2.0', 'Image method will be depretiated');
+
+        return $this->getImage();
     }
 }

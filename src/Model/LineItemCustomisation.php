@@ -4,15 +4,17 @@ namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
 use SilverCommerce\TaxAdmin\Traits\Taxable;
+use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
 
 /**
- * A single customisation that can be applied to a LineItem.
+ * Customisations allow basic key - value pairs to be assigned
+ * to line items (for example: Colour - Blue)
  *
- * A customisation by default allows the following details:
- *  - Title: The name of the customisation (eg. "Colour")
- *  - Value: The data associated with thie customisation (eg. "Red")
- *  - Price: Does this customisation change the LineItem's price?
+ * @property string Title name of the customisation (eg. "Colour")
+ * @property string Value data associated customisation (eg. "Red")
+ *
+ * @method LineItem Parent
  */
 class LineItemCustomisation extends DataObject implements TaxableProvider
 {
@@ -20,45 +22,38 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
 
     private static $table_name = 'LineItemCustomisation';
 
-    /**
-     * Standard database columns
-     *
-     * @var array
-     * @config
-     */
     private static $db = [
-        "Title" => "Varchar",
-        "Value" => "Text",
-        "BasePrice" => "Decimal(9,3)",
-        "Price" => "Decimal(9,3)"
+        'Name' => 'Varchar',
+        'Value' => 'Text',
+
+        // Legacy, price modifications are now run through
+        // seperate modifiers
+        'Title' => 'Varchar',
+        'BasePrice' => 'Decimal(9,3)',
+        'Price' => 'Decimal(9,3)'
     ];
 
-    /**
-     * DB foreign key associations
-     *
-     * @var array
-     * @config
-     */
     private static $has_one = [
-        "Parent" => LineItem::class
+        'Parent' => LineItem::class
     ];
+
+    private static $casting = [
+        'Title' => 'Varchar'
+    ];
+
+    private static $summary_fields = [
+        'Title',
+        'Value'
+    ];
+
+    public function getLocale()
+    {
+        return $this->Parent()->getLocale();
+    }
 
     /**
-     * Fields to display in gridfields
-     *
-     * @var array
-     * @config
+     * Depreciated methods as of 2.0
      */
-    private static $summary_fields = [
-        "Title",
-        "Value",
-        "BasePrice"
-    ];
-
-    private static $field_labels = [
-        'BasePrice' => 'Price'
-    ];
-
     public function getBasePrice()
     {
         return $this->dbObject('BasePrice')->getValue();
@@ -66,30 +61,22 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
 
     public function getTaxRate()
     {
+        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+
         return $this->Parent()->getTaxRate();
     }
 
-    public function getLocale()
-    {
-        return $this->Parent()->getLocale();
-    }
-    /**
-     * Get should this field automatically show the price including TAX?
-     *
-     * @return bool
-     */
     public function getShowPriceWithTax()
     {
+        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+
         return $this->Parent()->getShowPriceWithTax();
     }
 
-    /**
-     * We don't want to show a tax string on Line Items
-     *
-     * @return false
-     */
     public function getShowTaxString()
     {
+        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+
         return false;
     }
 }
