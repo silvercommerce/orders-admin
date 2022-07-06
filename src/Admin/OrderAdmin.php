@@ -6,21 +6,20 @@ use DateTime;
 use SilverStripe\ORM\DB;
 use SilverStripe\Forms\DateField;
 use Colymba\BulkManager\BulkManager;
-use SilverStripe\Core\Config\Config;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
-use Colymba\BulkManager\BulkAction\EditHandler;
-use Colymba\BulkManager\BulkAction\UnlinkHandler;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
+use SilverCommerce\OrdersAdmin\BulkManager\PaidHandler;
 use ilateral\SilverStripe\ModelAdminPlus\ModelAdminPlus;
+use SilverCommerce\OrdersAdmin\BulkManager\BulkDownloadHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\CancelHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\RefundHandler;
 use SilverStripe\Forms\GridField\GridFieldSortableHeader;
-use SilverCommerce\CatalogueAdmin\BulkManager\PaidHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\CancelHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\RefundHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\PendingHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\PartPaidHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\DispatchedHandler;
-use SilverCommerce\CatalogueAdmin\BulkManager\ProcessingHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\PendingHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\BulkViewHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\PartPaidHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\DispatchedHandler;
+use SilverCommerce\OrdersAdmin\BulkManager\ProcessingHandler;
 use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
 
  /**
@@ -83,7 +82,7 @@ class OrderAdmin extends ModelAdminPlus
             $headers->setFieldSorting($sorting);
         }
 
-        // Bulk manager
+        /** @var BulkManager  */
         $manager = $config->getComponentByType(BulkManager::class);
 
         // Manage orders
@@ -96,7 +95,10 @@ class OrderAdmin extends ModelAdminPlus
             $manager->addBulkAction(ProcessingHandler::class);
             $manager->addBulkAction(DispatchedHandler::class);
         }
-        
+
+        $manager->addBulkAction(BulkViewHandler::class);
+        $manager->addBulkAction(BulkDownloadHandler::class);
+
         // Set our default detailform and bulk manager
         if ($config) {
             $config

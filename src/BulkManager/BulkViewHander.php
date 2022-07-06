@@ -2,27 +2,27 @@
 
 namespace SilverCommerce\OrdersAdmin\BulkManager;
 
-use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Convert;
 use Colymba\BulkManager\BulkAction\Handler as GridFieldBulkActionHandler;
+use SilverStripe\View\Requirements;
 
 /**
- * A {@link GridFieldBulkActionHandler} for bulk cancelling records
+ * A {@link GridFieldBulkActionHandler} for viewing a
+ * bulk list of records via the DisplayController
  *
  * @author i-lateral (http://www.i-lateral.com)
  * @package orders-admin
  */
-class CollectedHandler extends GridFieldBulkActionHandler
+class BulkViewHandler extends GridFieldBulkActionHandler
 {
-    private static $url_segment = 'collected';
+    private static $url_segment = 'bulkview';
 
     private static $allowed_actions = [
-        'collected'
+        'index'
     ];
 
     private static $url_handlers = [
-        "" => "collected"
+        "" => "index"
     ];
 
     /**
@@ -30,7 +30,7 @@ class CollectedHandler extends GridFieldBulkActionHandler
      *
      * @var string
      */
-    protected $label = 'Collected';
+    protected $label = 'Bulk View';
 
     /**
      * Front-end icon path for this handler's action.
@@ -44,7 +44,7 @@ class CollectedHandler extends GridFieldBulkActionHandler
      *
      * @var boolean
      */
-    protected $xhr = true;
+    protected $xhr = false;
     
     /**
      * Set to true is this handler will destroy any data.
@@ -61,26 +61,16 @@ class CollectedHandler extends GridFieldBulkActionHandler
      */
     public function getI18nLabel()
     {
-        return _t('OrdersAdmin.Collected', $this->getLabel());
+        return _t('OrdersAdmin.BulkView', $this->getLabel());
     }
 
-    public function collected(HTTPRequest $request)
+    public function index(HTTPRequest $request)
     {
-        $ids = [];
+        Requirements::clear();
 
-        foreach ($this->getRecords() as $record) {
-            array_push($ids, $record->ID);
-            $record->markCollected();
-            $record->write();
-        }
-
-        $response = new HTTPResponse(Convert::raw2json([
-            'done' => true,
-            'records' => $ids
-        ]));
-
-        $response->addHeader('Content-Type', 'text/json');
-
-        return $response;
+        return $this->renderWith(
+            __CLASS__,
+            ['List' => $this->getRecords()]
+        );
     }
 }

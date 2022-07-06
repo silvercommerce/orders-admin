@@ -66,6 +66,22 @@ checks:
     argument_type_checks: true
 
 build:
+  environment:
+      php: 7.4
+      mysql: true
+      node: false
+      postgresql: false
+      mongodb: false
+      elasticsearch: false
+      redis: false
+      memcached: false
+      neo4j: false
+      rabbitmq: false
+  dependencies:
+      before:
+        - composer self-update
+        - composer clearcache
+        - composer install --no-interaction --prefer-dist --no-progress
   nodes:
     analysis:
       tests:

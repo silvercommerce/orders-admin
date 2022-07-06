@@ -230,3 +230,13 @@
 
 * Ensure that when an estimate is converted to an invoice, it is actually an estimate
 * Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
+## 1.5.0
+
+* Add ability to specify if estimate can have a negative value
+* Migrate some logic from Estimates/Invoices to a factory
+* Tidy up code folder, PSR4 folder naming
+* Add basic versioning to line items as well as Estimates/Invoices
+* Set Estimate/Invoice title to use full ref
+* Ensure that when an estimate is converted to an invoice, it is actually an estimate
+* Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)

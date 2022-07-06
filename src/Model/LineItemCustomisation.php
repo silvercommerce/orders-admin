@@ -2,17 +2,23 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
-use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
-use SilverCommerce\TaxAdmin\Traits\Taxable;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Dev\Deprecation;
+use SilverCommerce\TaxAdmin\Traits\Taxable;
+use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
 
 /**
- * Customisations allow basic key - value pairs to be assigned
- * to line items (for example: Colour - Blue)
+ * A single customisation that can be applied to a LineItem.
  *
- * @property string Title name of the customisation (eg. "Colour")
- * @property string Value data associated customisation (eg. "Red")
+ * A customisation by default allows the following details:
+ *  - Title: The name of the customisation (eg. "Colour")
+ *  - Value: The data associated with thie customisation (eg. "Red")
+ *  - Price: Does this customisation change the LineItem's price?
+ *
+ * @property string Title
+ * @property string Value
+ * @property float BasePrice
+ * @property float Price
  *
  * @method LineItem Parent
  */
@@ -22,60 +28,84 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
 
     private static $table_name = 'LineItemCustomisation';
 
+    /**
+     * Standard database columns
+     *
+     * @var array
+     */
     private static $db = [
-        'Name' => 'Varchar',
-        'Value' => 'Text',
+        "Title" => "Varchar",
+        "Value" => "Text",
 
-        // Legacy, price modifications are now run through
-        // seperate modifiers
-        'Title' => 'Varchar',
-        'BasePrice' => 'Decimal(9,3)',
-        'Price' => 'Decimal(9,3)'
+        // Legacy Fields
+        "BasePrice" => "Decimal(9,3)",
+        "Price" => "Decimal(9,3)"
     ];
-
-    private static $has_one = [
-        'Parent' => LineItem::class
-    ];
-
-    private static $casting = [
-        'Title' => 'Varchar'
-    ];
-
-    private static $summary_fields = [
-        'Title',
-        'Value'
-    ];
-
-    public function getLocale()
-    {
-        return $this->Parent()->getLocale();
-    }
 
     /**
-     * Depreciated methods as of 2.0
+     * DB foreign key associations
+     *
+     * @var array
      */
+    private static $has_one = [
+        "Parent" => LineItem::class
+    ];
+
+    /**
+     * Fields to display in gridfields
+     *
+     * @var array
+     */
+    private static $summary_fields = [
+        "Title",
+        "Value",
+        "BasePrice"
+    ];
+
+    private static $field_labels = [
+        'BasePrice' => 'Price'
+    ];
+
     public function getBasePrice()
     {
+        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
+
         return $this->dbObject('BasePrice')->getValue();
     }
 
     public function getTaxRate()
     {
-        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
 
         return $this->Parent()->getTaxRate();
     }
 
+    public function getLocale()
+    {
+        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
+
+        return $this->Parent()->getLocale();
+    }
+    /**
+     * Get should this field automatically show the price including TAX?
+     *
+     * @return bool
+     */
     public function getShowPriceWithTax()
     {
-        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
 
         return $this->Parent()->getShowPriceWithTax();
     }
 
+    /**
+     * We don't want to show a tax string on Line Items
+     *
+     * @return false
+     */
     public function getShowTaxString()
     {
-        Deprecation::notice('2.0', 'Price modifications will be removed from customisations');
+        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
 
         return false;
     }

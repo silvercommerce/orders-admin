@@ -3,7 +3,6 @@
 namespace SilverCommerce\OrdersAdmin\Tasks;
 
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\DataList;
 use SilverStripe\Control\Director;
 use SilverStripe\Dev\MigrationTask;
 use SilverStripe\ORM\DatabaseAdmin;
@@ -15,14 +14,12 @@ use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
-use SilverCommerce\OrdersAdmin\Model\PriceModifier;
 
 /**
  * Task to handle migrating orders/items to newer versions
  */
 class OrdersMigrationTask extends MigrationTask
 {
-    const CHUNK_SIZE = 200;
 
     /**
      * Should this task be invoked automatically via dev/build?
@@ -58,28 +55,104 @@ class OrdersMigrationTask extends MigrationTask
      */
     public function up()
     {
-        $chunk_size = self::CHUNK_SIZE;
-        $curr_chunk = 0;
-        $migrated = 0;
-        $start_time = time();
+        // Migrate estimate/invoice numbers to new ref field
+        $this->log('- Migrating estimate/invoice numbers');
+        $total = 0;
 
         if (class_exists(Subsite::class)) {
-            $estimates = Subsite::get_from_all_subsites(Estimate::class);
+            $items = Subsite::get_from_all_subsites(Estimate::class);
         } else {
-            $estimates = Estimate::get();
+            $items = Estimate::get();
+        }
+        
+        $count = false;
+        if ($items) {
+            $this->log('- '.$items->count().' items to convert.');
+            $count = $items->count();
+        }
+        $i = 0;
+
+        foreach ($items as $item) {
+            if ($item->Number !== null) {
+                $config = SiteConfig::current_site_config();
+                $inv_prefix = $config->InvoiceNumberPrefix;
+                $est_prefix = $config->EstimateNumberPrefix;
+                $number = $item->Number;
+
+                // Strip off current prefix and convert to a ref
+                if ($item instanceof Invoice) {
+                    $ref = str_replace($inv_prefix . "-", "", $number);
+                    $ref = str_replace('-', '', $ref);
+                    $item->Ref = (int)$ref;
+                    $item->Prefix = $inv_prefix;
+                } else {
+                    $ref = str_replace($est_prefix . "-", "", $number);
+                    $ref = str_replace('-', '', $ref);
+                    $item->Ref = (int)$ref;
+                    $item->Prefix = $est_prefix;
+                }
+
+                $item->Number = null;
+                $item->write();
+            }
+            $i++;
+            $this->log('- '.$i.'/'.$count.' items migrated.', true);
         }
 
+        unset($items);
+
+        // Change price/tax on line items to use new fields from extension
         $items = LineItem::get();
-        $customisations = LineItemCustomisation::get();
+        $count = $items->count();
+        $this->log("Migrating {$count} Line Items");
+        $i = 0;
 
-        $this->processChunkedList($estimates, $start_time);
-        $this->processChunkedList($items, $start_time);
-        $this->processChunkedList($customisations, $start_time);
+        foreach ($items as $item) {
+            $write = false;
 
-        // purge current var
-        $estimates = null;
-        $items = null;
-        $customisations = null;
+            if ((int)$item->Price && (int)$item->BasePrice == 0) {
+                $item->BasePrice = $item->Price;
+                $write = true;
+            }
+
+            if ($item->TaxID != 0 && $item->TaxRateID == 0) {
+                $item->TaxRateID = $item->TaxID;
+                $write = true;
+            }
+
+            if ($write) {
+                $item->write();
+                $i++;
+            }
+        }
+
+        unset($items);
+        
+        $this->log("Migrated {$i} Line Item Customisations");
+
+        // Change price/tax on line items to use new fields from extension
+        $items = LineItemCustomisation::get();
+        $count = $items->count();
+        $this->log("Migrating {$count} Line Items");
+        $i = 0;
+
+        foreach ($items as $item) {
+            $write = false;
+
+            if ((int)$item->Price && (int)$item->BasePrice == 0) {
+                $item->BasePrice = $item->Price;
+                $write = true;
+            }
+
+            if ($write) {
+                $item->write();
+                $i++;
+            }
+        }
+
+        unset($items);
+        
+        $this->log("Migrated {$i} Line Items");
     }
 
     /**
@@ -87,170 +160,22 @@ class OrdersMigrationTask extends MigrationTask
      */
     public function down()
     {
-        $this->log('Downgrade Not Possible');
-    }
+        $zones = Zone::get();
 
-    protected function processChunkedList(
-        DataList $list,
-        int $start_time
-    ) {
-        $chunk_size = self::CHUNK_SIZE;
-        $curr_chunk = 0;
-        $migrated = 0;
-        $items_count = $list->count();
-        $total_chunks = 1;
-        $class = $list->dataClass();
-
-        // If we have a usable list, calculate total chunks
-        if ($items_count > 0) {
-            $this->log("- {$items_count} {$class} to migrate.");
-
-            // Round up the total chunks, so stragglers are caught
-            $total_chunks = ceil(($items_count / $chunk_size));
-        }
-
-        /**
-         * Break line items list into chunks to save memory
-         *
-         * @var DataList $estimates
-         */
-        while ($curr_chunk < $total_chunks) {
-            $chunked_list =  $list
-                ->limit($chunk_size, $curr_chunk * $chunk_size);
-
-            foreach ($chunked_list as $item) {
-                $result = 0;
-
-                if ($item instanceof Estimate) {
-                    $result = $this->convertEstimate($item);
-                } elseif ($item instanceof LineItem) {
-                    $result = $this->convertLineItem($item);
-                } elseif ($item instanceof LineItemCustomisation) {
-                    $result = $this->convertCustomisation($item);
-                }
-
-                if ($result === $item->ID) {
-                    $migrated++;
-                }
-            }
-
-            $chunked_time = time() - $start_time;
-
-            $this->log(
-                "- Migrated {$migrated} of {$items_count} in {$chunked_time}s",
-                true
-            );
-
-            $curr_chunk++;
-        }
-
-        // purge current var
-        $chunked_list = null;
-    }
-
-    protected function convertEstimate(Estimate $estimate): int
-    {
-        if ($estimate->Number !== null) {
-            $config = SiteConfig::current_site_config();
-            $inv_prefix = $config->InvoiceNumberPrefix;
-            $est_prefix = $config->EstimateNumberPrefix;
-            $number = $estimate->Number;
-
-            // Strip off current prefix and convert to a ref
-            if ($estimate instanceof Invoice) {
-                $ref = str_replace($inv_prefix . "-", "", $number);
-                $ref = str_replace('-', '', $ref);
-                $estimate->Ref = (int)$ref;
-                $estimate->Prefix = $inv_prefix;
-            } else {
-                $ref = str_replace($est_prefix . "-", "", $number);
-                $ref = str_replace('-', '', $ref);
-                $estimate->Ref = (int)$ref;
-                $estimate->Prefix = $est_prefix;
-            }
-
-            $estimate->Number = null;
-            return $estimate->write();
-        }
-
-        return 0;
-    }
-
-    protected function convertLineItem(LineItem $item): int
-    {
-        $write = false;
-
-        if (intval($item->Price) > 0 && intval($item->BasePrice) == 0) {
-            $item->UnmodifiedPrice = $item->Price;
-            $write = true;
-        }
-
-        if (intval($item->BasePrice) > 0) {
-            $item->UnmodifiedPrice = $item->BasePrice;
-            $write = true;
-        }
-
-        if ($write) {
-            return $item->write();
-        }
-
-        return 0;
-    }
-
-    protected function convertCustomisation(LineItemCustomisation $item): int
-    {
-        $write = false;
-
-        // If legacy Price field is set, migrate it
-        if ($item->Price > 0 && intval($item->BasePrice) === 0) {
-            $item->BasePrice = $item->Price;
-            $item->Price = 0;
-            $write = true;
-        }
-
-        // If legacy Price field is set, migrate it
-        if (!empty($item->Title) && empty($item->Name)) {
-            $item->Name = $item->Title;
-            $item->Title = null;
-            $write = true;
-        }
-
-        // If customisation modifies price, generate modification
-        //  and link to this customisation
-        if ($item->BasePrice > 0) {
-            $modifier = PriceModifier::create();
-            $modifier->Name = $item->Name;
-            $modifier->ModifyPrice = $item->BasePrice;
-            $modifier->LineItemID = $item->ParentID;
-            $modifier->CustomisationID = $item->ID;
-            $modifier->write();
-
-            $item->BasePrice = 0;
-            $write = true;
-        }
-
-        if ($write) {
-            return $item->write();
-        }
-
-        return 0;
+        $this->log('No Downgrade Required');
     }
 
     /**
-     * Log a message to the terminal/browser
-     * 
-     * @param string $message   Message to log
-     * @param bool   $linestart Set cursor to start of line (instead of return)
-     * 
-     * @return null
+     * @param string $text
      */
-    protected function log($message, $linestart = false)
+    protected function log($text)
     {
-        if (Director::is_cli()) {
-            $end = ($linestart) ? "\r" : "\n";
-            print_r($message . $end);
+        if (Controller::curr() instanceof DatabaseAdmin) {
+            DB::alteration_message($text, 'obsolete');
+        } elseif (Director::is_cli()) {
+            echo $text . "\n";
         } else {
-            print_r($message . "<br/>");
+            echo $text . "<br/>";
         }
     }
 }

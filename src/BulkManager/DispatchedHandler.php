@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverCommerce\CatalogueAdmin\BulkManager;
+namespace SilverCommerce\OrdersAdmin\BulkManager;
 
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\HTTPRequest;

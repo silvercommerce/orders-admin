@@ -299,7 +299,7 @@ class Invoice extends Estimate implements PermissionProvider
     public function DisplayLink()
     {
         return Controller::join_links(
-            DisplayController::create()->AbsoluteLink("invoice"),
+            DisplayController::create()->AbsoluteLink(),
             $this->ID,
             $this->AccessKey
         );
@@ -314,7 +314,7 @@ class Invoice extends Estimate implements PermissionProvider
     public function PDFLink()
     {
         return Controller::join_links(
-            DisplayController::create()->AbsoluteLink("invoicepdf"),
+            DisplayController::create()->AbsoluteLink('pdf'),
             $this->ID,
             $this->AccessKey
         );

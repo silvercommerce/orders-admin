@@ -24,7 +24,7 @@
         "issues": "https://github.com/silvercommerce/orders-admin/issues"
     },
     "require": {
-        "php": ">=7.1.0",
+        "php": ">=7.2.0",
         "silverstripe/framework": "~4.0",
         "silverstripe/siteconfig": "~4.0",
         "silverstripe/admin": "~1.0",
@@ -32,7 +32,8 @@
         "colymba/gridfield-bulk-editing-tools": "^3.0",
         "symbiote/silverstripe-gridfieldextensions": "^3.0",
         "dompdf/dompdf": "^0.8",
-        "i-lateral/silverstripe-modeladminplus": "~1.0",
+        "i-lateral/silverstripe-modeladminplus": "^1.0",
+        "i-lateral/silverstripe-file-base64": "^1.0",
         "silvercommerce/settings": "^1.0",
         "silvercommerce/tax-admin": "^1.4",
         "silvercommerce/contact-admin": "^1.0",

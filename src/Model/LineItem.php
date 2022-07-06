@@ -26,6 +26,7 @@ use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
+use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
@@ -48,14 +49,27 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * - Deliverable: Is this a product that can be delivered? This can effect
  *                delivery options
  *
- * @property string Key encoded string of item data to identify this item
- * @property string Title Name of this item
- * @property int    Quantity Number of items to purchase
- * @property float  UnmodifiedPrice The price of a single item
- * @property string StockID Product stock identifier
- * @property bool   Locked Can this quantity be changed
- * @property bool   Stocked Is this item stocked
- * @property bool   Deliverable Can this item be delivered
+ * @property string Key
+ * @property string Title
+ * @property float  UnmodifiedPrice
+ * @property int    Quantity
+ * @property string StockID
+ * @property bool   Locked
+ * @property bool   Stocked
+ * @property bool   Deliverable
+ * @property float  UnitPrice
+ * @property float  UnitTax
+ * @property float  UnitTotal
+ * @property float  SubTotal
+ * @property float  TaxRate
+ * @property float  TaxTotal
+ * @property float  Total
+ * @property string CustomisationsString
+ * @property string CustomisationAndPriceList
+ * @property string Currency
+ * @property string CurrencySymbol
+ * @property float  NoTaxPrice
+ * @property float  TaxPercentage
  *
  * @method Estimate Parent
  * @method TaxRate TaxRate
@@ -103,13 +117,27 @@ class LineItem extends DataObject implements TaxableProvider
 
     private static $has_one = [
         "Parent"      => Estimate::class,
+        "TaxRate"     => TaxRate::class,
+
+        // Legacy params
         "Tax"         => TaxRate::class,
-        "TaxRate"     => TaxRate::class
     ];
 
     private static $has_many = [
         'PriceModifications' => PriceModifier::class,
         'Customisations'     => LineItemCustomisation::class
+    ];
+
+    private static $extensions = [
+        Versioned::class . '.versioned',
+    ];
+
+    private static $versioning = [
+        "History"
+    ];
+
+    private static $owned_by = [
+        'Parent'
     ];
 
     private static $defaults = [
@@ -193,14 +221,77 @@ class LineItem extends DataObject implements TaxableProvider
         return $price;
     }
 
+    public function getUnitPrice(): float
+    {
+        return $this->getNoTaxPrice();
+    }
+
     /**
      * Stub method that is more logically named
      *
      * @return float
      */
-    public function getUnitPrice(): float
+    public function getCMSFields()
     {
-        return $this->getNoTaxPrice();
+        $this->beforeUpdateCMSFields(function ($fields) {
+            $config = SiteConfig::current_site_config();
+
+            $fields->removeByName(
+                [
+                    'Customisation',
+                    'Price',
+                    'TaxID'
+                ]
+            );
+
+            $fields->addFieldToTab(
+                "Root.Main",
+                ReadonlyField::create("Key"),
+                "Title"
+            );
+
+            $fields->addFieldToTab(
+                "Root.Main",
+                DropdownField::create(
+                    "TaxRateID",
+                    $this->fieldLabel("TaxRate"),
+                    $config->TaxRates()->map()
+                ),
+                "Quantity"
+            );
+
+            // Change unlink button to remove on customisation
+            $custom_field = $fields->dataFieldByName("Customisations");
+
+            if ($custom_field) {
+                $config = $custom_field->getConfig();
+                $config
+                    ->removeComponentsByType(GridFieldDeleteAction::class)
+                    ->removeComponentsByType(GridFieldDataColumns::class)
+                    ->removeComponentsByType(GridFieldEditButton::class)
+                    ->removeComponentsByType(GridFieldAddNewButton::class)
+                    ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
+                    ->addComponents(
+                        new GridFieldEditableColumns(),
+                        new GridFieldAddNewInlineButton(),
+                        new GridFieldEditButton(),
+                        new GridFieldDeleteAction()
+                    );
+                
+                    $custom_field->setConfig($config);
+            }
+
+            $fields->addFieldToTab(
+                "Root.History",
+                VersionHistoryField::create(
+                    "History",
+                    _t("SilverCommerce\VersionHistoryField.History", "History"),
+                    $this
+                )->addExtraClass("stacked")
+            );
+        });
+
+        return parent::getCMSFields();
     }
 
     /**
@@ -460,65 +551,6 @@ class LineItem extends DataObject implements TaxableProvider
 
         return $product;
     }
-
-    /**
-     * Modify default field scaffolding in admin
-     *
-     * @return FieldList
-     */
-    public function getCMSFields()
-    {
-        $this->beforeUpdateCMSFields(function ($fields) {
-            $config = SiteConfig::current_site_config();
-
-            $fields->removeByName(
-                [
-                    'Customisation',
-                    'Price',
-                    'TaxID'
-                ]
-            );
-
-            $fields->addFieldToTab(
-                "Root.Main",
-                ReadonlyField::create("Key"),
-                "Title"
-            );
-
-            $fields->addFieldToTab(
-                "Root.Main",
-                DropdownField::create(
-                    "TaxRateID",
-                    $this->fieldLabel("TaxRate"),
-                    $config->TaxRates()->map()
-                ),
-                "Quantity"
-            );
-
-            // Change unlink button to remove on customisation
-            $custom_field = $fields->dataFieldByName("Customisations");
-
-            if ($custom_field) {
-                $config = $custom_field->getConfig();
-                $config
-                    ->removeComponentsByType(GridFieldDeleteAction::class)
-                    ->removeComponentsByType(GridFieldDataColumns::class)
-                    ->removeComponentsByType(GridFieldEditButton::class)
-                    ->removeComponentsByType(GridFieldAddNewButton::class)
-                    ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
-                    ->addComponents(
-                        new GridFieldEditableColumns(),
-                        new GridFieldAddNewInlineButton(),
-                        new GridFieldEditButton(),
-                        new GridFieldDeleteAction()
-                    );
-                
-                    $custom_field->setConfig($config);
-            }
-        });
-
-        return parent::getCMSFields();
-    }
     
     /**
      * Provide a string of customisations seperated by a comma but not
@@ -590,8 +622,9 @@ class LineItem extends DataObject implements TaxableProvider
      * Check stock levels for this item, will return the actual number
      * of remaining stock after removing the current quantity
      *
-     * @param $qty The quantity we want to check against
-     * @return Int
+     * @param int $qty The quantity we want to check against
+     *
+     * @return int
      */
     public function checkStockLevel($qty)
     {
