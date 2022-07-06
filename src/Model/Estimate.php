@@ -43,6 +43,7 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
+use SilverStripe\Versioned\RestoreAction;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -1063,6 +1064,58 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         $clone->invokeWithExtensions('onAfterDuplicate', $this, $doWrite);
         
         return $clone;
+    }
+
+    /**
+     * Ensure related items at the same time as we restore the estimate/invoice
+     *
+     * @return self
+     */
+    public function doRestoreToStage(): self
+    {
+        // First restore the current order from archive
+        $this->writeToStage(Versioned::DRAFT);
+
+        $restored = Versioned::get_by_stage($this->classname, Versioned::DRAFT)
+            ->byID($this->ID);
+
+        // Get the most recent version of all line items from this
+        // order, and restore them 
+        $singleton = LineItem::singleton();
+        $baseTable = $singleton->baseTable();
+        $draftTable = $baseTable . '_Draft';
+
+        // List of versioned line items and their latest versions
+        $latest_versions = [];
+        
+        $list = LineItem::get()
+            ->setDataQueryParam('Versioned.mode', 'latest_versions')
+            ->filter('Parent.ID', $restored->ID)
+            ->leftJoin(
+                $draftTable,
+                "\"{$baseTable}\".\"ID\" = \"{$draftTable}\".\"ID\""
+            )->where("\"{$draftTable}\".\"ID\" IS NULL");
+        
+        // First get a list of the items latest versions
+        foreach ($list as $item) {
+            if (!array_key_exists($item->ID, $latest_versions)) {
+                $latest_versions[$item->ID] = $item->Version;
+                continue;
+            }
+
+            if ((int)$item->Version > $latest_versions[$item->ID]) {
+                $latest_versions[$item->ID] = $item->Version;
+            }
+        }
+        
+        // Now, re-loop through list and generate final items
+        foreach ($list as $item) {
+            if ($item->Version == $latest_versions[$item->ID]) {
+                RestoreAction::restore($item);
+            }
+        }
+
+        return $restored;
     }
 
     public function onBeforeWrite()
