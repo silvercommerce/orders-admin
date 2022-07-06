@@ -72,12 +72,14 @@ class OrdersMigrationTask extends MigrationTask
         $items = LineItem::get();
         $customisations = LineItemCustomisation::get();
 
-
+        $this->processChunkedList($estimates, $start_time);
+        $this->processChunkedList($items, $start_time);
+        $this->processChunkedList($customisations, $start_time);
 
         // purge current var
-        $chunked_list = null;
         $estimates = null;
         $items = null;
+        $customisations = null;
     }
 
     /**
