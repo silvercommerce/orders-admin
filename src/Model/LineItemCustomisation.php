@@ -68,15 +68,11 @@ class LineItemCustomisation extends DataObject implements TaxableProvider
 
     public function getBasePrice()
     {
-        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
-
         return $this->dbObject('BasePrice')->getValue();
     }
 
     public function getTaxRate()
     {
-        Deprecation::notice('2.0', 'Customisation prices are depreciated, use PriceModifiers instead');
-
         return $this->Parent()->getTaxRate();
     }
 
