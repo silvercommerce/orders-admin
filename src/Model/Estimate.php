@@ -1092,40 +1092,12 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         $restored = Versioned::get_by_stage($this->classname, Versioned::DRAFT)
             ->byID($this->ID);
 
-        // Get the most recent version of all line items from this
-        // order, and restore them 
-        $singleton = LineItem::singleton();
-        $baseTable = $singleton->baseTable();
-        $draftTable = $baseTable . '_Draft';
+        $items = Versioned::get_including_deleted(LineItem::class)
+            ->filter('Parent.ID', $restored->ID);
 
-        // List of versioned line items and their latest versions
-        $latest_versions = [];
-        
-        $list = LineItem::get()
-            ->setDataQueryParam('Versioned.mode', 'latest_versions')
-            ->filter('Parent.ID', $restored->ID)
-            ->leftJoin(
-                $draftTable,
-                "\"{$baseTable}\".\"ID\" = \"{$draftTable}\".\"ID\""
-            )->where("\"{$draftTable}\".\"ID\" IS NULL");
-        
-        // First get a list of the items latest versions
-        foreach ($list as $item) {
-            if (!array_key_exists($item->ID, $latest_versions)) {
-                $latest_versions[$item->ID] = $item->Version;
-                continue;
-            }
-
-            if ((int)$item->Version > $latest_versions[$item->ID]) {
-                $latest_versions[$item->ID] = $item->Version;
-            }
-        }
-        
-        // Now, re-loop through list and generate final items
-        foreach ($list as $item) {
-            if ($item->Version == $latest_versions[$item->ID]) {
-                RestoreAction::restore($item);
-            }
+        // loop through list and generate final items
+        foreach ($items as $item) {
+            RestoreAction::restore($item);
         }
 
         return $restored;
