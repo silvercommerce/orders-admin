@@ -42,6 +42,7 @@ use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
+use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Versioned\RestoreAction;
 
@@ -219,8 +220,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      */
     private static $searchable_fields = [
         'Ref',
-        'StartDate',
-        'EndDate',
         'Company',
         'FirstName',
         'Surname',
@@ -880,6 +879,20 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         });
         
         return parent::getCMSFields();
+    }
+
+    public function getDefaultSearchContext()
+    {
+        return OrderSearchContext::create(
+            static::class,
+            $this->scaffoldSearchFields(),
+            $this->defaultSearchFilters()
+        );
+    }
+
+    public function getModelAdminSearchContext()
+    {
+        return $this->getDefaultSearchContext();
     }
 
     public function requireDefaultRecords()
