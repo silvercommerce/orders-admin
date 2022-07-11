@@ -21,6 +21,7 @@ use SilverCommerce\OrdersAdmin\BulkManager\PartPaidHandler;
 use SilverCommerce\OrdersAdmin\BulkManager\DispatchedHandler;
 use SilverCommerce\OrdersAdmin\BulkManager\ProcessingHandler;
 use SilverCommerce\OrdersAdmin\Forms\GridField\OrdersDetailForm;
+use SilverStripe\Forms\GridField\GridFieldConfig;
 
  /**
   * Add interface to manage orders through the CMS
@@ -66,15 +67,15 @@ class OrderAdmin extends ModelAdminPlus
         return parent::getExportFields();
     }
 
-    public function getEditForm($id = null, $fields = null)
+    public function getGridFieldConfig(): GridFieldConfig
     {
-        $form = parent::getEditForm($id, $fields);
-        $fields = $form->Fields();
-        $gridfield = $fields
-            ->fieldByName($this->sanitiseClassName($this->modelClass));
-        $config = $gridfield->getConfig();
-        
-        // Adding custom sorting for support of FullRef
+        $config = parent::getGridFieldConfig();
+
+        /**
+         * Add custom sorting for support of FullRef
+         *
+         * @var GridFieldSortableHeader $headers
+         */
         $headers = $config->getComponentByType(GridFieldSortableHeader::class);
         if ($headers) {
             $sorting = $headers->getFieldSorting();
@@ -86,7 +87,7 @@ class OrderAdmin extends ModelAdminPlus
         $manager = $config->getComponentByType(BulkManager::class);
 
         // Manage orders
-        if ($this->modelClass == Invoice::class && $gridfield) {
+        if ($this->modelClass == Invoice::class) {
             $manager->addBulkAction(CancelHandler::class);
             $manager->addBulkAction(RefundHandler::class);
             $manager->addBulkAction(PendingHandler::class);
@@ -99,16 +100,12 @@ class OrderAdmin extends ModelAdminPlus
         $manager->addBulkAction(BulkViewHandler::class);
         $manager->addBulkAction(BulkDownloadHandler::class);
 
-        // Set our default detailform and bulk manager
-        if ($config) {
-            $config
-                ->removeComponentsByType(GridFieldDetailForm::class)
-                ->addComponent(new OrdersDetailForm());
-        }
+        // Overide default detailform
+        $config
+            ->removeComponentsByType(GridFieldDetailForm::class)
+            ->addComponent(new OrdersDetailForm());
 
-        $this->extend("updateEditForm", $form);
-
-        return $form;
+        return $config;
     }
     
     public function getList()
@@ -166,35 +163,5 @@ class OrderAdmin extends ModelAdminPlus
         $this->extend("updateList", $list);
 
         return $list;
-    }
-
-    public function SearchForm()
-    {
-        $form = parent::SearchForm();
-        $fields = $form->Fields();
-        $data = $this->getSearchData();
-        $singleton = Estimate::singleton();
-
-        // Replace the start field
-        $fields->replaceField(
-            "StartDate",
-            DateField::create(
-                "Start",
-                $singleton->fieldLabel("StartDate")
-            )
-        );
-
-        // Replace the start field
-        $fields->replaceField(
-            "EndDate",
-            DateField::create(
-                "End",
-                $singleton->fieldLabel("EndDate")
-            )
-        );
-
-        $form->loadDataFrom($data);
-
-        return $form;
     }
 }
