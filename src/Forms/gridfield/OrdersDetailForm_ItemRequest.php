@@ -2,25 +2,21 @@
 
 namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
+use SilverStripe\Core\Convert;
+use SilverStripe\ORM\HasManyList;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\Permission;
-use SilverStripe\Security\Security;
-use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
+use SilverStripe\Admin\LeftAndMain;
+use SilverStripe\Security\Security;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
-use SilverStripe\View\Requirements;
-use SilverStripe\Versioned\Versioned;
-use SilverStripe\Versioned\DataDifferencer;
-use SilverStripe\Core\Convert;
-use SilverStripe\Admin\LeftAndMain;
-use SilverStripe\Control\PjaxResponseNegotiator;
-use SilverStripe\ORM\ValidationException;
+use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\ValidationResult;
+use SilverStripe\ORM\ValidationException;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverStripe\Control\PjaxResponseNegotiator;
 use SilverStripe\Versioned\VersionedGridFieldItemRequest;
-use SilverStripe\Forms\ReadonlyField;
 
 class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
 {
@@ -35,18 +31,20 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     {
         $controller = $this->getToplevelController();
         $form = $this->ItemEditForm();
+        $record = $this->getRecord();
 
         // If this is a new record, we need to save it first
-        if ($this->record->ID == 0) {
+        if (!$record->exists()) {
             // ensure we populate any foreign keys first
             $list = $this->gridField->getList();
-            if ($list instanceof HasManyList && !$this->record->isInDB()) {
+
+            if ($list instanceof HasManyList) {
                 $key = $list->getForeignKey();
                 $id = $list->getForeignID();
-                $this->record->$key = $id;
+                $record->$key = $id;
             }
 
-            $this->record->write();
+            $record->write();
             
             $controller
                 ->getRequest()
@@ -75,47 +73,20 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     {
         $form = parent::ItemEditForm();
         $fields = $form->Fields();
-        $actions = $form->Actions();
         $record = $this->record;
-        $member = Member::currentUser();
-
-        $can_view = $this->record->canView();
-        $can_edit = $this->record->canEdit();
-        $can_delete = $this->record->canDelete();
-        $can_create = $this->record->canCreate();
-
-        // First cache and remove the delete button
-        $delete_action = $actions->dataFieldByName("action_doDelete");
-        $actions->removeByName("action_doDelete");
-
-        // Deal with Estimate objects
-        if ($record->ClassName == Estimate::class) {
-            if ($record->ID && $can_edit) {
-                $actions->insertAfter(
-                    FormAction::create(
-                        'doConvert',
-                        _t('OrdersAdmin.ConvertToInvoice', 'Convert To Invoice')
-                    )->setUseButtonTag(true)
-                    ->addExtraClass('btn-outline-primary btn-hide-outline font-icon-sync'),
-                    "action_doSave"
-                );
-            }
-        }
+        $can_edit = $record->canEdit();
+        $can_change_status = $record->canChangeStatus();
 
         // Deal with Order objects
-        if ($record->ClassName == Invoice::class) {
-            $can_change_status = $this->record->canChangeStatus();
-
+        if ($record instanceof Invoice) {
             // replace HasOneButtonField with ReadOnly field
-            ## This is to prevent an error where the Button's object attempts to render
+            // This is to prevent an error where the Button's object attempts to render
             if (!$can_edit) {
                 $name = null;
-                if ($record->CustomerID) {
-                    $customer = Member::get()->byID($record->CustomerID);
-                    if ($customer) {
-                        $name = $customer->getTitle();
-                    }
+                if ($record->Customer()->exists()) {
+                    $name = $record->Customer()->getTitle();
                 }
+
                 $fields->replaceField(
                     'Customer',
                     ReadonlyField::create(
@@ -133,7 +104,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
                     null,
                     $record->config()->statuses
                 );
-                
+
                 // Set default status if we can
                 if (!$record->Status && !$record->config()->default_status) {
                     $status_field
@@ -145,19 +116,81 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
                 
                 $fields->replaceField("Status", $status_field);
             }
-            
-            // Is user cannot edit, but can change status, add change
-            // status button
-            if ($record->ID && !$can_edit && $can_change_status) {
-                $actions->push(
-                    FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
-                        ->setUseButtonTag(true)
-                        ->addExtraClass('btn-primary font-icon-save')
-                );
-            }
         }
 
-        if ($record->ID) {
+        $this->extend("updateItemEditForm", $form);
+
+        return $form;
+    }
+
+    protected function getRightGroupField()
+    {
+        $right_group = parent::getRightGroupField();
+        $record = $this->record;
+
+        // Add view and download buttons
+        if ($record->exists()) {
+            $html = '<a href="' . $record->DisplayLink() . '" ';
+            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-eye"';
+            $html .= '>' . _t('OrdersAdmin.View', 'View') . '</a>';
+
+            $view_field = LiteralField::create('ViewButton', $html);
+
+            $html = '<a href="' . $record->PDFLink() . '" ';
+            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-down-circled"';
+            $html .= '>' . _t('OrdersAdmin.Download', 'Download') . '</a>';
+
+            $download_field = LiteralField::create('DownloadButton', $html);
+
+            $right_group->insertBefore(
+                'PreviousAndNextGroup',
+                $view_field
+            );
+            $right_group->insertBefore(
+                'PreviousAndNextGroup',
+                $download_field
+            );
+        }
+
+        return $right_group;
+    }
+
+    public function getFormActions()
+    {
+        $actions = parent::getFormActions();
+        $record = $this->record;
+        $can_create = $record->canCreate();
+        $can_edit = $record->canEdit();
+        $can_change_status = $record->canChangeStatus();
+
+        // Deal with Estimate objects
+        if ($record->ClassName == Estimate::class
+            && $record->exists() && $can_edit
+        ) {
+            $actions->insertAfter(
+                "action_doSave",
+                FormAction::create(
+                    'doConvert',
+                    _t('OrdersAdmin.ConvertToInvoice', 'Convert To Invoice')
+                )->setUseButtonTag(true)
+                ->addExtraClass('btn-outline-primary btn-hide-outline font-icon-sync'),
+            );
+        }
+
+        // If user cannot edit, but can change status
+        // add change status button
+        if ($record instanceof Invoice && $record->exists()
+            && !$can_edit && $can_change_status
+        ) {
+            $actions->insertAfter(
+                'action_doSave',
+                FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
+                    ->setUseButtonTag(true)
+                    ->addExtraClass('btn-primary font-icon-save')
+            );
+        }
+
+        if ($record->exists() && $can_create) {
             // Add a duplicate button, either after the save button or
             // the change status "save" button.
             $duplicate_button = FormAction::create(
@@ -166,38 +199,14 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
             )->setUseButtonTag(true)
             ->addExtraClass('btn-outline-primary  btn-hide-outline font-icon-switch');
             
-            if ($actions->find("Name", "action_doSave")) {
-                $actions->insertAfter($duplicate_button, "action_doSave");
-            }
-            
-            if ($actions->find("Name", "action_doChangeStatus")) {
-                $actions->insertAfter($duplicate_button, "action_doChangeStatus");
-            }
-
-            $html = '<a href="' . $record->DisplayLink() . '" ';
-            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-eye"';
-            $html .= '>' . _t('OrdersAdmin.View', 'View') . '</a>';
-            
-            $view_field = LiteralField::create('ViewButton', $html);
-
-            $html = '<a href="' . $record->PDFLink() . '" ';
-            $html .= 'target="_blank" class="btn btn-outline-primary  btn-hide-outline font-icon-down-circled"';
-            $html .= '>' . _t('OrdersAdmin.Download', 'Download') . '</a>';
-            
-            $download_field = LiteralField::create('DownloadButton', $html);
-            
-            $actions->push($view_field, "action_doSave");
-            $actions->push($download_field, "action_doSave");
+            $actions->insertAfter(
+                "action_doSave",
+                $duplicate_button,
+                true
+            );
         }
 
-        // Finally, if allowed, re-add the delete button (so it is last)
-        if ($record->ID && $can_delete) {
-            $actions->push($delete_action);
-        }
-
-        $this->extend("updateItemEditForm", $form);
-
-        return $form;
+        return $actions;
     }
     
     public function doDuplicate($data, $form)
