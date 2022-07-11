@@ -304,6 +304,10 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         'Items'
     ];
 
+    private static $cascade_duplicates = [
+        'Items'
+    ];
+
     private static $defaults = [
         "DisableNegative" => false
     ];
