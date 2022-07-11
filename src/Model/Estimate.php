@@ -44,6 +44,7 @@ use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
+use SilverStripe\Security\Security;
 use SilverStripe\Versioned\RestoreAction;
 
 /**
@@ -296,6 +297,10 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     ];
 
     private static $owns = [
+        'LineItems'
+    ];
+
+    private static $cascade_deletes = [
         'LineItems'
     ];
 
@@ -1058,7 +1063,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     public function duplicate($doWrite = true, $relations = null)
     {
         $clone = parent::duplicate($doWrite, $relations);
-        
+
         // Set up items
         if ($doWrite) {
             $clone->Ref = "";
@@ -1073,9 +1078,9 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
                 $clone_item->write();
             }
         }
-        
+
         $clone->invokeWithExtensions('onAfterDuplicate', $this, $doWrite);
-        
+
         return $clone;
     }
 
@@ -1180,20 +1185,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
     }
 
-    /**
-     * API Callback before this object is removed from to the DB
-     *
-     */
-    public function onBeforeDelete()
-    {
-        parent::onBeforeDelete();
-        
-        // Delete all items attached to this order
-        foreach ($this->Items() as $item) {
-            $item->delete();
-        }
-    }
-
     public function providePermissions()
     {
         return [
@@ -1238,7 +1229,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_VIEW_ESTIMATES"])) {
@@ -1262,7 +1253,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
         
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_CREATE_ESTIMATES"])) {
@@ -1286,7 +1277,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_EDIT_ESTIMATES"])) {
@@ -1310,7 +1301,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_DELETE_ESTIMATES"])) {
