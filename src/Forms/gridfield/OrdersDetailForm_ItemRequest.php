@@ -4,7 +4,6 @@ namespace SilverCommerce\OrdersAdmin\Forms\GridField;
 
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Security\Member;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\Security\Security;
@@ -73,7 +72,9 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     {
         $form = parent::ItemEditForm();
         $fields = $form->Fields();
+        $actions = $form->Actions();
         $record = $this->record;
+        $can_create = $record->canCreate();
         $can_edit = $record->canEdit();
         $can_change_status = $record->canChangeStatus();
 
@@ -113,9 +114,30 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
                     $status_field
                         ->setValue($record->Status);
                 }
-                
+
                 $fields->replaceField("Status", $status_field);
             }
+        }
+
+        /**
+         * If change status action is present, allow
+         *
+         * @var FormAction $change_status
+         */
+        $change_status = $actions->fieldByName('MajorActions.action_doChangeStatus');
+
+        if (!empty($change_status)) {
+            $change_status
+                ->setDisabled(false)
+                ->setReadonly(false);
+        }
+
+        $duplicate_action = $actions->fieldByName('MajorActions.action_doDuplicate');
+
+        if (!empty($duplicate_action) && $can_create) {
+            $duplicate_action
+                ->setDisabled(false)
+                ->setReadonly(false);
         }
 
         $this->extend("updateItemEditForm", $form);
@@ -158,6 +180,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     public function getFormActions()
     {
         $actions = parent::getFormActions();
+        $major_actions = $actions->fieldByName('MajorActions');
         $record = $this->record;
         $can_create = $record->canCreate();
         $can_edit = $record->canEdit();
@@ -167,7 +190,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         if ($record->ClassName == Estimate::class
             && $record->exists() && $can_edit
         ) {
-            $actions->insertAfter(
+            $major_actions->insertAfter(
                 "action_doSave",
                 FormAction::create(
                     'doConvert',
@@ -177,32 +200,27 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
             );
         }
 
-        // If user cannot edit, but can change status
-        // add change status button
-        if ($record instanceof Invoice && $record->exists()
-            && !$can_edit && $can_change_status
-        ) {
-            $actions->insertAfter(
-                'action_doSave',
-                FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
-                    ->setUseButtonTag(true)
-                    ->addExtraClass('btn-primary font-icon-save')
-            );
-        }
-
+        // Add a duplicate button, either after the save button or
+        // the change status "save" button.
         if ($record->exists() && $can_create) {
-            // Add a duplicate button, either after the save button or
-            // the change status "save" button.
             $duplicate_button = FormAction::create(
                 'doDuplicate',
                 _t('OrdersAdmin.Duplicate', 'Duplicate')
             )->setUseButtonTag(true)
             ->addExtraClass('btn-outline-primary  btn-hide-outline font-icon-switch');
             
-            $actions->insertAfter(
-                "action_doSave",
-                $duplicate_button,
-                true
+            $major_actions->push($duplicate_button);
+        }
+
+        // If user cannot edit, but can change status
+        // add change status button
+        if ($record instanceof Invoice && $record->exists()
+            && !$can_edit && $can_change_status
+        ) {
+            $major_actions->unshift(
+                FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
+                    ->setUseButtonTag(true)
+                    ->addExtraClass('btn-primary font-icon-save')
             );
         }
 
@@ -211,27 +229,34 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     
     public function doDuplicate($data, $form)
     {
-        $record = $this->record;
+        $record = $this->getRecord();
+        $can_create = $record->canCreate();
+        $can_edit = $record->canEdit();
 
-        if ($record && !$record->canEdit()) {
+        if (!$can_create) {
             return Security::permissionFailure($this);
         }
 
-        $form->saveInto($record);
-        
-        $record->write();
+        if ($can_edit) {
+            $form->saveInto($record);
+            $record->write();
+        }
         
         $new_record = $record->duplicate();
         
-        $this->gridField->getList()->add($new_record);
+        $this
+            ->getGridField()
+            ->getList()
+            ->add($new_record);
 
         $message = sprintf(
             _t('OrdersAdmin.Duplicated', 'Duplicated %s %s'),
-            $this->record->singular_name(),
-            '"'.Convert::raw2xml($this->record->Title).'"'
+            $record->singular_name(),
+            '"'.Convert::raw2xml($record->Title).'"'
         );
-        
+
         $toplevelController = $this->getToplevelController();
+
         if ($toplevelController && $toplevelController instanceof LeftAndMain) {
             $backForm = $toplevelController->getEditForm();
             $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
@@ -282,16 +307,17 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
     
     public function doChangeStatus($data, $form)
     {
-        $new_record = $this->record->ID == 0;
+        $record = $this->getRecord();
         $controller = $this->getToplevelController();
-        $list = $this->gridField->getList();
+        $grid_field = $this->getGridField();
+        $list = $grid_field->getList();
 
         try {
-            $this->record->Status = $data["Status"];
-            $this->record->write();
+            $record->Status = $data["Status"];
+            $record->write();
         } catch (ValidationException $e) {
-            $form->sessionMessage($e->getResult()->message(), 'bad', ValidationResult::CAST_HTML);
-            
+            $form->sessionMessage($e->getMessage(), 'bad', ValidationResult::CAST_HTML);
+
             $responseNegotiator = new PjaxResponseNegotiator([
                 'CurrentForm' => function () use (&$form) {
                     return $form->forTemplate();
@@ -300,11 +326,11 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
                     return $controller->redirectBack();
                 }
             ]);
-            
+
             if ($controller->getRequest()->isAjax()) {
                 $controller->getRequest()->addHeader('X-Pjax', 'CurrentForm');
             }
-            
+
             return $responseNegotiator->respond($controller->getRequest());
         }
 
@@ -320,19 +346,9 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
                 'link' => $link
             ]
         );
-        
+
         $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
 
-        if ($this->gridField->getList()->byId($this->record->ID)) {
-            // Return new view, as we can't do a "virtual redirect" via the CMS Ajax
-            // to the same URL (it assumes that its content is already current, and doesn't reload)
-            return $this->edit($controller->getRequest());
-        } else {
-            // Changes to the record properties might've excluded the record from
-            // a filtered list, so return back to the main view if it can't be found
-            $noActionURL = $controller->removeAction($data['url']);
-            $controller->getRequest()->addHeader('X-Pjax', 'Content');
-            return $controller->redirect($noActionURL, 302);
-        }
+        return $this->redirectAfterSave(false);
     }
 }
