@@ -297,11 +297,11 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     ];
 
     private static $owns = [
-        'LineItems'
+        'Items'
     ];
 
     private static $cascade_deletes = [
-        'LineItems'
+        'Items'
     ];
 
     private static $defaults = [
