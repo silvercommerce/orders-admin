@@ -364,11 +364,11 @@ class LineItemFactory
      */
     public function checkStockLevel()
     {
+        $item = $this->getItem();
         $qty = $this->getQuantity();
         $force = $this->config()->get('force_check_stock');
-        $stock_item = $this->getItem()->findStockItem();
+        $stock_item = $item->findStockItem();
         $param = $this->getProductStockParam();
-        $item = $this->getItem();
 
         // If we are checking stock and there is not enough, return false
         if (isset($stock_item)
@@ -403,9 +403,12 @@ class LineItemFactory
     public function delete()
     {
         $item = $this->getItem();
-        if (!empty($item)) {
+        if (!empty($item) && $item->isInDB()) {
             $item->delete();
         }
+
+        unset($this->item);
+
         return $this;
     }
 
