@@ -168,13 +168,13 @@ class LineItem extends DataObject implements TaxableProvider
         "StockID",
         "BasePrice",
         "TaxRateID",
-        "CustomisationAndPriceList"
+        "PriceModificationString"
     ];
 
     private static $field_labels = [
         "UnitPrice"         => "Single Item Price",
         "TaxRateID"         => "Tax",
-        "CustomisationAndPriceList" => "Customisations"
+        "PriceModificationString" => "Modifications"
     ];
 
     /**
