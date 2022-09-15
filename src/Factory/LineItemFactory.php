@@ -159,14 +159,22 @@ class LineItemFactory
         array $additional_data = []
     ): LineItemCustomisation {
         $item = $this->getItem();
+
+        if (empty($item)) {
+            throw new LogicException('No LineItem available, did you use `makeItem`?');
+        }
+
         $mapped_data = [];
         $class = self::CUSTOM_CLASS;
 
         /** @var LineItemCustomisation */
-        $customisation =  $class::create();
-        $customisation->Name = $name;
+        $customisation = $class::create();
+        $customisation->Title = $name;
         $customisation->Value = $value;
-        $customisation->ParentID = $item->ID;
+
+        $item
+            ->Customisations()
+            ->add($customisation);
 
         if (count($additional_data) > 0) {
             $customisation->write();
@@ -191,6 +199,8 @@ class LineItemFactory
      * @param float  $amount The amount to modify the price by (either positive or negative)
      * @param int $customisation_id Optionally link this to a customisation
      *
+     * @throws LogicException
+     * 
      * @return PriceModifier
      */
     public function modifyPrice(
@@ -199,13 +209,21 @@ class LineItemFactory
         int $customisation_id = 0
     ): PriceModifier  {
         $item = $this->getItem();
+
+        if (empty($item)) {
+            throw new LogicException('No LineItem available, did you use `makeItem`?');
+        }
+
         $class = self::PRICE_CLASS;
 
         /** @var PriceModifier */
         $modifier =  $class::create();
         $modifier->Name = $name;
         $modifier->ModifyPrice = $amount;
-        $modifier->LineItemID = $item->ID;
+
+        $item
+            ->PriceModifications()
+            ->add($modifier);
 
         if ($customisation_id > 0) {
             $customisation = $item
@@ -216,7 +234,7 @@ class LineItemFactory
                 throw new LogicException("Invalid customisation passed to modifier");
             }
 
-            $modifier->CustomisatioID = $customisation_id;
+            $modifier->CustomisationID = $customisation_id;
         }
 
         $modifier->write();

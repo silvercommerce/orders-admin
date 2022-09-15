@@ -2,6 +2,7 @@
 
 namespace SilverCommerce\OrdersAdmin\Factory;
 
+use LogicException;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Core\Config\Configurable;
@@ -133,6 +134,13 @@ class OrderFactory
 
     /**
      * Add a line item to the current order based on the provided product
+     * 
+     * This item can also be customised (EG Variations, colours, sizes, etc)
+     * buy providing an array of custom date in the format:
+     * 
+     *  - Title: The name of the customisation
+     *  - Value: A description of the customisation
+     *  - BasePrice: Modify this item by the given amount 
      *
      * @param DataObject $product Instance of the product we want to add
      * @param int        $qty     Quanty of items to add
@@ -140,6 +148,8 @@ class OrderFactory
      * @param array      $custom  List of customisations to add
      * @param bool       $deliver Is this item deliverable?
      *
+     * @throws LogicException
+     * 
      * @return self
      */
     public function addItem(
@@ -154,9 +164,28 @@ class OrderFactory
             ->setQuantity($qty)
             ->setLock($lock)
             ->setDeliverable($deliver)
-            ->setCustomisations($custom)
             ->makeItem()
             ->write();
+        
+        // Setup customisations
+        foreach ($custom as $customisation) {
+            if (!isset($customisation['Title']) || !isset($customisation['Value'])) {
+                throw new LogicException('Customisations require a Title AND a value');
+            }
+
+            $custom_item = $factory->customise(
+                $customisation['Title'],
+                $customisation['Value']
+            );
+
+            if (isset($customisation['BasePrice'])) {
+                $factory->modifyPrice(
+                    $customisation['Title'] . ': ' .$customisation['Value'],
+                    $customisation['BasePrice'],
+                    $custom_item->ID
+                );
+            }
+        }
 
         $this->addFromLineItemFactory($factory);
 
