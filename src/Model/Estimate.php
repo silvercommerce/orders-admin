@@ -43,7 +43,10 @@ use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
+use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
+use SilverStripe\Security\Security;
+use SilverStripe\Versioned\RestoreAction;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -219,8 +222,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      */
     private static $searchable_fields = [
         'Ref',
-        'StartDate',
-        'EndDate',
         'Company',
         'FirstName',
         'Surname',
@@ -297,7 +298,15 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     ];
 
     private static $owns = [
-        'LineItems'
+        'Items'
+    ];
+
+    private static $cascade_deletes = [
+        'Items'
+    ];
+
+    private static $cascade_duplicates = [
+        'Items'
     ];
 
     private static $defaults = [
@@ -881,6 +890,20 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         return parent::getCMSFields();
     }
 
+    public function getDefaultSearchContext()
+    {
+        return OrderSearchContext::create(
+            static::class,
+            $this->scaffoldSearchFields(),
+            $this->defaultSearchFilters()
+        );
+    }
+
+    public function getModelAdminSearchContext()
+    {
+        return $this->getDefaultSearchContext();
+    }
+
     public function requireDefaultRecords()
     {
         parent::requireDefaultRecords();
@@ -1044,7 +1067,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     public function duplicate($doWrite = true, $relations = null)
     {
         $clone = parent::duplicate($doWrite, $relations);
-        
+
         // Set up items
         if ($doWrite) {
             $clone->Ref = "";
@@ -1059,10 +1082,34 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
                 $clone_item->write();
             }
         }
-        
+
         $clone->invokeWithExtensions('onAfterDuplicate', $this, $doWrite);
-        
+
         return $clone;
+    }
+
+    /**
+     * Ensure related items at the same time as we restore the estimate/invoice
+     *
+     * @return self
+     */
+    public function doRestoreToStage(): self
+    {
+        // First restore the current order from archive
+        $this->writeToStage(Versioned::DRAFT);
+
+        $restored = Versioned::get_by_stage($this->classname, Versioned::DRAFT)
+            ->byID($this->ID);
+
+        $items = Versioned::get_including_deleted(LineItem::class)
+            ->filter('Parent.ID', $restored->ID);
+
+        // loop through list and generate final items
+        foreach ($items as $item) {
+            RestoreAction::restore($item);
+        }
+
+        return $restored;
     }
 
     public function onBeforeWrite()
@@ -1142,20 +1189,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
     }
 
-    /**
-     * API Callback before this object is removed from to the DB
-     *
-     */
-    public function onBeforeDelete()
-    {
-        parent::onBeforeDelete();
-        
-        // Delete all items attached to this order
-        foreach ($this->Items() as $item) {
-            $item->delete();
-        }
-    }
-
     public function providePermissions()
     {
         return [
@@ -1200,7 +1233,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_VIEW_ESTIMATES"])) {
@@ -1224,7 +1257,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
         
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_CREATE_ESTIMATES"])) {
@@ -1248,7 +1281,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_EDIT_ESTIMATES"])) {
@@ -1272,7 +1305,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_DELETE_ESTIMATES"])) {
