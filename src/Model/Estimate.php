@@ -1219,11 +1219,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         ];
     }
 
-    /**
-     * Only order creators or users with VIEW admin rights can view
-     *
-     * @return boolean
-     */
     public function canView($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -1243,11 +1238,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         return false;
     }
 
-    /**
-     * Anyone can create orders, even guest users
-     *
-     * @return boolean
-     */
     public function canCreate($member = null, $context = [])
     {
         $extended = $this->extendedCan(__FUNCTION__, $member, $context);
@@ -1267,11 +1257,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         return false;
     }
 
-    /**
-     * Only users with EDIT admin rights can view an order
-     *
-     * @return boolean
-     */
     public function canEdit($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -1291,11 +1276,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         return false;
     }
 
-    /**
-     * No one should be able to delete an order once it has been created
-     *
-     * @return boolean
-     */
     public function canDelete($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);

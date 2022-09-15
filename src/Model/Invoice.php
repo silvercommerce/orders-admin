@@ -11,6 +11,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Security\Security;
 
 /**
  * Order objects track all the details of an order and if they were completed or
@@ -565,11 +566,6 @@ class Invoice extends Estimate implements PermissionProvider
         ];
     }
 
-    /**
-     * Only order creators or users with VIEW admin rights can view
-     *
-     * @return Boolean
-     */
     public function canView($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -579,7 +575,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_VIEW_INVOICES"])) {
@@ -589,11 +585,6 @@ class Invoice extends Estimate implements PermissionProvider
         return false;
     }
 
-    /**
-     * Anyone can create orders, even guest users
-     *
-     * @return Boolean
-     */
     public function canCreate($member = null, $context = [])
     {
         $extended = $this->extendedCan(__FUNCTION__, $member, $context);
@@ -603,7 +594,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
         
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_CREATE_INVOICES"])) {
@@ -613,11 +604,6 @@ class Invoice extends Estimate implements PermissionProvider
         return false;
     }
 
-    /**
-     * Only users with EDIT admin rights can view an order
-     *
-     * @return Boolean
-     */
     public function canEdit($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -627,7 +613,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member &&
@@ -640,11 +626,6 @@ class Invoice extends Estimate implements PermissionProvider
         return false;
     }
 
-    /**
-     * Only users with EDIT admin rights can view an order
-     *
-     * @return Boolean
-     */
     public function canChangeStatus($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -654,7 +635,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_STATUS_INVOICES"])) {
@@ -664,11 +645,6 @@ class Invoice extends Estimate implements PermissionProvider
         return false;
     }
 
-    /**
-     * No one should be able to delete an order once it has been created
-     *
-     * @return Boolean
-     */
     public function canDelete($member = null)
     {
         $extended = $this->extendedCan(__FUNCTION__, $member);
@@ -678,7 +654,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_DELETE_INVOICES"])) {
