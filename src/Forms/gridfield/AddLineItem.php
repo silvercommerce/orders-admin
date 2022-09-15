@@ -12,15 +12,15 @@ use SilverStripe\View\ArrayData;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\HasManyList;
-use SilverStripe\Forms\HiddenField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\HTTPResponse;
-use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverStripe\Forms\GridField\GridField;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverStripe\Forms\GridField\GridField_FormAction;
-use Doctrine\Instantiator\Exception\UnexpectedValueException;
+use SilverCommerce\OrdersAdmin\Factory\LineItemFactory;
+use SilverCommerce\OrdersAdmin\Factory\OrderFactory;
+use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 
 /**
@@ -85,25 +85,6 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
      **/
     protected $create_field = "Title";
 
-    /**
-     * Fields that we are mapping from the source object to our item
-     *
-     * @var array
-     **/
-    protected $source_fields = [
-        "Title" => "Title",
-        "StockID" => "StockID",
-        "BasePrice" => "BasePrice"
-    ];
-
-    /**
-     * This is the field that we attempt to match a TAX rate to
-     * when setting up an order item
-     *
-     * @var string
-     **/
-    protected $source_tax_field = "TaxPercentage";
-
     public function getSourceClass()
     {
         return $this->source_class;
@@ -159,28 +140,6 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
         return $this;
     }
 
-    public function getSourceFields()
-    {
-        return $this->source_fields;
-    }
-
-    public function setSourceFields($fields)
-    {
-        $this->source_fields = $fields;
-        return $this;
-    }
-
-    public function getSourceTaxField()
-    {
-        return $this->source_tax_field;
-    }
-
-    public function setSourceTaxField($field)
-    {
-        $this->source_tax_field = $field;
-        return $this;
-    }
-
     public function getSearchFilter()
     {
         return $this->search_filter;
@@ -191,7 +150,6 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
         $this->search_filter = $search_filter;
         return $this;
     }
-
 
     /**
      * Handles the add action for the given DataObject
@@ -208,6 +166,10 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
         $data
     ) {
         if ($actionName == "addto") {
+            $order = $grid
+                ->getForm()
+                ->getController()
+                ->getRecord();
             $obj = null;
             $source_class = $this->getSourceClass();
             $source_item = null;
@@ -215,8 +177,6 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
             $list = $grid->getList();
             $filter = [];
             $string = "";
-            $stock_id_param = LineItem::STOCKID;
-            $stock_id = null;
 
             if (!class_exists($source_class)) {
                 throw new LogicException('No source class set');
@@ -241,54 +201,40 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
                     ->first();
             }
 
-            // If no product found, then create new item
+            // If no product found, then create new line item
+            // from an empty product
             if (empty($source_item)) {
-                $this->createNewItem($grid, $string);
+                $obj = $this->createNewItem($grid, $string);
+                $list->add($obj);
                 return;
             }
 
-            $stock_id = $source_item->dbObject($stock_id_param);
-
-            if (!empty($stock_id)) {
-                // first ensure that this item isn't already
-                // added, if so, increment
-                $stock_id = $stock_id->getValue();
-
-                $obj = $list
-                    ->filter($stock_id_param, $stock_id)
-                    ->first();
+            if (is_a($order, Invoice::class)) {
+                $is_invoice = true;
+            } else {
+                $is_invoice = false;
             }
 
-            // If an item already existing on this order
-            // just update the quantity and reload 
-            if (!empty($obj) && $obj->canCreate()) {
-                $curr_qty = ($obj->Quantity) ? $obj->Quantity : 0;
+            $factory = OrderFactory::create(
+                $is_invoice,
+                $order->ID
+            );
 
-                $obj->setCastedField(
-                    "Quantity",
-                    $curr_qty + 1
-                );
+            $item_factory = LineItemFactory::create()
+                ->setParent($order)
+                ->setProduct($source_item)
+                ->setQuantity(1)
+                ->makeItem();
 
-                $obj->write();
-            }
-
-            // If no existing item has been found, create
-            // a new one with linked source data
-            if (empty($obj)) {
-                $obj = $this->createNewItem(
-                    $grid,
-                    $string,
-                    $source_item
-                );
-            }
+            $factory->addFromLineItemFactory($item_factory);
+            $factory->write();
 
             return;
         }
     }
 
     /**
-     * Create a new line item and link it to the current
-     * list then return
+     * Create a new line item and return
      *
      * @param GridField $grid_field
      * @param string $title
@@ -296,48 +242,29 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
      * 
      * @return LineItem
      */
-    protected function createNewItem(GridField $grid, string $title, DataObject $source = null)
-    {
-        /** @var HasManyList */
-        $list = $grid->getList();
-        $class = $grid->getModelClass();
+    protected function createNewItem(
+        GridField $grid,
+        string $title,
+        DataObject $source = null
+    ): LineItem {
         $field = $this->getCreateField();
+        $product_class = $this->getSourceClass();
 
-        $item = $class::create([
-            $field => $title,
-            'Quantity' => 1
-        ]);
-
+        // Slightly hacky way to bypas the product class
+        // requirements in the factory
         if (empty($source)) {
-            $item->write();
-            $list->add($item);
-            return $item;
+            $source = $product_class::create([
+                $field => $title
+            ]);
         }
 
-        foreach ($this->getSourceFields() as $obj_field => $source_field) {
-            $value = $source->relField($source_field);
+        $factory = LineItemFactory::create()
+            ->setQuantity(1)
+            ->setProduct($source)
+            ->makeItem()
+            ->write();
 
-            if (empty($value)) {
-                continue;
-            }
-
-            $item->setCastedField(
-                $obj_field,
-                $source->$source_field
-            );
-        }
-
-        // Setup the tax
-        $tax_field = $this->getSourceTaxField();
-        $tax = TaxRate::get()->find("Rate", $source->$tax_field);
-        if (!empty($tax)) {
-            $item->TaxRateID = $tax->ID;
-        }
-
-        $item->write();
-        $list->add($item);
-
-        return $item;
+        return $factory->getItem();
     }
 
     /**
