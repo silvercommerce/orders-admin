@@ -41,6 +41,7 @@ use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
 use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
+use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 
@@ -760,20 +761,19 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
                 "Prefix",
                 "DisableNegative"
             ]);
-            
+
             $fields->addFieldsToTab(
                 "Root.Main",
                 [
-                    // Items field
                     ReadOnlyGridField::create(
                         "Items",
                         "",
                         $this->Items(),
-                        $config = GridFieldConfig::create()
+                        GridFieldConfig::create()
                             ->addComponents(
                                 new GridFieldButtonRow('before'),
                                 new GridFieldTitleHeader(),
-                                new GridFieldEditableColumns(),
+                                new LineItemEditableColumns(),
                                 new GridFieldEditButton(),
                                 new GridFieldDetailForm(),
                                 new GridFieldDeleteAction(),

@@ -2,12 +2,12 @@
 
 namespace SilverCommerce\OrdersAdmin\Model;
 
-use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 use SilverStripe\i18n\i18n;
 use SilverStripe\Assets\Image;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
@@ -24,10 +24,12 @@ use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
 use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
+use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\LiteralField;
 
 /**
  * A LineItem is a single line item on an order, extimate or even in
@@ -105,13 +107,13 @@ class LineItem extends DataObject implements TaxableProvider
         'Stocked'           => 'Boolean',
         'Deliverable'       => 'Boolean',
 
-        // Polymorphic-ish fields to handle storing product data from versioned table
+        // Polymorphic-ish filds to handle storing product data from versioned table
         'ProductID' => 'Int',
         'ProductClass' => 'Varchar(255)',
         'ProductVersion' => 'Int',
 
         // Legacy fields
-        "BasePrice"     => "Decimal(9,3)", 
+        "BasePrice"     => "Decimal(9,3)",
         "Price"         => "Currency",
     ];
 
@@ -166,7 +168,7 @@ class LineItem extends DataObject implements TaxableProvider
         "Quantity",
         "Title",
         "StockID",
-        "BasePrice",
+        "UnmodifiedPrice",
         "TaxRateID",
         "PriceModificationString"
     ];
@@ -176,6 +178,23 @@ class LineItem extends DataObject implements TaxableProvider
         "TaxRateID"         => "Tax",
         "PriceModificationString" => "Modifications"
     ];
+
+    /**
+     * If this object is linked to an existing object,
+     * return that, else return the default
+     *
+     * @return string
+     */
+    public function getStockID(): string
+    {
+        $product = $this->findStockItem();
+
+        if ($product->exists()) {
+            return (string)$product->StockID;
+        }
+
+        return (string)$this->dbObject('StockID');
+    }
 
     /**
      * Get the basic price for this line without
@@ -517,7 +536,9 @@ class LineItem extends DataObject implements TaxableProvider
      */
     public function findStockItem(): DataObject
     {
-        $stock_id = $this->StockID;
+        $stock_id = $this
+            ->dbObject('StockID')
+            ->getValue();
         $class = $this->ProductClass;
         $id = $this->ProductID;
         $version = $this->ProductVersion;
