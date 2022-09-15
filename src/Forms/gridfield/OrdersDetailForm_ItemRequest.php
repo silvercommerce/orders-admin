@@ -76,10 +76,11 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         $record = $this->record;
         $can_create = $record->canCreate();
         $can_edit = $record->canEdit();
-        $can_change_status = $record->canChangeStatus();
 
         // Deal with Order objects
         if ($record instanceof Invoice) {
+            $can_change_status = $record->canChangeStatus();
+
             // replace HasOneButtonField with ReadOnly field
             // This is to prevent an error where the Button's object attempts to render
             if (!$can_edit) {
@@ -184,7 +185,6 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         $record = $this->record;
         $can_create = $record->canCreate();
         $can_edit = $record->canEdit();
-        $can_change_status = $record->canChangeStatus();
 
         // Deal with Estimate objects
         if ($record->ClassName == Estimate::class
@@ -215,7 +215,7 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         // If user cannot edit, but can change status
         // add change status button
         if ($record instanceof Invoice && $record->exists()
-            && !$can_edit && $can_change_status
+            && !$can_edit && $record->canChangeStatus()
         ) {
             $major_actions->unshift(
                 FormAction::create('doChangeStatus', _t('OrdersAdmin.Save', 'Save'))
