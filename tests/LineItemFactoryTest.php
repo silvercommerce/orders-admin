@@ -157,7 +157,7 @@ class LineItemFactoryTest extends SapphireTest
 
         $this->assertNotEmpty($customisation);
         $this->assertInstanceOf(LineItemCustomisation::class, $customisation);
-        $this->assertEquals("Colour", $customisation->Name);
+        $this->assertEquals("Colour", $customisation->Title);
         $this->assertEquals("Blue", $customisation->Value);
 
         $this->assertCount(1, $factory->getItem()->Customisations());
