@@ -36,7 +36,8 @@ class PriceModifier extends DataObject
 
     private static $summary_fields = [
         'Name',
-        'ModifyPrice'
+        'ModifyPrice',
+        'CustomisationID'
     ];
 
     private static $field_labels = [

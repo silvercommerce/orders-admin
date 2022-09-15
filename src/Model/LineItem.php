@@ -9,6 +9,7 @@ use SilverStripe\Dev\Deprecation;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\HasManyList;
+use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Versioned\Versioned;
@@ -18,6 +19,7 @@ use SilverCommerce\TaxAdmin\Traits\Taxable;
 use SilverStripe\Core\Manifest\ModuleLoader;
 use SilverStripe\Subsites\State\SubsiteState;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
+use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldEditButton;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
 use SilverStripe\ORM\FieldType\DBHTMLText as HTMLText;
@@ -25,11 +27,11 @@ use SilverCommerce\TaxAdmin\Interfaces\TaxableProvider;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
+use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemRelationConfig;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
-use SilverStripe\Forms\LiteralField;
 
 /**
  * A LineItem is a single line item on an order, extimate or even in
@@ -252,22 +254,37 @@ class LineItem extends DataObject implements TaxableProvider
      */
     public function getCMSFields()
     {
-        $this->beforeUpdateCMSFields(function ($fields) {
+        $this->beforeUpdateCMSFields(function (FieldList $fields) {
             $config = SiteConfig::current_site_config();
+            $product = $this->findStockItem();
 
-            $fields->removeByName(
-                [
-                    'Customisation',
-                    'Price',
-                    'TaxID'
-                ]
-            );
+            $fields->removeByName([
+                'Customisation',
+                'Price',
+                'TaxID',
+                'ProductID',
+                'ProductClass',
+                'ProductVersion',
+                'BasePrice'
+            ]);
 
             $fields->addFieldToTab(
                 "Root.Main",
                 ReadonlyField::create("Key"),
                 "Title"
             );
+
+            // If a product is set, remove unmodified price and
+            // swap with disabled product price
+            if ($product->exists()) {
+                $fields->replaceField(
+                    'UnmodifiedPrice',
+                    ReadonlyField::create(
+                        'ProductBasePrice',
+                        $this->fieldLabel('BasePrice')
+                    )->setValue($product->BasePrice)
+                );
+            }
 
             $fields->addFieldToTab(
                 "Root.Main",
@@ -276,28 +293,19 @@ class LineItem extends DataObject implements TaxableProvider
                     $this->fieldLabel("TaxRate"),
                     $config->TaxRates()->map()
                 ),
-                "Quantity"
+                "Locked"
             );
 
-            // Change unlink button to remove on customisation
             $custom_field = $fields->dataFieldByName("Customisations");
 
             if ($custom_field) {
-                $config = $custom_field->getConfig();
-                $config
-                    ->removeComponentsByType(GridFieldDeleteAction::class)
-                    ->removeComponentsByType(GridFieldDataColumns::class)
-                    ->removeComponentsByType(GridFieldEditButton::class)
-                    ->removeComponentsByType(GridFieldAddNewButton::class)
-                    ->removeComponentsByType(GridFieldAddExistingAutocompleter::class)
-                    ->addComponents(
-                        new GridFieldEditableColumns(),
-                        new GridFieldAddNewInlineButton(),
-                        new GridFieldEditButton(),
-                        new GridFieldDeleteAction()
-                    );
-                
-                    $custom_field->setConfig($config);
+                $custom_field->setConfig(LineItemRelationConfig::create());
+            }
+
+            $modifiers_field = $fields->dataFieldByName("PriceModifications");
+
+            if ($modifiers_field) {
+                $modifiers_field->setConfig(LineItemRelationConfig::create());
             }
 
             $fields->addFieldToTab(
