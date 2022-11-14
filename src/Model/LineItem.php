@@ -144,6 +144,10 @@ class LineItem extends DataObject implements TaxableProvider
         'Parent'
     ];
 
+    private static $cascade_deletes = [
+        'Customisations'
+    ];
+
     private static $defaults = [
         "Quantity"      => 1,
         "Locked"        => false,
@@ -668,22 +672,6 @@ class LineItem extends DataObject implements TaxableProvider
     }
 
     /**
-     * Generate a key based on this item and its customisations
-     *
-     * @return string
-     */
-    public function generateKey()
-    {
-        // Generate a unique item key based on the current ID and customisations
-        $key = base64_encode(
-            json_encode(
-                $this->Customisations()->map("Title", "Value")->toArray()
-            )
-        );
-        return $this->StockID . ':' . $key;
-    }
-
-    /**
      * Only order creators or users with VIEW admin rights can view
      *
      * @return Boolean
@@ -766,17 +754,6 @@ class LineItem extends DataObject implements TaxableProvider
     }
 
     /**
-     * Pre-write tasks
-     *
-     * @return void
-     */
-    public function onBeforeWrite()
-    {
-        parent::onBeforeWrite();
-        $this->Key = $this->generateKey();
-    }
-
-    /**
      * Clean up DB on deletion
      *
      * @return void
@@ -789,7 +766,6 @@ class LineItem extends DataObject implements TaxableProvider
             $customisation->delete();
         }
     }
-
 
     /********* DEPRECIATED METHODS ***********/
     public function getCustomisationAndPriceList()
@@ -824,5 +800,16 @@ class LineItem extends DataObject implements TaxableProvider
         Deprecation::notice('2.0', 'Image method will be depretiated');
 
         return $this->getImage();
+    }
+
+    public function generateKey()
+    {
+        // Generate a unique item key based on the current ID and customisations
+        $key = base64_encode(
+            json_encode(
+                $this->Customisations()->map("Title", "Value")->toArray()
+            )
+        );
+        return $this->StockID . ':' . $key;
     }
 }
