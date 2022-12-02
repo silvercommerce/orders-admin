@@ -207,15 +207,17 @@ class OrderFactory
         // First check if this item exists
         $items = $this->getItems();
         $existing = null;
+        $key = $factory->getKey();
+        $qty = $factory->getQuantity();
 
         if ($items->count() > 0) {
-            $existing = $items->find("Key", $factory->getKey());
+            $existing = $items->find("Key", $key);
         }
 
         // If object already in the cart, update quantity and delete new item
         // else add as usual
         if (isset($existing)) {
-            $this->updateItem($existing->Key, $factory->getQuantity());
+            $this->updateItem($existing->Key, $qty);
             $factory->delete();
         } else {
             if (!$factory->checkStockLevel()) {

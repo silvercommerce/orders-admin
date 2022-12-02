@@ -63,6 +63,13 @@ class LineItemFactory
     protected $parent;
 
     /**
+     * The stock ID of the current item
+     *
+     * @var string
+     */
+    protected $stock_id = "";
+
+    /**
      * DataObject that will act as the product
      *
      * @var \SilverStripe\ORM\DataObject
@@ -137,9 +144,9 @@ class LineItemFactory
         $item = $class::create($this->getItemArray());
 
         // Setup Key
-        $item->Key = $item->generateKey();
+        $item->Key = $this->generateKey();
         $this->setItem($item);
-        
+
         return $this;
     }
 
@@ -188,6 +195,7 @@ class LineItemFactory
         }
 
         $customisation->write();
+        $this->update();
         return $customisation;
     }
 
@@ -250,7 +258,7 @@ class LineItemFactory
     {
         $item = $this->getItem();
         $item->update($this->getItemArray());
-        $item->Key = $item->generateKey();
+        $item->Key = $this->generateKey();
         $this->setItem($item);
 
         return $this;
@@ -348,6 +356,7 @@ class LineItemFactory
         // Setup initial line item
         return [
             'Title' => $product->Title,
+            'UnmodifiedPrice' => $product->BasePrice,
             'TaxRateID' => $tax_rate->ID,
             'Quantity' => $qty,
             'Stocked' => $stocked,
@@ -357,6 +366,26 @@ class LineItemFactory
             'ProductID' => $product->ID,
             'ProductVersion' => $product->Version
         ];
+    }
+
+    protected function generateKey(): string
+    {
+        $stock_id = $this->getStockID();
+        $item = $this->getItem();
+
+        if (empty($item)) {
+            return $stock_id;
+        }
+
+        $customisations = $item
+            ->Customisations()
+            ->map("Title", "Value")
+            ->toArray();
+
+        // Generate a unique item key based on the current ID and customisations
+        $key = base64_encode(json_encode($customisations));
+
+        return $stock_id . ':' . $key;
     }
 
     /**
@@ -494,6 +523,11 @@ class LineItemFactory
     public function setProduct(DataObject $product)
     {
         $this->product = $product;
+
+        if (!empty($product->StockID)) {
+            $this->setStockID($product->StockID);
+        }
+
         return $this;
     }
 
@@ -624,6 +658,25 @@ class LineItemFactory
     public function setParent(Estimate $parent)
     {
         $this->parent = $parent;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */ 
+    public function getStockID(): string
+    {
+        return $this->stock_id;
+    }
+
+    /**
+     * @param string $stock_id
+     *
+     * @return self
+     */ 
+    public function setStockID(string $stock_id): self
+    {
+        $this->stock_id = $stock_id;
         return $this;
     }
 
