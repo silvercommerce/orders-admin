@@ -3,9 +3,12 @@
 namespace SilverCommerce\OrdersAdmin\Model;
 
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Forms\DropdownField;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
+use SilverCommerce\OrdersAdmin\Tasks\NotificationMigrationTask;
 
 class Notification extends DataObject
 {
@@ -39,6 +42,18 @@ class Notification extends DataObject
         "VendorEmail",
         "CustomSubject"
     ];
+
+    public function requireDefaultRecords()
+    {
+        parent::requireDefaultRecords();
+
+        $run_migration = NotificationMigrationTask::config()->run_during_dev_build;
+
+        if ($run_migration) {
+            $request = Injector::inst()->get(HTTPRequest::class);
+            NotificationMigrationTask::create()->run($request);
+        }
+    }
 
     public function getCMSFields()
     {

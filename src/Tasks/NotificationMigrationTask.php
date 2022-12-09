@@ -43,7 +43,7 @@ class NotificationMigrationTask extends MigrationTask
 
         $total = $notifications->count();
 
-        $this->log("- Migrating: {$migrated}/{$total} Notifications", true);
+        $this->log("- Migrating: {$migrated}/{$total} notifications", true);
 
         /** @var LegacyNotification $notification */
         foreach ($notifications as $notification) {
@@ -99,10 +99,10 @@ class NotificationMigrationTask extends MigrationTask
             $notification->delete();
             $migrated++;
 
-            $this->log("- Migrating: {$migrated}/{$total} Notifications", true);
+            $this->log("- Migrating: {$migrated}/{$total} notifications", true);
         }
 
-        $this->log("- Migrating: {$migrated} Notifications", false);
+        $this->log("- Migrating: {$migrated}/{$total} notifications", false);
     }
 
     /**
