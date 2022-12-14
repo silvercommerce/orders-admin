@@ -6,10 +6,10 @@ use StatusChangeRule;
 use SilverStripe\Control\Director;
 use SilverStripe\Dev\MigrationTask;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
-use ilateral\SilverStripe\Notifier\Model\Notification;
 use SilverCommerce\OrdersAdmin\Notifications\InvoiceVendorEmail;
 use SilverCommerce\OrdersAdmin\Notifications\InvoiceCustomerEmail;
 use SilverCommerce\OrdersAdmin\Model\Notification as LegacyNotification;
+use SilverCommerce\OrdersAdmin\Notifications\InvoiceNotification;
 
 class NotificationMigrationTask extends MigrationTask
 {
@@ -50,8 +50,8 @@ class NotificationMigrationTask extends MigrationTask
             $customer = false;
             $vendor = false;
 
-            /** @var Notification */
-            $new = Notification::create();
+            /** @var InvoiceNotification */
+            $new = InvoiceNotification::create();
             $new->BaseClassName = Invoice::class;
             $new->write();
 
