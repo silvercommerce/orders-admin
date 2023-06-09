@@ -1073,14 +1073,6 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
             $clone->Ref = "";
             $clone->Prefix = "";
             $clone->write();
-
-            foreach ($this->Items() as $item) {
-                $item_class = $item->ClassName;
-                $clone_item = new $item_class($item->toMap(), false, $this->model);
-                $clone_item->ID = 0;
-                $clone_item->ParentID = $clone->ID;
-                $clone_item->write();
-            }
         }
 
         $clone->invokeWithExtensions('onAfterDuplicate', $this, $doWrite);
