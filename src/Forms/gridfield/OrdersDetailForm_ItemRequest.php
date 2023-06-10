@@ -249,25 +249,19 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
             ->getList()
             ->add($new_record);
 
+        // Ensure linking for redirect relates to new record
+        $this->record = $new_record;
+
         $message = sprintf(
             _t('OrdersAdmin.Duplicated', 'Duplicated %s %s'),
             $record->singular_name(),
             '"'.Convert::raw2xml($record->Title).'"'
         );
 
-        $toplevelController = $this->getToplevelController();
+        $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
 
-        if ($toplevelController && $toplevelController instanceof LeftAndMain) {
-            $backForm = $toplevelController->getEditForm();
-            $backForm->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
-        } else {
-            $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
-        }
-        
-        $toplevelController = $this->getToplevelController();
-        $toplevelController->getRequest()->addHeader('X-Pjax', 'Content');
-
-        return $toplevelController->redirect($this->getBacklink(), 302);
+        // Redirect after save
+        return $this->redirectAfterSave(true);
     }
     
     public function doConvert($data, $form)
