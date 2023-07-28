@@ -230,3 +230,7 @@
 
 * Ensure that when an estimate is converted to an invoice, it is actually an estimate
 * Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
+## 1.4.5
+
+* Add search context from 1.5 branch
