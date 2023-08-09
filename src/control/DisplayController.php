@@ -4,6 +4,8 @@ namespace SilverCommerce\OrdersAdmin\Control;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use InvalidArgumentException;
+use LeKoala\Uuid\UuidExtension;
 use SilverStripe\Core\Path;
 use SilverStripe\Assets\Image;
 use SilverStripe\Security\Member;
@@ -62,17 +64,52 @@ class DisplayController extends Controller
         parent::init();
 
         $member = Security::getCurrentUser();
-        $object = Estimate::get()
-            ->byID($this->getrequest()->param("ID"));
+        $request = $this->getRequest();
+        $id = $request->param("ID");
+        $key = $request->param("OtherID");
+        $is_uuid = true;
+        $object = null;
 
-        if ($object && (
-            ($member && $object->canView($member)) ||
-            ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
-        )) {
-            $this->object = $object;
-        } else {
-            return Security::permissionFailure();
+        // If needed keys are not present, return 404
+        if (empty($id) || empty($key)) {
+            return $this->httpError(404);
         }
+
+        // Is ID a UUID or a legacy ID format?
+        try {
+            UuidExtension::getUuidFormat($id);
+        } catch (InvalidArgumentException $e) {
+            $is_uuid = false;
+        }
+
+        // Either try and retrieve the object by the relevant
+        // format
+        if ($is_uuid) {
+            $object = UuidExtension::getByUuid(Estimate::class, $id);
+        } elseif ((int)$id > 0) {
+            $object = Estimate::get_by_id($id);
+        }
+
+        // Ensure order is available and has an access key
+        if (empty($object) || empty($object->AccessKey)) {
+            return $this->httpError(500);
+        }
+
+        // If a user is currently set and they can view
+        // continue
+        if (!empty($member) && !$object->canView($member)) {
+            $this->object = $object;
+            return;
+        }
+
+        // If not logged in, ensure the key is valid
+        if ($object->AccessKey === $key) {
+            $this->object = $object;
+            return;
+        }
+
+        // Finally default to permission failier
+        return Security::permissionFailure();
     }
 
     /**
@@ -129,7 +166,7 @@ class DisplayController extends Controller
         
         return $string;
     }
-    
+
     /**
      * Get a relative link to anorder or invoice
      *
@@ -148,7 +185,7 @@ class DisplayController extends Controller
             $action
         );
     }
-    
+
     /**
      * Get an absolute link to an order or invoice
      *
@@ -190,7 +227,7 @@ class DisplayController extends Controller
     public function invoice(HTTPRequest $request)
     {
         $config = SiteConfig::current_site_config();
-        
+
         $this->customise([
             "Type" => "Invoice",
             "HeaderContent" => $config->dbObject("InvoiceHeaderContent"),
@@ -201,7 +238,7 @@ class DisplayController extends Controller
         ]);
 
         $this->extend("updateInvoice");
-        
+
         return $this->render();
     }
 
@@ -233,7 +270,7 @@ CSS
         $pdf->stream("{$this->object->FullRef}.pdf");
         exit();
     }
-    
+
     public function estimate(HTTPRequest $request)
     {
         $config = SiteConfig::current_site_config();
@@ -247,7 +284,7 @@ CSS
         ]);
 
         $this->extend("updateEstimate");
-        
+
         return $this->render();
     }
 

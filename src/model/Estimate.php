@@ -276,7 +276,7 @@ class Estimate extends DataObject implements PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink("estimate"),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
@@ -291,7 +291,7 @@ class Estimate extends DataObject implements PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink("estimatepdf"),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
