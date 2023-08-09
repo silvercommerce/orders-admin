@@ -4,6 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 
 use DateTime;
 use SilverStripe\i18n\i18n;
+use LeKoala\Uuid\UuidExtension;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
@@ -15,12 +16,16 @@ use SilverStripe\Forms\HeaderField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\LiteralField;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Security\Permission;
 use SilverStripe\Versioned\Versioned;
+use SilverStripe\Forms\CompositeField;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\FieldType\DBCurrency;
+use SilverShop\HasOneField\HasOneButtonField;
 use SilverStripe\Security\PermissionProvider;
 use SilverCommerce\ContactAdmin\Model\Contact;
 use SilverCommerce\TaxAdmin\Helpers\MathsHelper;
@@ -32,17 +37,13 @@ use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
+use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
+use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
-use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
-use SilverStripe\Forms\CompositeField;
-use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
-use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Control\HTTPRequest;
-use SilverShop\HasOneField\HasOneButtonField;
 
 /**
  * Represents an estimate (an unofficial quotation that has not yet been paid for)
@@ -240,6 +241,7 @@ class Estimate extends DataObject implements PermissionProvider
      * @config
      */
     private static $extensions = [
+        UuidExtension::class,
         Versioned::class . '.versioned',
     ];
 

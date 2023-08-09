@@ -37,7 +37,8 @@
         "silvercommerce/tax-admin": "^1.4",
         "silvercommerce/contact-admin": "^1.0",
         "silvercommerce/versionhistoryfield": "^1.0",
-        "silvershop/silverstripe-hasonefield": "^3.0"
+        "silvershop/silverstripe-hasonefield": "^3.0",
+        "lekoala/silverstripe-uuid": "^1.1"
     },
     "require-dev": {
         "silvercommerce/tax-admin": "1.*@dev",
