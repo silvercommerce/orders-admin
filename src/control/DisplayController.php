@@ -4,18 +4,16 @@ namespace SilverCommerce\OrdersAdmin\Control;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use SilverStripe\Core\Path;
 use InvalidArgumentException;
 use LeKoala\Uuid\UuidExtension;
-use SilverStripe\Core\Path;
-use SilverStripe\Assets\Image;
-use SilverStripe\Security\Member;
 use SilverStripe\Control\Director;
 use SilverStripe\Security\Security;
 use SilverStripe\View\Requirements;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Control\HTTPStreamResponse;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverCommerce\OrdersAdmin\Model\Estimate;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
@@ -92,7 +90,7 @@ class DisplayController extends Controller
 
         // Ensure order is available and has an access key
         if (empty($object) || empty($object->AccessKey)) {
-            return $this->httpError(500);
+            return $this->httpError(403);
         }
 
         // If a user is currently set and they can view
@@ -226,6 +224,12 @@ class DisplayController extends Controller
 
     public function invoice(HTTPRequest $request)
     {
+        $object = $this->object;
+
+        if (!is_a($object, Invoice::class)) {
+            return $this->httpError(404);
+        }
+
         $config = SiteConfig::current_site_config();
 
         $this->customise([
@@ -234,7 +238,7 @@ class DisplayController extends Controller
             "FooterContent" => $config->dbObject("InvoiceFooterContent"),
             "Title" => _t("Orders.InvoiceTitle", "Invoice"),
             "MetaTitle" => _t("Orders.InvoiceTitle", "Invoice"),
-            "Object" => $this->object
+            "Object" => $object
         ]);
 
         $this->extend("updateInvoice");
@@ -260,6 +264,8 @@ class DisplayController extends Controller
         $style
 CSS
         );
+
+        /** @var DBHTMLText */
         $result = $this->invoice($request);
         $html = $result->getValue();
         $pdf = $this->generate_pdf($html);
@@ -273,6 +279,12 @@ CSS
 
     public function estimate(HTTPRequest $request)
     {
+        $object = $this->object;
+
+        if (!is_a($object, Estimate::class)) {
+            return $this->httpError(404);
+        }
+
         $config = SiteConfig::current_site_config();
         $this->customise([
             "Type" => "Estimate",
@@ -280,7 +292,7 @@ CSS
             "FooterContent" => $config->dbObject("EstimateFooterContent"),
             "Title" => _t("Orders.EstimateTitle", "Estimate"),
             "MetaTitle" => _t("Orders.EstimateTitle", "Estimate"),
-            "Object" => $this->object
+            "Object" => $object
         ]);
 
         $this->extend("updateEstimate");
@@ -296,6 +308,8 @@ CSS
         $style
 CSS
         );
+
+        /** @var DBHTMLText */
         $result = $this->estimate($request);
         $html = $result->getValue();
 
