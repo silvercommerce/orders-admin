@@ -93,9 +93,8 @@ class DisplayController extends Controller
             return $this->httpError(403);
         }
 
-        // If a user is currently set and they can view
-        // continue
-        if (!empty($member) && !$object->canView($member)) {
+        // If user is set and can view, then return
+        if (!empty($member) && $object->canView($member)) {
             $this->object = $object;
             return;
         }
