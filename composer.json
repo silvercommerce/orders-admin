@@ -42,7 +42,7 @@
     },
     "require-dev": {
         "silvercommerce/tax-admin": "1.*@dev",
-        "silvercommerce/catalogue-admin": "1.*@dev",
+        "silvercommerce/catalogue-admin": "1.*dev",
         "silvercommerce/stock": "1.*@dev",
         "i-lateral/silverstripe-gridfield-addons":"2.*@dev",
         "phpunit/phpunit": "^9.5",
