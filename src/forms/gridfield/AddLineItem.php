@@ -34,7 +34,8 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @author Michael Strong <github@michaelstrong.co.uk>
 **/
 class AddLineItem extends GridFieldAddExistingAutocompleter
-{   
+{
+
     /**
      * Default field to create the dataobject from.
      *
@@ -260,7 +261,7 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
             }
 
             // If an item already existing on this order
-            // just update the quantity and reload 
+            // just update the quantity and reload
             if (!empty($obj) && $obj->canCreate()) {
                 $curr_qty = ($obj->Quantity) ? $obj->Quantity : 0;
 
@@ -293,7 +294,7 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
      * @param GridField $grid_field
      * @param string $title
      * @param DataObject $source
-     * 
+     *
      * @return LineItem
      */
     protected function createNewItem(GridField $grid, string $title, DataObject $source = null)

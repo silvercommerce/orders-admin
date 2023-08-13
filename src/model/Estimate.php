@@ -595,7 +595,7 @@ class Estimate extends DataObject implements PermissionProvider
      *
      * This method writes and reloads the object so
      * we are now working with the new object type
-     * 
+     *
      * If the current object is already a type of
      * invoice, we just return the current object
      * with no further action
