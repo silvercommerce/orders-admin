@@ -53,6 +53,14 @@
             "client/dist"
         ]
     },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "silverstripe/vendor-plugin": true,
+            "php-http/discovery": true,
+            "silverstripe/recipe-plugin": true
+        }
+    },
     "autoload": {
         "psr-4": {
             "SilverCommerce\\OrdersAdmin\\": "src/",
