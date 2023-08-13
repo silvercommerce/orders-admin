@@ -30,21 +30,11 @@ class LineItemTest extends SapphireTest
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         i18n::set_locale('en_GB');
-    }
-
-    /**
-     * Clean up after tear down
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
     }
     
     /**

@@ -25,26 +25,6 @@ class InvoiceTest extends SapphireTest
     ];
 
     /**
-     * Add some extra functionality on construction
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
-     * Clean up after tear down
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
-    /**
      * Test that mark paid flags the order as paid
      *
      * @return void
