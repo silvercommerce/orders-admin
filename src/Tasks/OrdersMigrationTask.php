@@ -173,6 +173,12 @@ class OrdersMigrationTask extends MigrationTask
             return $estimate->write();
         }
 
+        // Manually set the UUID
+        if (empty($estimate->Uuid)) {
+            $estimate->assignNewUuid();
+            return $estimate->write();
+        }
+
         return 0;
     }
 
