@@ -48,9 +48,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(0, $item_none->TaxPercentage);
-        $this->assertEquals(5, $item_reduced->TaxPercentage);
-        $this->assertEquals(20, $item_vat->TaxPercentage);
+        $this->assertEqualsWithDelta(0, $item_none->TaxPercentage, 0.001);
+        $this->assertEqualsWithDelta(5, $item_reduced->TaxPercentage, 0.001);
+        $this->assertEqualsWithDelta(20, $item_vat->TaxPercentage, 0.001);
     }
 
     /**
@@ -64,9 +64,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(6.50, $item_none->UnitPrice);
-        $this->assertEquals(5.99, $item_reduced->UnitPrice);
-        $this->assertEquals(5.99, $item_vat->UnitPrice);
+        $this->assertEqualsWithDelta(6.50, $item_none->UnitPrice, 0.0001);
+        $this->assertEqualsWithDelta(5.99, $item_reduced->UnitPrice, 0.0001);
+        $this->assertEqualsWithDelta(5.99, $item_vat->UnitPrice, 0.0001);
     }
 
     /**
@@ -80,9 +80,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(0, $item_none->UnitTax);
-        $this->assertEquals(0.2995, $item_reduced->UnitTax);
-        $this->assertEquals(1.198, $item_vat->UnitTax);
+        $this->assertEqualsWithDelta(0, $item_none->UnitTax, 0.01);
+        $this->assertEqualsWithDelta(0.2995, $item_reduced->UnitTax, 0.00001);
+        $this->assertEqualsWithDelta(1.198, $item_vat->UnitTax, 0.0001);
     }
 
     /**
@@ -96,9 +96,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(6.5, $item_none->UnitTotal);
-        $this->assertEquals(6.2895, $item_reduced->UnitTotal);
-        $this->assertEquals(7.188, $item_vat->UnitTotal);
+        $this->assertEqualsWithDelta(6.5, $item_none->UnitTotal, 0.001);
+        $this->assertEqualsWithDelta(6.2895, $item_reduced->UnitTotal, 0.00001);
+        $this->assertEqualsWithDelta(7.188, $item_vat->UnitTotal, 0.0001);
     }
 
     /**
@@ -112,9 +112,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(13.00, $item_none->SubTotal);
-        $this->assertEquals(11.98, $item_reduced->SubTotal);
-        $this->assertEquals(11.98, $item_vat->SubTotal);
+        $this->assertEqualsWithDelta(13.00, $item_none->SubTotal, 0.001);
+        $this->assertEqualsWithDelta(11.98, $item_reduced->SubTotal, 0.001);
+        $this->assertEqualsWithDelta(11.98, $item_vat->SubTotal, 0.001);
     }
 
     /**
@@ -128,9 +128,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(0, $item_none->TaxTotal);
-        $this->assertEquals(0.599, $item_reduced->TaxTotal);
-        $this->assertEquals(2.396, $item_vat->TaxTotal);
+        $this->assertEqualsWithDelta(0, $item_none->TaxTotal, 0.01);
+        $this->assertEqualsWithDelta(0.599, $item_reduced->TaxTotal, 0.0001);
+        $this->assertEqualsWithDelta(2.396, $item_vat->TaxTotal, 0.0001);
     }
 
     /**
@@ -144,9 +144,9 @@ class LineItemTest extends SapphireTest
         $item_reduced = $this->objFromFixture(LineItem::class, 'reducedtaxitem');
         $item_vat = $this->objFromFixture(LineItem::class, 'taxitemone');
 
-        $this->assertEquals(13.00, $item_none->Total);
-        $this->assertEquals(12.579, $item_reduced->Total);
-        $this->assertEquals(14.376, $item_vat->Total);
+        $this->assertEqualsWithDelta(13.00, $item_none->Total, 0.0001);
+        $this->assertEqualsWithDelta(12.579, $item_reduced->Total, 0.0001);
+        $this->assertEqualsWithDelta(14.376, $item_vat->Total, 0.0001);
     }
 
     /**
@@ -193,7 +193,7 @@ class LineItemTest extends SapphireTest
 
         $this->assertTrue(is_object($product));
         $this->assertEquals("Socks", $product->Title);
-        $this->assertEquals(5.99, $product->NoTaxPrice);
+        $this->assertEqualsWithDelta(5.99, $product->NoTaxPrice, 0.001);
     }
 
     /**
