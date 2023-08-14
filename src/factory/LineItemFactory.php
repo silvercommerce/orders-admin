@@ -180,6 +180,7 @@ class LineItemFactory
         $item = $this->getItem();
         $product = $this->getProduct();
         $default = TaxRate::create();
+        $default->Title = _t(__CLASS__ . '.DefaultTaxRate', "Default Tax");
         $default->Rate = 0;
         $default->ID = -1;
 
