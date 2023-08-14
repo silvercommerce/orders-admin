@@ -11,6 +11,7 @@ SilverCommerce\GeoZones\Model\Region:
     Name: Alabama
     Code: AL
     CountryCode: US
+
 SilverCommerce\GeoZones\Model\Zone:
   uk:
     Country: '["GB"]'

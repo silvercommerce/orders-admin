@@ -124,6 +124,8 @@ class LineItemFactoryTest extends SapphireTest
             ->setItem($item)
             ->setParent($estimate);
 
+        var_dump($factory->findBestTaxRate());
+
         $this->assertEquals(0, $item->TaxPercentage);
         $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
 
