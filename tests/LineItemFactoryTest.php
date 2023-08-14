@@ -117,17 +117,18 @@ class LineItemFactoryTest extends SapphireTest
         $item = $this->objFromFixture(LineItem::class, 'taxtestableuk');
         $estimate = $item->Parent();
 
-        var_dump($estimate);
-        var_dump($factory->findBestTaxRate());
-
         $factory = LineItemFactory::create()
             ->setItem($item)
             ->setParent($estimate);
+        
+        $rate = $factory->findBestTaxRate();
 
-        var_dump($factory->findBestTaxRate());
+        var_dump($estimate);
+        var_dump($factory);
+        var_dump($rate);
 
         $this->assertEquals(0, $item->TaxPercentage);
-        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+        $this->assertEquals(20, $rate->Rate);
 
         $estimate->DeliveryCountry = "NZ";
         $estimate->DeliveryCounty = "AUK";
