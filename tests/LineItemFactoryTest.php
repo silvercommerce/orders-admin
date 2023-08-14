@@ -2,6 +2,7 @@
 
 namespace SilverCommerce\OrdersAdmin\Tests;
 
+use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationException;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
