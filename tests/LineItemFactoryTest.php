@@ -116,6 +116,9 @@ class LineItemFactoryTest extends SapphireTest
         // Now test a more flexible category
         $item = $this->objFromFixture(LineItem::class, 'taxtestableuk');
         $estimate = $item->Parent();
+        $estimate->DeliveryCountry = "GB";
+        $estimate->DeliveryCounty = "BIR";
+
         $factory = LineItemFactory::create()
             ->setItem($item)
             ->setParent($estimate);
