@@ -4,6 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
+use SilverCommerce\GeoZones\Model\Zone;
 use SilverStripe\ORM\ValidationException;
 use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
@@ -124,6 +125,8 @@ class LineItemFactoryTest extends SapphireTest
         
         $rate = $factory->findBestTaxRate();
 
+        $zones = Zone::get();
+
         $all_rates = TaxRate::get();
         $rates = TaxRate::get()
             ->filterAny([
@@ -131,6 +134,7 @@ class LineItemFactoryTest extends SapphireTest
                 "Zones.Regions.CountryCode" => 'GB'
             ])->filter("Zones.Regions.Code", 'BIR');
 
+        var_dump($zones->toArray());
         var_dump($all_rates->toArray());
         var_dump($rates->toArray());
 
