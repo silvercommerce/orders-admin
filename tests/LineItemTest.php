@@ -5,7 +5,6 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
-use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
 use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
 use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
 
