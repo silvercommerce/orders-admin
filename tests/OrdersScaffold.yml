@@ -14,15 +14,15 @@ SilverCommerce\GeoZones\Model\Region:
 
 SilverCommerce\GeoZones\Model\Zone:
   uk:
-    Country: '["GB"]'
+    Country: 'GB'
     AllRegions: 1
     Enabled: 1
   nz:
-    Country: '["NZ"]'
+    Country: 'NZ'
     AllRegions: 1
     Enabled: 1
   us:
-    Country: '["US"]'
+    Country: 'US'
     AllRegions: 1
     Enabled: 1
 

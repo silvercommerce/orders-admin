@@ -125,19 +125,6 @@ class LineItemFactoryTest extends SapphireTest
         
         $rate = $factory->findBestTaxRate();
 
-        $zones = Zone::get();
-
-        $all_rates = TaxRate::get();
-        $rates = TaxRate::get()
-            ->filterAny([
-                'Global' => 1,
-                "Zones.Regions.CountryCode" => 'GB'
-            ])->filter("Zones.Regions.Code", 'BIR');
-
-        var_dump($zones->toArray());
-        var_dump($all_rates->toArray());
-        var_dump($rates->toArray());
-
         $this->assertEquals(0, $item->TaxPercentage);
         $this->assertEquals(20, $rate->Rate);
 
