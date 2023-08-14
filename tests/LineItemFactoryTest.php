@@ -5,6 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\ORM\ValidationException;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\OrdersAdmin\Factory\LineItemFactory;
 use SilverCommerce\CatalogueAdmin\Model\CatalogueProduct;
@@ -123,9 +124,15 @@ class LineItemFactoryTest extends SapphireTest
         
         $rate = $factory->findBestTaxRate();
 
-        var_dump($estimate);
-        var_dump($factory);
-        var_dump($rate);
+        $all_rates = TaxRate::get();
+        $rates = TaxRate::get()
+            ->filterAny([
+                'Global' => 1,
+                "Zones.Regions.CountryCode" => 'GB'
+            ])->filter("Zones.Regions.Code", 'BIR');
+
+        var_dump($all_rates->toArray());
+        var_dump($rates->toArray());
 
         $this->assertEquals(0, $item->TaxPercentage);
         $this->assertEquals(20, $rate->Rate);
