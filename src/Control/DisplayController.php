@@ -5,8 +5,8 @@ namespace SilverCommerce\OrdersAdmin\Control;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use SilverStripe\Core\Path;
-use SilverStripe\Assets\Image;
-use SilverStripe\Security\Member;
+use InvalidArgumentException;
+use LeKoala\Uuid\UuidExtension;
 use SilverStripe\Control\Director;
 use SilverStripe\Security\Security;
 use SilverStripe\View\Requirements;
@@ -60,12 +60,40 @@ class DisplayController extends Controller
         parent::init();
 
         $member = Security::getCurrentUser();
-        $object = Estimate::get()
-            ->byID($this->getrequest()->param("ID"));
+        $request = $this->getRequest();
+        $id = $request->param("ID");
+        $key = $request->param("OtherID");
+        $is_uuid = true;
+        $object = null;
+
+        // If needed keys are not present, return 404
+        if (empty($id) || empty($key)) {
+            return $this->httpError(404);
+        }
+
+        // Is ID a UUID or a legacy ID format?
+        try {
+            UuidExtension::getUuidFormat($id);
+        } catch (InvalidArgumentException $e) {
+            $is_uuid = false;
+        }
+
+        // Either try and retrieve the object by the relevant
+        // format
+        if ($is_uuid) {
+            $object = UuidExtension::getByUuid(Estimate::class, $id);
+        } elseif ((int)$id > 0) {
+            $object = Estimate::get_by_id($id);
+        }
+
+        // Ensure order is available and has an access key
+        if (empty($object) || empty($object->AccessKey)) {
+            return $this->httpError(403);
+        }
 
         if ($object && (
             ($member && $object->canView($member)) ||
-            ($object->AccessKey && $object->AccessKey == $this->request->param("OtherID"))
+            ($object->AccessKey && $object->AccessKey === $key)
         )) {
             $this->setObject($object);
         } else {
@@ -93,7 +121,39 @@ class DisplayController extends Controller
 
         return $dompdf;
     }
-    
+
+    /**
+     * @return \SilverStripe\Assets\Image
+     */
+    public function Logo()
+    {
+        $config = SiteConfig::current_site_config();
+        $image = $config->EstimateInvoiceLogo();
+
+        $this->extend("updateLogo", $image);
+        
+        return $image;
+    }
+
+    /**
+     * get the current logo as a base 64 encoded string
+     *
+     * @return string
+     */
+    public function LogoBase64(int $width = 0, int $height = 0)
+    {
+        $logo = $this->Logo();
+
+        if ($width > 0 && $height > 0) {
+            $logo = $logo->Fit($width, $height);
+        }
+        $string = base64_encode($logo->getString());
+
+        $this->extend("updateLogoBase64", $string);
+        
+        return $string;
+    }
+
     /**
      * Get a relative link to anorder or invoice
      *
@@ -112,7 +172,7 @@ class DisplayController extends Controller
             $action
         );
     }
-    
+
     /**
      * Get an absolute link to an order or invoice
      *

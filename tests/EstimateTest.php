@@ -93,7 +93,7 @@ class EstimateTest extends SapphireTest
         $this->assertEquals(2, $no_tax_order->TotalItems);
         $this->assertEquals(1, $no_tax_order->TotalWeight);
         $this->assertEquals(2, $tax_order->TotalItems);
-        $this->assertEquals(1.5, $tax_order->TotalWeight);
+        $this->assertEqualsWithDelta(1.5, $tax_order->TotalWeight, 0.01);
     }
 
     /**
@@ -108,9 +108,9 @@ class EstimateTest extends SapphireTest
         $tax_order_one = $this->objFromFixture(Estimate::class, 'standardtax');
         $tax_order_two = $this->objFromFixture(Estimate::class, 'complextax');
 
-        $this->assertEquals(0, $no_tax_order->TaxTotal);
-        $this->assertEquals(2.396, $tax_order_one->TaxTotal);
-        $this->assertEquals(2.995, $tax_order_two->TaxTotal);
+        $this->assertEqualsWithDelta(0, $no_tax_order->TaxTotal, 0.0001);
+        $this->assertEqualsWithDelta(2.396, $tax_order_one->TaxTotal, 0.0001);
+        $this->assertEqualsWithDelta(2.995, $tax_order_two->TaxTotal, 0.0001);
     }
 
     /**
@@ -125,11 +125,11 @@ class EstimateTest extends SapphireTest
         $tax_order_one = $this->objFromFixture(Estimate::class, 'standardtax');
         $tax_order_two = $this->objFromFixture(Estimate::class, 'complextax');
 
-        $this->assertEquals(13.00, $no_tax_order->SubTotal);
-        $this->assertEquals(13.00, $no_tax_order->Total);
-        $this->assertEquals(11.98, $tax_order_one->SubTotal);
-        $this->assertEquals(14.376, $tax_order_one->Total);
-        $this->assertEquals(23.96, $tax_order_two->SubTotal);
-        $this->assertEquals(26.955, $tax_order_two->Total);
+        $this->assertEqualsWithDelta(13.00, $no_tax_order->SubTotal, 0.0001);
+        $this->assertEqualsWithDelta(13.00, $no_tax_order->Total, 0.0001);
+        $this->assertEqualsWithDelta(11.98, $tax_order_one->SubTotal, 0.0001);
+        $this->assertEqualsWithDelta(14.376, $tax_order_one->Total, 0.0001);
+        $this->assertEqualsWithDelta(23.96, $tax_order_two->SubTotal, 0.0001);
+        $this->assertEqualsWithDelta(26.955, $tax_order_two->Total, 0.0001);
     }
 }

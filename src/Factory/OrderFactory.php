@@ -3,6 +3,7 @@
 namespace SilverCommerce\OrdersAdmin\Factory;
 
 use LogicException;
+use InvalidArgumentException;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
 use SilverStripe\Core\Config\Configurable;
@@ -127,7 +128,7 @@ class OrderFactory
             $order = $class::create();
         }
 
-        $this->order = $order;
+        $this->setOrder($order);
 
         return $this;
     }
@@ -301,7 +302,13 @@ class OrderFactory
      */
     public function setCustomer(Contact $contact)
     {
-        $this->order->CustomerID = $contact->ID;
+        $order = $this->getOrder();
+
+        if (isset($order)) {
+            $order->CustomerID = $contact->ID;
+            $this->setOrder($order);
+        }
+
         return $this;
     }
 
@@ -312,8 +319,11 @@ class OrderFactory
      */
     public function write()
     {
-        if (!empty($this->order)) {
-            $this->order->write();
+        $order = $this->getOrder();
+
+        if (!empty($order)) {
+            $order->write();
+            $this->setOrder($order);
         }
 
         return $this;
@@ -328,21 +338,34 @@ class OrderFactory
     {
         $order = $this->order;
         
-        if (isset($this->order)) {
+        if (isset($order)) {
             $order->delete();
         }
 
         return $this;
     }
 
-    /**
-     * Get an instance of an Invoice/Estimate
-     *
-     * @return  \SilverCommerce\OrdersAdmin\Model\Estimate
-     */
     public function getOrder()
     {
         return $this->order;
+    }
+
+    public function setOrder($order)
+    {
+        $is_invoice = $this->getIsInvoice();
+        
+        if ($is_invoice === true) {
+            $class = $this->config()->invoice_class;
+        } else {
+            $class = $this->config()->estimate_class;
+        }
+
+        if (!is_a($order, $class)) {
+            throw new InvalidArgumentException('Order must be an instance of ' . $class);
+        }
+
+        $this->order = $order;
+        return $this;
     }
 
     /**

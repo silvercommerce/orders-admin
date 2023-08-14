@@ -2,8 +2,11 @@
 
 namespace SilverCommerce\OrdersAdmin\Tests;
 
+use SilverStripe\i18n\i18n;
 use SilverStripe\Dev\SapphireTest;
+use SilverCommerce\GeoZones\Model\Zone;
 use SilverStripe\ORM\ValidationException;
+use SilverCommerce\TaxAdmin\Model\TaxRate;
 use SilverCommerce\OrdersAdmin\Model\LineItem;
 use SilverCommerce\OrdersAdmin\Model\PriceModifier;
 use SilverCommerce\OrdersAdmin\Factory\LineItemFactory;
@@ -13,6 +16,18 @@ use SilverCommerce\OrdersAdmin\Model\LineItemCustomisation;
 class LineItemFactoryTest extends SapphireTest
 {
     protected static $fixture_file = 'OrdersScaffold.yml';
+
+    /**
+     * Add some extra functionality on construction
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        i18n::set_locale('en_GB');
+    }
 
     public function testMakeItem()
     {
@@ -224,12 +239,15 @@ class LineItemFactoryTest extends SapphireTest
         // Now test a more flexible category
         $item = $this->objFromFixture(LineItem::class, 'taxtestableuk');
         $estimate = $item->Parent();
+
         $factory = LineItemFactory::create()
             ->setItem($item)
             ->setParent($estimate);
+        
+        $rate = $factory->findBestTaxRate();
 
         $this->assertEquals(0, $item->TaxPercentage);
-        $this->assertEquals(20, $factory->findBestTaxRate()->Rate);
+        $this->assertEquals(20, $rate->Rate);
 
         $estimate->DeliveryCountry = "NZ";
         $estimate->DeliveryCounty = "AUK";

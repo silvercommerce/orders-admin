@@ -34,7 +34,8 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @author Michael Strong <github@michaelstrong.co.uk>
 **/
 class AddLineItem extends GridFieldAddExistingAutocompleter
-{   
+{
+
     /**
      * Default field to create the dataobject from.
      *
@@ -239,7 +240,7 @@ class AddLineItem extends GridFieldAddExistingAutocompleter
      * @param GridField $grid_field
      * @param string $title
      * @param DataObject $source
-     * 
+     *
      * @return LineItem
      */
     protected function createNewItem(

@@ -11,34 +11,35 @@ SilverCommerce\GeoZones\Model\Region:
     Name: Alabama
     Code: AL
     CountryCode: US
+
 SilverCommerce\GeoZones\Model\Zone:
   uk:
-    Country: '["GB"]'
+    Country: 'GB'
     AllRegions: 1
     Enabled: 1
   nz:
-    Country: '["NZ"]'
+    Country: 'NZ'
     AllRegions: 1
     Enabled: 1
   us:
-    Country: '["US"]'
+    Country: 'US'
     AllRegions: 1
     Enabled: 1
 
 SilverCommerce\TaxAdmin\Model\TaxRate:
   vat:
     ID: 1
-    Title: "VAT"
+    Title: "Test VAT"
     Rate: 20
     Zones: =>SilverCommerce\GeoZones\Model\Zone.uk
   reduced:
     ID: 2
-    Title: "Reduced Rate"
+    Title: "Test Reduced Rate"
     Rate: 5
     Zones: =>SilverCommerce\GeoZones\Model\Zone.nz
   zero:
     ID: 3
-    Title: "Zero Rate"
+    Title: "Test Zero Rate"
     Rate: 0
     Zones: =>SilverCommerce\GeoZones\Model\Zone.us
 
@@ -185,39 +186,39 @@ SilverCommerce\OrdersAdmin\Model\Estimate:
     DeliveryCountry: "GB"
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxtestableuk
   addressdetails_uk_two:
-    Ref: 1231
+    Ref: 1232
     Address1: "123 Street Name"
-    Address2: "A Place"
+    Address2: "Another Place"
     City: "A City"
-    PostCode: "AB12 3AB"
+    PostCode: "BB55 5FG"
     County: "BIR"
     Country: "GB"
-    DeliveryAddress1: "321 Street Name"
+    DeliveryAddress1: "96 Some Road"
     DeliveryCity: "Delivery City"
     DeliveryPostCode: "ZX98 9XZ"
     DeliveryCounty: "BIR"
     DeliveryCountry: "GB"
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.fixedtaxtestableuk
   deliverable:
-    Ref: 1232
+    Ref: 1233
     Items:
       - =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
       - =>SilverCommerce\OrdersAdmin\Model\LineItem.deliverable
   notdeliverable:
-    Ref: 1233
+    Ref: 1234
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notdeliverable
   standardnotax:
-    Ref: 1234
+    Ref: 1235
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.notaxitem
   standardtax:
-    Ref: 1235
+    Ref: 1236
     Items: =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemone
   complextax:
-    Ref: 1236
+    Ref: 1237
     Items:
       - =>SilverCommerce\OrdersAdmin\Model\LineItem.reducedtaxitem
       - =>SilverCommerce\OrdersAdmin\Model\LineItem.taxitemtwo
 
 SilverCommerce\OrdersAdmin\Model\Invoice:
   unpaid:
-    Ref: 1231
+    Ref: 5555

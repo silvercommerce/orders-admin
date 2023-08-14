@@ -4,6 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Model;
 
 use DateTime;
 use SilverStripe\i18n\i18n;
+use LeKoala\Uuid\UuidExtension;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\ArrayData;
@@ -37,13 +38,13 @@ use SilverCommerce\ContactAdmin\Model\ContactLocation;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
+use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\OrdersAdmin\Tasks\OrdersMigrationTask;
 use SilverCommerce\OrdersAdmin\Compat\NumberMigrationTask;
 use Symbiote\GridFieldExtensions\GridFieldEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\AddLineItem;
 use SilverCommerce\OrdersAdmin\Forms\GridField\LineItemEditableColumns;
 use SilverCommerce\OrdersAdmin\Forms\GridField\ReadOnlyGridField;
-use SilverCommerce\OrdersAdmin\Search\OrderSearchContext;
 use SilverCommerce\VersionHistoryField\Forms\VersionHistoryField;
 use SilverStripe\Security\Security;
 use SilverStripe\Versioned\RestoreAction;
@@ -285,6 +286,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      * @var array
      */
     private static $extensions = [
+        UuidExtension::class,
         Versioned::class . '.versioned',
     ];
 
@@ -333,7 +335,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink(),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
@@ -348,7 +350,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink('pdf'),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
@@ -666,7 +668,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      *
      * This method writes and reloads the object so
      * we are now working with the new object type
-     * 
+     *
      * If the current object is already a type of
      * invoice, we just return the current object
      * with no further action

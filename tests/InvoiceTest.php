@@ -4,7 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Tests;
 
 use SilverStripe\Dev\SapphireTest;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
-use SilverCommerce\TaxAdmin\Tests\Model\TestProduct;
+use SilverCommerce\OrdersAdmin\Tests\Model\TestProduct;
 
 class InvoiceTest extends SapphireTest
 {
@@ -23,26 +23,6 @@ class InvoiceTest extends SapphireTest
     protected static $extra_dataobjects = [
         TestProduct::class
     ];
-
-    /**
-     * Add some extra functionality on construction
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    /**
-     * Clean up after tear down
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
 
     /**
      * Test that mark paid flags the order as paid

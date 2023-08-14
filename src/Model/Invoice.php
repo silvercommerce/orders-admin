@@ -301,7 +301,7 @@ class Invoice extends Estimate implements PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink(),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
@@ -316,7 +316,7 @@ class Invoice extends Estimate implements PermissionProvider
     {
         return Controller::join_links(
             DisplayController::create()->AbsoluteLink('pdf'),
-            $this->ID,
+            $this->UuidSegment(),
             $this->AccessKey
         );
     }
