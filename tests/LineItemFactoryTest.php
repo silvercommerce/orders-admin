@@ -118,6 +118,7 @@ class LineItemFactoryTest extends SapphireTest
         $estimate = $item->Parent();
 
         var_dump($estimate);
+        var_dump($factory->findBestTaxRate());
 
         $factory = LineItemFactory::create()
             ->setItem($item)
