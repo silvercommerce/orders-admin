@@ -54,7 +54,7 @@ interface Orderable
     /**
      * Should the current estimate/invoice be considered
      * (locked)?
-     * 
+     *
      * Usually this means the estimate only contains locked
      * items.
      *

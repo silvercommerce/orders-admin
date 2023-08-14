@@ -125,7 +125,7 @@ class LineItemFactory
      * List of customisation data that will need to be setup
      *
      * Depreciated as of v2
-     * 
+     *
      * @var array
      */
     protected $customisations = [];
@@ -208,14 +208,14 @@ class LineItemFactory
      * @param int $customisation_id Optionally link this to a customisation
      *
      * @throws LogicException
-     * 
+     *
      * @return PriceModifier
      */
     public function modifyPrice(
         string $name,
         float $amount,
         int $customisation_id = 0
-    ): PriceModifier  {
+    ): PriceModifier {
         $item = $this->getItem();
 
         if (empty($item)) {
@@ -664,7 +664,7 @@ class LineItemFactory
 
     /**
      * @return string
-     */ 
+     */
     public function getStockID(): string
     {
         return $this->stock_id;
@@ -674,7 +674,7 @@ class LineItemFactory
      * @param string $stock_id
      *
      * @return self
-     */ 
+     */
     public function setStockID(string $stock_id): self
     {
         $this->stock_id = $stock_id;
@@ -685,7 +685,7 @@ class LineItemFactory
      * Get if this item is deliverable
      *
      * @return  bool
-     */ 
+     */
     public function getDeliverable()
     {
         return $this->deliverable;
@@ -697,7 +697,7 @@ class LineItemFactory
      * @param bool $deliverable
      *
      * @return self
-     */ 
+     */
     public function setDeliverable(bool $deliverable)
     {
         $this->deliverable = $deliverable;

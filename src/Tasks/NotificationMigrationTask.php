@@ -115,10 +115,10 @@ class NotificationMigrationTask extends MigrationTask
 
     /**
      * Log a message to the terminal/browser
-     * 
+     *
      * @param string $message   Message to log
      * @param bool   $linestart Set cursor to start of line (instead of return)
-     * 
+     *
      * @return null
      */
     protected function log($message, $linestart = false)

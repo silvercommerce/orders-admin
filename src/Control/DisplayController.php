@@ -212,7 +212,7 @@ class DisplayController extends Controller
     }
 
     public function index(HTTPRequest $request)
-    {   
+    {
         return $this->render();
     }
 
@@ -251,7 +251,7 @@ CSS
      * Get the object associated with this controller
      *
      * @return Estimate
-     */ 
+     */
     public function getObject(): Estimate
     {
         return $this->object;
@@ -263,7 +263,7 @@ CSS
      * @param Estimate $object
      *
      * @return self
-     */ 
+     */
     public function setObject(Estimate $object)
     {
         $this->object = $object;

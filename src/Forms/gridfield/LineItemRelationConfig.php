@@ -13,7 +13,7 @@ use Symbiote\GridFieldExtensions\GridFieldAddNewInlineButton;
 use Symbiote\GridFieldExtensions\GridFieldTitleHeader;
 
 /**
- * Custom config for loading relations of a LineItem 
+ * Custom config for loading relations of a LineItem
  */
 class LineItemRelationConfig extends GridFieldConfig
 {

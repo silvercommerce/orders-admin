@@ -35,7 +35,6 @@ class InvoiceCustomerEmail extends EmailNotification
     public function getCMSFields()
     {
         $this->beforeUpdateCMSFields(function (FieldList $fields) {
-            
         });
 
         return parent::getCMSFields();

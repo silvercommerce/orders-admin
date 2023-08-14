@@ -135,13 +135,13 @@ class OrderFactory
 
     /**
      * Add a line item to the current order based on the provided product
-     * 
+     *
      * This item can also be customised (EG Variations, colours, sizes, etc)
      * buy providing an array of custom date in the format:
-     * 
+     *
      *  - Title: The name of the customisation
      *  - Value: A description of the customisation
-     *  - BasePrice: Modify this item by the given amount 
+     *  - BasePrice: Modify this item by the given amount
      *
      * @param DataObject $product Instance of the product we want to add
      * @param int        $qty     Quanty of items to add
@@ -150,7 +150,7 @@ class OrderFactory
      * @param bool       $deliver Is this item deliverable?
      *
      * @throws LogicException
-     * 
+     *
      * @return self
      */
     public function addItem(

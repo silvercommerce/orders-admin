@@ -539,7 +539,7 @@ class LineItem extends DataObject implements TaxableProvider
 
     /**
      * Find the stock item linked from this line item
-     * 
+     *
      * **NOTE** This method will return a product from the
      * version table, so modifying or writing it will result in a
      * duplicate item being created.
