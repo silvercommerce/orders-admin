@@ -234,3 +234,9 @@
 ## 1.4.5
 
 * Add search context from 1.5 branch
+
+## 1.4.6
+
+* Add UUID's to orders
+* Switch to using UUID and Key for frontend display
+* Allow manually setting of an order in OrderFactory
