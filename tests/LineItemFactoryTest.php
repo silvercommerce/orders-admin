@@ -12,6 +12,18 @@ class LineItemFactoryTest extends SapphireTest
 {
     protected static $fixture_file = 'OrdersScaffold.yml';
 
+    /**
+     * Add some extra functionality on construction
+     *
+     * @return void
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        i18n::set_locale('en_GB');
+    }
+
     public function testMakeItem()
     {
         $socks = $this->objFromFixture(CatalogueProduct::class, 'socks');
