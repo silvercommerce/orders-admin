@@ -29,17 +29,17 @@ SilverCommerce\GeoZones\Model\Zone:
 SilverCommerce\TaxAdmin\Model\TaxRate:
   vat:
     ID: 1
-    Title: "VAT"
+    Title: "Test VAT"
     Rate: 20
     Zones: =>SilverCommerce\GeoZones\Model\Zone.uk
   reduced:
     ID: 2
-    Title: "Reduced Rate"
+    Title: "Test Reduced Rate"
     Rate: 5
     Zones: =>SilverCommerce\GeoZones\Model\Zone.nz
   zero:
     ID: 3
-    Title: "Zero Rate"
+    Title: "Test Zero Rate"
     Rate: 0
     Zones: =>SilverCommerce\GeoZones\Model\Zone.us
 
