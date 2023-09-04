@@ -566,7 +566,9 @@ class LineItem extends DataObject implements TaxableProvider
         }
 
         // Backwards compatability for older line items
-        if (empty($id) && !empty($stock_id) && !empty($class)) {
+        if ((empty($id) || empty($version))
+            && !empty($stock_id) && !empty($class)
+        ) {
             $filter['StockID'] = $stock_id;
             $product = $class::get()
                 ->filter($filter)

@@ -365,7 +365,10 @@ class LineItemFactory
             'Locked' => $lock,
             'ProductClass' => $product->ClassName,
             'ProductID' => $product->ID,
-            'ProductVersion' => $product->Version
+            'ProductVersion' => $product->Version,
+
+            // Retained for better backwards support
+            'StockID' => $product->StockID
         ];
     }
 
@@ -488,7 +491,7 @@ class LineItemFactory
         }
 
         $product = $item->FindStockItem();
-        if (!empty($product)) {
+        if (!empty($product) && $product->exists()) {
             $this->setProduct($product);
         }
 
