@@ -936,6 +936,14 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      */
     protected function getPrefix(): string
     {
+        $prefix = $this
+            ->dbObject('Prefix')
+            ->getValue();
+
+        if (!empty($prefix)) {
+            return (string)$prefix;
+        }
+
         $config = SiteConfig::current_site_config();
         return (string)$config->EstimateNumberPrefix;
     }

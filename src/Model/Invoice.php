@@ -491,6 +491,14 @@ class Invoice extends Estimate implements PermissionProvider
      */
     protected function getPrefix(): string
     {
+        $prefix = $this
+            ->dbObject('Prefix')
+            ->getValue();
+
+        if (!empty($prefix)) {
+            return (string)$prefix;
+        }
+
         $config = SiteConfig::current_site_config();
         return (string)$config->InvoiceNumberPrefix;
     }
