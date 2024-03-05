@@ -32,6 +32,8 @@ class InvoiceNotification extends Notification
 
         $this->beforeUpdateCMSFields(
             function ($fields) use ($self) {
+                $fields->removeByName('StateUpdated');
+
                 /** @var FieldList $fields */
                 $fields->replaceField(
                     'BaseClassName',
@@ -45,5 +47,14 @@ class InvoiceNotification extends Notification
         );
 
         return parent::getCMSFields();
+    }
+
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        // Ensure that global update is cleared
+        // as it can cause errors
+        $this->StateUpdated = false;
     }
 }
