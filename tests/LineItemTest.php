@@ -220,7 +220,7 @@ class LineItemTest extends SapphireTest
         $this->assertEqualsWithDelta(1, $versioned_product->Version, 0.01);
         $this->assertEqualsWithDelta(4.99, $versioned_product->NoTaxPrice, 0.001);
         $this->assertEqualsWithDelta(4.99, $line_item->NoTaxPrice, 0.001);
-        $this->assertEqualsWithDelta(5.99, $product->NoTaxPrice, 0.001);
+        $this->assertEqualsWithDelta(6.99, $product->NoTaxPrice, 0.001);
     }
 
     /**

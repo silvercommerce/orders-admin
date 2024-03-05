@@ -21,9 +21,13 @@ class EstimateTest extends SapphireTest
     public function testConvertToInvoice()
     {
         $estimate = $this->objFromFixture(Estimate::class, 'addressdetails_uk');
+        $ref = $estimate->Ref;
+        $fullref = $estimate->FullRef;
         $invoice = $estimate->convertToInvoice();
 
         $this->assertTrue($invoice instanceof Invoice);
+        $this->assertNotEquals($ref, $invoice->Ref);
+        $this->assertNotEquals($fullref, $invoice->FullRef);
     }
 
     /**
