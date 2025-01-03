@@ -145,7 +145,8 @@ class LineItem extends DataObject implements TaxableProvider
     ];
 
     private static $cascade_deletes = [
-        'Customisations'
+        'Customisations',
+        'PriceModifications'
     ];
 
     private static $defaults = [
