@@ -186,12 +186,13 @@ class LineItemFactory
         $class = self::ITEM_CLASS;
         // Setup initial line item
         $item = $class::create($this->getItemArray());
-        $item->Key = $this->generateKey();
 
         $this->setItem($item);
 
         $this->performPriceModifications();
         $this->performCustomisation();
+
+        $item->Key = $this->generateKey();
 
         return $this;
     }
