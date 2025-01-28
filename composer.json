@@ -33,7 +33,7 @@
         "dompdf/dompdf": "^3",
         "dft/silverstripe-modeladminplus": "^2.1",
         "silvercommerce/settings": "^1.1",
-        "silvercommerce/tax-admin": "^2",
+        "silvercommerce/tax-admin": "^1.4",
         "silvercommerce/contact-admin": "^1.4",
         "silvercommerce/versionhistoryfield": "^1.1",
         "silvershop/silverstripe-hasonefield": "^4",
