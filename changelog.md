@@ -240,3 +240,9 @@
 * Add UUID's to orders
 * Switch to using UUID and Key for frontend display
 * Allow manually setting of an order in OrderFactory
+
+## 1.4.7
+
+* Add SS5 support
+* Remove reliance on depreciated methods
+* Slight Code cleanup

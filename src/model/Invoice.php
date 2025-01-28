@@ -579,7 +579,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_VIEW_INVOICES"])) {
@@ -603,7 +603,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
         
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_CREATE_INVOICES"])) {
@@ -627,7 +627,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member &&
@@ -654,7 +654,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_STATUS_INVOICES"])) {
@@ -678,7 +678,7 @@ class Invoice extends Estimate implements PermissionProvider
         }
 
         if (!$member) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         if ($member && Permission::checkMember($member->ID, ["ADMIN", "ORDERS_DELETE_INVOICES"])) {

@@ -77,12 +77,8 @@ class OrdersDetailForm_ItemRequest extends VersionedGridFieldItemRequest
         $fields = $form->Fields();
         $actions = $form->Actions();
         $record = $this->record;
-        $member = Member::currentUser();
-
-        $can_view = $this->record->canView();
         $can_edit = $this->record->canEdit();
         $can_delete = $this->record->canDelete();
-        $can_create = $this->record->canCreate();
 
         // First cache and remove the delete button
         $delete_action = $actions->dataFieldByName("action_doDelete");
