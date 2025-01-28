@@ -27,12 +27,7 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * A specific gridfield field designed to allow the creation of a new
  * order item and that auto completes all fields from a pre-defined
  * object (default Product).
- *
- * @package orders-admin
- *
- * @author ilateral <info@ilateral.co.uk>
- * @author Michael Strong <github@michaelstrong.co.uk>
-**/
+ **/
 class AddLineItem extends GridFieldAddExistingAutocompleter
 {
 

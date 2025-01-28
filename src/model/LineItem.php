@@ -46,8 +46,6 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
  * @method TaxRate Tax
  * @method TaxRate TaxRate
  * @method \SilverStripe\ORM\HasManyList Customisations
- *
- * @author Mo <morven@ilateral.co.uk>
  */
 class LineItem extends DataObject implements TaxableProvider
 {

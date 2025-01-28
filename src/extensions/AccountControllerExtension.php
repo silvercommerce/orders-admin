@@ -2,31 +2,16 @@
 
 namespace SilverCommerce\OrdersAdmin\Extensions;
 
-use SilverStripe\i18n\i18n;
-use SilverStripe\Forms\Form;
 use SilverStripe\Core\Extension;
 use SilverStripe\View\ArrayData;
-use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\FormAction;
 use SilverStripe\ORM\PaginatedList;
-use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\HiddenField;
 use SilverStripe\Security\Security;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\CheckboxField;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\CompositeField;
-use SilverStripe\Forms\RequiredFields;
-use SilverStripe\ORM\ValidationResult;
-use SilverCommerce\ContactAdmin\Model\ContactLocation;
-use ilateral\SilverStripe\Users\Control\AccountController;
+use DFT\SilverStripe\Users\Control\AccountController;
 
 /**
  * Add extra fields to a user account (if the users module is
  * installed) to allow logged in users to see their invoices.
  *
- * @package orders
  */
 class AccountControllerExtension extends Extension
 {
