@@ -5,7 +5,7 @@ namespace SilverCommerce\OrdersAdmin\Search;
 use DateTime;
 use SilverStripe\Forms\DateField;
 use SilverStripe\Versioned\Versioned;
-use ilateral\SilverStripe\ModelAdminPlus\SearchContext;
+use DFT\SilverStripe\ModelAdminPlus\SearchContext;
 
 class OrderSearchContext extends SearchContext
 {

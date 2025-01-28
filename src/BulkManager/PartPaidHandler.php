@@ -7,12 +7,6 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Convert;
 use Colymba\BulkManager\BulkAction\Handler as GridFieldBulkActionHandler;
 
-/**
- * A {@link GridFieldBulkActionHandler} for bulk cancelling records
- *
- * @author i-lateral (http://www.i-lateral.com)
- * @package orders-admin
- */
 class PartPaidHandler extends GridFieldBulkActionHandler
 {
     private static $url_segment = 'partpaid';
