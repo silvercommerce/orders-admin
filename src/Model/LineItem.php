@@ -740,9 +740,9 @@ class LineItem extends DataObject implements TaxableProvider
      * @param boolean $doWrite (write the cloned object to DB)
      * @return DataObject $clone The duplicated object
      */
-    public function duplicate($doWrite = true, $manyMany = "many_many")
+    public function duplicate(bool $doWrite = true, ?array $relations = null): static
     {
-        $clone = parent::duplicate($doWrite);
+        $clone = parent::duplicate($doWrite, $relations);
 
         // Ensure we clone any customisations
         if ($doWrite) {

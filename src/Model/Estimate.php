@@ -905,7 +905,7 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
      * @param array|null|false $relations List of relations to duplicate.
      * @return DataObject A duplicate of this node. The exact type will be the type of this node.
      */
-    public function duplicate($doWrite = true, $relations = null)
+    public function duplicate(bool $doWrite = true, ?array $relations = null): static
     {
         $clone = parent::duplicate($doWrite, $relations);
 
