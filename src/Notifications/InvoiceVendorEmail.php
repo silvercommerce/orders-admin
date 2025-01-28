@@ -4,7 +4,7 @@ namespace SilverCommerce\OrdersAdmin\Notifications;
 
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\Email\Email;
-use ilateral\SilverStripe\Notifier\Types\EmailNotification;
+use DFT\SilverStripe\Notifier\Types\EmailNotification;
 
 class InvoiceVendorEmail extends EmailNotification
 {

@@ -14,13 +14,6 @@ use Colymba\BulkManager\BulkAction\Handler as GridFieldBulkActionHandler;
 use DateTime;
 use SilverCommerce\OrdersAdmin\Control\DisplayController;
 
-/**
- * A {@link GridFieldBulkActionHandler} for viewing a
- * bulk list of records via the DisplayController
- *
- * @author i-lateral (http://www.i-lateral.com)
- * @package orders-admin
- */
 class BulkDownloadHandler extends GridFieldBulkActionHandler
 {
     private static $url_segment = 'bulkdownload';

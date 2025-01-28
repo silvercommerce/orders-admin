@@ -3,8 +3,7 @@
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
-use SilverCommerce\OrdersAdmin\Model\Invoice;
-use ilateral\SilverStripe\Notifier\Model\NotificationRule;
+use DFT\SilverStripe\Notifier\Model\NotificationRule;
 
 /**
  * Specific notification rule dedicated to only monitoring the status of

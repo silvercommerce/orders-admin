@@ -2,6 +2,6 @@
 Name: notificationsconfig
 ---
 # allow configuring of notifications to users and a custom page type
-ilateral\SilverStripe\Notifier\Notifier:
+DFT\SilverStripe\Notifier\Notifier:
   registered_objects:
     - SilverCommerce\OrdersAdmin\Model\Invoice

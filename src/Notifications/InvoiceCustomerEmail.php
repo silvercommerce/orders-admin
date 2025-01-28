@@ -3,7 +3,7 @@
 namespace SilverCommerce\OrdersAdmin\Notifications;
 
 use SilverStripe\Forms\FieldList;
-use ilateral\SilverStripe\Notifier\Types\EmailNotification;
+use DFT\SilverStripe\Notifier\Types\EmailNotification;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Config\Config;

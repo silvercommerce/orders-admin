@@ -6,7 +6,7 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Core\Injector\Injector;
 use SilverCommerce\OrdersAdmin\Model\Invoice;
-use ilateral\SilverStripe\Notifier\Model\Notification;
+use DFT\SilverStripe\Notifier\Model\Notification;
 
 class InvoiceNotification extends Notification
 {

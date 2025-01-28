@@ -1,4 +1,4 @@
-<% include ilateral\SilverStripe\Notifier\Includes\EmailHead %>
+<% include DFT\SilverStripe\Notifier\Includes\EmailHead %>
 
 <h1><%t Orders.OrderStatusUpdate "Order Status Update" %></h1>
 
@@ -116,4 +116,4 @@
     </table>
 <% end_with %>
 
-<% include ilateral\SilverStripe\Notifier\Includes\EmailFoot %>
+<% include DFT\SilverStripe\Notifier\Includes\EmailFoot %>

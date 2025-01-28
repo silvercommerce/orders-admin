@@ -6,13 +6,6 @@ use SilverStripe\Control\HTTPRequest;
 use Colymba\BulkManager\BulkAction\Handler as GridFieldBulkActionHandler;
 use SilverStripe\View\Requirements;
 
-/**
- * A {@link GridFieldBulkActionHandler} for viewing a
- * bulk list of records via the DisplayController
- *
- * @author i-lateral (http://www.i-lateral.com)
- * @package orders-admin
- */
 class BulkViewHandler extends GridFieldBulkActionHandler
 {
     private static $url_segment = 'bulkview';

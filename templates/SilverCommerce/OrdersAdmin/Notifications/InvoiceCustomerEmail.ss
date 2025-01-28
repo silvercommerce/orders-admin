@@ -1,4 +1,4 @@
-<% include ilateral\SilverStripe\Notifier\Includes\EmailHead %>
+<% include DFT\SilverStripe\Notifier\Includes\EmailHead %>
 
 <% with $Object %>
     <% if $Status == 'failed' %>
@@ -127,4 +127,4 @@
     <% end_if %>
 <% end_with %>
 
-<% include ilateral\SilverStripe\Notifier\Includes\EmailFoot %>
+<% include DFT\SilverStripe\Notifier\Includes\EmailFoot %>
