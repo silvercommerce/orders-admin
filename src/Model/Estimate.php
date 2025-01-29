@@ -423,7 +423,12 @@ class Estimate extends DataObject implements Orderable, PermissionProvider
         $config = SiteConfig::current_site_config();
         $length = $config->OrderNumberLength;
         $prefix = ($this->Prefix) ? $this->Prefix : "";
-        $return = str_pad($this->Ref, $length, "0", STR_PAD_LEFT);
+        $return = str_pad(
+            (string) $this->Ref,
+            $length,
+            "0",
+            STR_PAD_LEFT
+        );
 
         // Work out if an order prefix string has been set
         if ($prefix) {
