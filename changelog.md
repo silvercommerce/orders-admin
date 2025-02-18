@@ -250,3 +250,7 @@
 * Set Estimate/Invoice title to use full ref
 * Ensure that when an estimate is converted to an invoice, it is actually an estimate
 * Forcefully regenerate invoice ref and prefix on conversion (rather than relying on onBeforeWrite)
+
+## 1.6.0
+
+* Silverstripe 5 version of 1.5 branch
